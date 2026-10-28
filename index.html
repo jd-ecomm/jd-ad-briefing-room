@@ -7,7 +7,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&display=swap">
-<link rel="stylesheet" href="brief.css">
+<link rel="stylesheet" href="brief.css?v=4c7673b">
 <style>
 /* Layout: CRM-style workspace. Sticky header + tabs, filter rail left, card grid, detail drawer right. JD v2, dark-first. */
 @font-face{font-family:'FF';src:url('fonts/ForeverForwardSans-Headline.woff2') format('woff2');font-display:swap}
@@ -258,7 +258,7 @@ function toast(t){const el=$('#toast');el.textContent=t;el.hidden=false;clearTim
 async function copy(t){try{await navigator.clipboard.writeText(t);toast('Copied '+t)}catch(e){toast('Copy failed. ID: '+t)}}
 function linkFor(id){const u=location.href.split('#')[0];return u+'#'+id}
 
-fetch('data.json').then(r=>r.json()).then(j=>{D=j;M=j.matrix;
+fetch('data.json',{cache:'no-cache'}).then(r=>r.json()).then(j=>{D=j;M=j.matrix;
   M.angles.forEach(a=>ANG[a.id]=a);(M.variations?.rows||[]).forEach(v=>VAR[v.id]=v);M.styles.forEach(s=>STY[s.id]=s);M.phases.forEach(p=>PH[p.id]=p);
   buildRail();renderHouse();renderMessaging();renderStudio();renderOurs();route();});
 
@@ -470,6 +470,6 @@ document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>location.hash=b
  document.addEventListener('visibilitychange',()=>{if(document.hidden&&cur)stop(cur)});
 })();
 </script>
-<script src="brief.js" charset="utf-8"></script>
-<script src="project.js" charset="utf-8"></script>
-<script src="delivered.js" charset="utf-8"></script>
+<script src="brief.js?v=4c7673b" charset="utf-8"></script>
+<script src="project.js?v=4c7673b" charset="utf-8"></script>
+<script src="delivered.js?v=4c7673b" charset="utf-8"></script>
