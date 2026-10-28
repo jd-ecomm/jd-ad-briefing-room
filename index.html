@@ -412,9 +412,7 @@ function renderHouse(){const H=D.house;if(!H)return;const S=Object.fromEntries(D
   <h3 class="disp hh">What runs when</h3>
   <div class="tbl"><table style="min-width:760px"><thead><tr><th>Theme</th>${M.phases.map(p=>`<th>${p.id} ${esc(p.name)}<br><span style="text-transform:none;letter-spacing:0;font-weight:500">${esc(p.dates)}</span></th>`).join('')}</tr></thead><tbody>
   ${H.themes.map(t=>`<tr><td><b>${t.id}</b> ${esc(t.name)}</td>${M.phases.map(p=>`<td><span class="dot ${t.phases.includes(p.id)?'':'off'}">${t.phases.includes(p.id)?'●':''}</span></td>`).join('')}</tr>`).join('')}
-  </tbody></table></div>
-  <h3 class="disp hh">Minimum viable set</h3>
-  <div class="offer">${H.mvs.map(c=>`<div class="ocard"><div class="lbl">${esc(c[0])}</div><ul style="margin:10px 0 0;padding-left:18px;line-height:1.6;color:var(--fg2)">${c.slice(1).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div>`;
+  </tbody></table></div>`;
 }
 /* ---------- studio ---------- */
 function renderStudio(){
