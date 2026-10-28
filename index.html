@@ -186,21 +186,18 @@ td .hl{font-family:var(--display);font-size:24px;line-height:.85;text-transform:
 .thumb.playing .pbar,.thumb.panning .pbar{opacity:1}
 .thumb .mute{position:absolute;right:8px;bottom:18px;z-index:3;font:800 10px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;background:rgba(0,0,0,.72);color:#fff;border-radius:999px;padding:6px 9px;opacity:0}
 .thumb.playing .mute{opacity:1}
-.thumb.pan img{object-fit:cover;object-position:0% 0%}
-.thumb.pan.panning img{object-position:100% 100%}
-.scard .sm{position:relative;overflow:hidden;aspect-ratio:4/5;background:#0a0a0a}
+.thumb.pan.panning img{transform:scale(1.04)}
+.scard .sm{position:relative;overflow:hidden;aspect-ratio:9/14;background:#0a0a0a}
 .scard .sm img{width:100%;height:100%;object-fit:contain;aspect-ratio:auto}
-.scard .sm.tall img{object-fit:cover;object-position:50% 0%}
-.scard:hover .sm.tall img{object-position:50% 100%}
+.scard:hover .sm img{transform:scale(1.04)}
 .hovhint{position:absolute;left:8px;bottom:8px;z-index:3;font:800 10px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;background:var(--y);color:#000;border-radius:999px;padding:5px 8px;opacity:0}
-.thumb.pan:not(.panning) .hovhint{opacity:1}
+.thumb.pan .hovhint{opacity:1}
 @media (prefers-reduced-motion:no-preference){
  .card,.scard{transition:transform .22s cubic-bezier(.2,.8,.2,1),border-color .2s,box-shadow .25s}
  .card:hover,.scard:hover{transform:translateY(-4px)}
  .card::after,.scard::after{transition:opacity .2s}
  .thumb .pv,.thumb .mute,.thumb .pbar,.hovhint{transition:opacity .25s}
- .thumb.pan img{transition:object-position 4.5s cubic-bezier(.45,0,.55,1)}
- .scard .sm.tall img{transition:object-position 3.5s cubic-bezier(.45,0,.55,1)}
+ .thumb.pan img,.scard .sm img{transition:transform .35s cubic-bezier(.2,.8,.2,1)}
 }
 </style>
 
@@ -294,7 +291,7 @@ function renderGrid(){
   $('#grid').innerHTML=L.length?L.map(card).join(''):`<p class="note">No ads match these filters. Clear a filter to widen the set.</p>`;
 }
 function card(i){return `<div class="card" data-id="${i.sid}" role="button" tabindex="0">
-  <div class="thumb${isPan(i)?' pan':''}"${i.mp4?` data-mp4="${i.mp4}"`:''}>${i.mp4||isPan(i)?'<div class="pbar"><i></i></div>':''}${i.mp4?'<span class="mute">🔇 Preview</span>':''}${isPan(i)?`<span class="hovhint">${i.cards>1?i.cards+' cards · ':''}Hover to scroll</span>`:''}${i.img?`<img loading="lazy" src="${i.img}" alt="${esc(i.brand)} ad ${i.sid}">`:`<div class="cthumb"><div class="cb0">${esc(i.brand)}</div><div class="cb1">${esc(i.headline||'')}</div><div class="cb2">${esc(i.copy)}</div></div>`}
+  <div class="thumb${isPan(i)?' pan':''}"${i.mp4?` data-mp4="${i.mp4}"`:''}>${i.mp4?'<div class="pbar"><i></i></div>':''}${i.mp4?'<span class="mute">🔇 Preview</span>':''}${isPan(i)?`<span class="hovhint">${i.cards>1?i.cards+' cards':'Carousel'}</span>`:''}${i.img?`<img loading="lazy" src="${i.img}" alt="${esc(i.brand)} ad ${i.sid}">`:`<div class="cthumb"><div class="cb0">${esc(i.brand)}</div><div class="cb1">${esc(i.headline||'')}</div><div class="cb2">${esc(i.copy)}</div></div>`}
    <div class="badge">${i.video?'<span class="b v">▶ Video</span>':`<span class="b">${esc(i.format)}</span>`}${i.copyonly?'<span class="b">Copy + link</span>':''}${i.signal==='High'?'<span class="sig">High</span>':''}</div>
    <button class="star ${stars.has(i.sid)?'on':''}" data-star="${i.sid}" aria-label="Shortlist ${i.sid}">★</button></div>
   <div class="cb"><div class="top"><span class="sid">${i.sid}</span><span class="lbl">${esc(i.market||'')}</span></div>
