@@ -47,6 +47,8 @@ const store={
  async delBrief(id){if(MODE==='remote')return api('bb_briefs?id=eq.'+id,{method:'DELETE'});const d=LS.db();d.briefs=d.briefs.filter(x=>x.id!==id);d.assets=d.assets.filter(a=>a.brief_id!==id);LS.save(d)},
  async assets(bid){if(MODE==='remote')return api('bb_assets?select=*&brief_id=eq.'+bid+'&order=ord.asc,created_at.asc');return LS.db().assets.filter(a=>a.brief_id===bid).sort((a,b)=>a.ord-b.ord)},
  async addAsset(a){a={id:uid(),created_at:now(),updated_at:now(),updated_by:ME,...BLANK(),...a};if(MODE==='remote')return (await api('bb_assets',{method:'POST',body:JSON.stringify(a)}))[0];const d=LS.db();d.assets.push(a);LS.save(d);return a},
+ async addAssets(list){list=list.map(a=>({id:uid(),created_at:now(),updated_at:now(),updated_by:ME,...BLANK(),...a}));if(MODE==='remote')return api('bb_assets',{method:'POST',body:JSON.stringify(list)});const d=LS.db();d.assets.push(...list);LS.save(d);return list},
+ async counts(){let rows;if(MODE==='remote')rows=await api('bb_assets?select=brief_id');else rows=LS.db().assets;const c={};rows.forEach(r=>c[r.brief_id]=(c[r.brief_id]||0)+1);return c},
  async patchAsset(id,p){p={...p,updated_by:ME};if(MODE==='remote')return api('bb_assets?id=eq.'+id,{method:'PATCH',body:JSON.stringify(p),headers:{Prefer:'return=minimal'}});const d=LS.db();Object.assign(d.assets.find(x=>x.id===id)||{},p,{updated_at:now()});LS.save(d)},
  async delAsset(id){if(MODE==='remote')return api('bb_assets?id=eq.'+id,{method:'DELETE'});const d=LS.db();d.assets=d.assets.filter(x=>x.id!==id);LS.save(d)},
  async queue(bid){if(MODE==='remote')return api('bb_queue?select=*&brief_id=eq.'+bid+'&order=created_at.desc&limit=20');return LS.db().queue.filter(q=>q.brief_id===bid).reverse()},
@@ -76,7 +78,7 @@ async function hello(){
 }
 
 /* ---------- state ---------- */
-const S={briefs:[],brief:null,assets:[],queue:[],loaded:false,poll:null};
+const S={briefs:[],brief:null,assets:[],queue:[],loaded:false,poll:null,start:true,counts:{}};
 const cur=()=>S.brief;
 async function loadBriefs(){
   try{S.briefs=await store.briefs()}catch(e){MODE='local';S.briefs=await store.briefs()}
@@ -112,6 +114,80 @@ function waterfall(st){const per=Math.max(1,+st.wf_per||4),gap=Math.max(1,+st.wf
   const order=[...S.assets].sort((a,b)=>score(b)-score(a)||(a.ord-b.ord));const nb=Math.ceil(order.length/per);
   let step=gap;if(start&&end&&nb>1){const span=(end-start)/864e5;if((nb-1)*gap>span)step=Math.max(0,span/(nb-1))}
   return order.map((a,k)=>{const b=Math.floor(k/per);let d=null;if(start){d=new Date(start.getTime()+Math.round(b*step)*864e5);if(end&&d>end)d=end;d=d.toISOString().slice(0,10)}return{id:a.id,batch:b+1,deadline:d}})}
+
+
+/* ---------- preloaded MVP brief ---------- */
+const BF='https://jdsports.ca/collections/black-friday';
+const MVP={name:'BFCM 2026 · MVP paid social brief',settings:{wf_start:'2026-11-03',wf_end:'2026-11-17',wf_per:4,wf_gap:3,fr:true},
+ batches:[['2026-11-03','Launch essentials · live 14 Nov'],['2026-11-06','Tier-1 personas · live 14 Nov'],['2026-11-10','Creator, brand & product heroes · add by 17 Nov'],['2026-11-13','Drop 2 & BF weekend · live 26 Nov'],['2026-11-17','Ends soon & Cyber Monday · live 27–30 Nov']],
+ rows:[
+ // batch 1
+ {sid:'JD-01',b:1,p:5,i:5,sizes:['4:5','9:16','1:1'],platforms:['FB/IG Feed','Stories','Reels'],headline:'UP TO 60% OFF',fr:"JUSQU'À 60 % DE RABAIS",lp:BF,why:'Core offer (T1). The always-on workhorse for prospecting and retargeting across all five phases. Story cut-down = JD-02.'},
+ {sid:'JD-40',b:1,p:5,i:5,format:'Motion (GIF)',video_len:'6s',sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories','Reels'],headline:"IT'S ON.",fr:"C'EST PARTI. JUSQU'À 60 % DE RABAIS",lp:BF,why:"Launch announcer (T2). Runs 14–16 Nov only, so it has to be first off the line."},
+ {sid:'JD-31',b:1,p:5,i:5,headline:'BLACK FRIDAY · UP TO 60% OFF',fr:'VENDREDI FOU · JUSQU’À 60 % DE RABAIS',lp:BF,why:'Catalogue (DPA) frame (T10). Highest-spend placement in 2025, so the frame must be approved before launch.'},
+ {sid:'JD-03',b:1,p:5,i:4,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories'],headline:'OUR BIGGEST SALE OF THE YEAR',fr:"NOTRE PLUS GRANDE SOLDE DE L'ANNÉE",lp:BF,why:'Brand-level launch line (A01). Story cut-down = JD-37.'},
+ // batch 2
+ {sid:'JD-45',b:2,p:4,i:5,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Reels'],why:'Persona: sneakerhead (T4, tier 1). Biggest BFCM revenue persona.'},
+ {sid:'JD-60',b:2,p:4,i:5,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories'],why:'Persona: winter (T13 winter wardrobe). Outerwear and fleece demand peaks in BFCM week.'},
+ {sid:'JD-43',b:2,p:4,i:4,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories'],why:"Persona: runner (T4, tier 1)."},
+ {sid:'JD-51',b:2,p:4,i:4,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories'],why:"Persona: women's (T4, tier 1). Check the gifts-for-her page is relaunched before this goes live."},
+ // batch 3
+ {sid:'JD-62',b:3,p:4,i:4,format:'Video',video_len:'15s',sizes:['9:16','4:5'],platforms:['Reels','TikTok','Stories'],why:'Creator launch video (T9 + T14 native creator lines). Brief one creator, 2 hooks; the static mockup is the end-card reference.'},
+ {sid:'JD-15',b:3,p:3,i:4,why:'Brand co-op (T5). Nike first; duplicate the row for adidas (JD-16) and New Balance (JD-17) once co-op terms are confirmed.'},
+ {sid:'JD-46',b:3,p:3,i:4,sizes:['4:5','1:1'],platforms:['FB/IG Feed','Catalogue (DPA)'],why:'Product hero (T6). Swap in the confirmed top seller and real price on 10 Nov.'},
+ {sid:'JD-20',b:3,p:3,i:4,why:'Gifting starts (T8). Under-$50 and gifts-for-him/her can follow as duplicates.'},
+ // batch 4
+ {sid:'JD-76',b:4,p:3,i:4,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories','Reels'],why:'Drop 2 announcer (T15). Gives lapsed visitors a new reason to come back on 26 Nov.'},
+ {sid:'JD-77',b:4,p:3,i:3,format:'Motion (GIF)',video_len:'6s',why:'Drop 2 Story/Reels version. Quick motion cut of the line-up.'},
+ {sid:'JD-07',b:4,p:3,i:3,headline:'LAST SIZES',fr:'DERNIÈRES TAILLES',lp:BF,why:'Scarcity (T3) for BF weekend retargeting. Feed the real low-stock SKUs.'},
+ {sid:'JD-59',b:4,p:3,i:3,why:"Social proof (T12). Confirm Canada's #1 sneaker from sales data before final."},
+ // batch 5
+ {sid:'JD-55',b:5,p:3,i:3,format:'Video',video_len:'10s',sizes:['9:16'],platforms:['Reels','TikTok','Stories'],why:'Ends soon (T11) native creator caption. FR version = JD-57.'},
+ {sid:'JD-12',b:5,p:2,i:4,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories'],headline:'EXTRA 20% OFF',fr:'20 % DE RABAIS SUPPLÉMENTAIRE',lp:BF,why:'Cyber Monday stack (P5). Show the price maths. Story = JD-13, FR = JD-36.'},
+ {sid:'JD-32',b:5,p:2,i:4,headline:'CYBER MONDAY · EXTRA 20% OFF',fr:'CYBERLUNDI · 20 % DE RABAIS SUPPLÉMENTAIRE',lp:BF,why:'Cyber Monday catalogue frame (T10). Swaps in on 30 Nov.'},
+ {sid:'JD-14',b:5,p:2,i:3,headline:'ENDS TONIGHT',fr:'SE TERMINE CE SOIR',lp:BF,why:'Hard deadline for the final 24 hours of Cyber Monday.'}
+ ]};
+function mvpAssets(bid){return MVP.rows.map((r,k)=>{const s=D.studio.find(x=>x.sid===r.sid);const a=s?fromMock(s):{name:r.sid};
+  const o={...a,brief_id:bid,ord:k+1,priority:r.p,impact:r.i,batch:r.b,deadline:MVP.batches[r.b-1][0],status:'Not started'};
+  ['format','video_len','sizes','platforms'].forEach(f=>{if(r[f])o[f]=r[f]});
+  if(r.headline){o.headline=r.headline;if(!o.overlay)o.overlay=r.headline}if(r.fr&&!o.fr_text)o.fr_text=r.fr;if(r.lp&&!o.landing_url)o.landing_url=r.lp;if(!o.landing_url)o.landing_url=BF;
+  if(!o.headline)o.headline=(s&&ANG[s.angles[0]]?.headline)||'';
+  o.notes=`Batch ${r.b}: ${MVP.batches[r.b-1][1]}. ${r.why} ${o.notes||''}`.trim();return o})}
+async function createMVP(){const v=S.briefs.filter(x=>x.settings?.origin==='mvp').length+1;const b=await store.addBrief({name:MVP.name+(v>1?' v'+v:''),deadline_mode:'waterfall',settings:{...MVP.settings,origin:'mvp'}});S.briefs.unshift(b);S.brief=b;ls.set('bb-active',b.id);
+  await store.addAssets(mvpAssets(b.id));await loadAssets();S.start=false;render();say('MVP brief loaded: '+S.assets.length+' assets in 5 batches')}
+async function createBlank(name){const b=await store.addBrief({name:name||'BFCM 2026 · New brief',settings:{origin:'scratch'}});S.briefs.unshift(b);S.brief=b;ls.set('bb-active',b.id);S.assets=[];S.queue=[];S.start=false;render()}
+function startPage(el){const n=MVP.rows.length;const deliv=MVP.rows.reduce((t,r)=>t+((r.sizes||[...(D.studio.find(x=>x.sid===r.sid)?.size.includes('1920')?['9:16']:D.studio.find(x=>x.sid===r.sid)?.size.includes('1080×1080')?['1:1']:['4:5'])]).length*2),0);
+  const thumbs=MVP.rows.slice(0,8).map(r=>{const s=D.studio.find(x=>x.sid===r.sid);return s?`<img src="studio/${s.file}.jpg" alt="">`:''}).join('');
+  el.innerHTML=`<div class="bb"><div class="bb-start">
+   <div class="bs-head"><span class="lbl" style="color:var(--y)">Brief Builder</span><h2 class="disp">Start a brief</h2><p>Pick a starting point. Either way you can add, remove and edit every asset afterwards.</p></div>
+   <div class="bs-opts">
+    <button type="button" class="bs-card rec" id="bs-mvp"><span class="bs-badge">Recommended</span>
+     <div class="bs-thumbs">${thumbs}</div>
+     <h3 class="disp">Preloaded MVP brief</h3>
+     <p>The minimum set to launch BFCM well: core offer, launch, catalogue frames, tier-1 personas, creator video, Drop 2 and Cyber Monday. Copy, French, CTAs, landing pages, sizes and channels are filled in, and assets are ranked by priority × impact into 5 delivery batches.</p>
+     <div class="bs-stats"><div><b>${n}</b><span>assets</span></div><div><b>${deliv}</b><span>deliverables EN/FR</span></div><div><b>5</b><span>batches</span></div><div><b>3–17</b><span>Nov due dates</span></div></div>
+     <ol class="bs-batches">${MVP.batches.map((x,k)=>`<li><b>Batch ${k+1} · ${E(fmtD(x[0]))}</b> ${E(x[1])} <span class="cnt">(${MVP.rows.filter(r=>r.b===k+1).length})</span></li>`).join('')}</ol>
+     <span class="btn y bs-go">Load MVP brief →</span></button>
+    <div class="bs-card" id="bs-scratch">
+     <div class="bs-blank" aria-hidden="true"><span>+</span></div>
+     <h3 class="disp">Build from scratch</h3>
+     <p>Start with an empty brief and add assets from the Messaging Matrix, JD Mockups or Library examples, or add blank rows.</p>
+     <label class="bs-name">Brief name<input class="bb-in" id="bs-n" value="BFCM 2026 · New brief"></label>
+     <button type="button" class="btn bs-go" id="bs-blank">Start empty brief →</button></div>
+   </div>
+   ${S.briefs.length?`<div class="bs-list"><div class="row" style="justify-content:space-between"><h3 class="disp" style="margin:0;font-size:34px">Your briefs <span class="cnt" style="font-family:var(--body)">${S.briefs.length}</span></h3><span class="cnt">Keep as many versions as you like. Load the MVP again or start another from scratch to compare.</span></div>
+    <div class="bs-grid">${S.briefs.map(x=>{const o=x.settings?.origin;return `<div class="bs-item${cur()&&x.id===cur().id?' on':''}"><div class="row" style="gap:6px"><span class="bs-tag ${o==='mvp'?'mvp':''}">${o==='mvp'?'Preloaded MVP':o==='scratch'?'From scratch':o==='copy'?'Copy':'Brief'}</span><span class="cnt">${S.counts[x.id]||0} assets</span></div>
+     <b>${E(x.name)}</b><span class="cnt">Updated ${new Date(x.updated_at).toLocaleString('en-CA',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}${x.updated_by||x.owner_email?' · '+E((x.updated_by||x.owner_email).split('@')[0]):''}</span>
+     <div class="row" style="gap:6px;margin-top:auto"><button type="button" class="btn y" data-open="${x.id}">Open</button><button type="button" class="btn g" data-copyb="${x.id}">Duplicate</button><button type="button" class="btn g" data-delb="${x.id}">Delete</button></div></div>`}).join('')}</div></div>`:''}
+   ${modeNote()}</div></div>`;
+  el.querySelector('#bs-mvp').onclick=async e=>{const t=e.currentTarget;if(t.dataset.busy)return;t.dataset.busy=1;t.querySelector('.bs-go').textContent='Loading…';try{await createMVP()}catch(err){say('Could not load: '+err.message);delete t.dataset.busy}};
+  el.querySelector('#bs-blank').onclick=()=>createBlank(el.querySelector('#bs-n').value.trim());
+  el.querySelectorAll('[data-open]').forEach(b=>b.onclick=async()=>{S.brief=S.briefs.find(x=>x.id===b.dataset.open);ls.set('bb-active',S.brief.id);await loadAssets();S.start=false;render();window.scrollTo({top:$('#v-brief').offsetTop-80})});
+  el.querySelectorAll('[data-copyb]').forEach(b=>b.onclick=async()=>{b.textContent='Copying…';await dupBrief(S.briefs.find(x=>x.id===b.dataset.copyb));S.counts=await store.counts().catch(()=>({}));S.start=true;render()});
+  el.querySelectorAll('[data-delb]').forEach(b=>b.onclick=async()=>{if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Click to confirm';b.style.background='#FF6B6B';b.style.color='#000';return}
+    await store.delBrief(b.dataset.delb);S.briefs=S.briefs.filter(x=>x.id!==b.dataset.delb);if(S.brief?.id===b.dataset.delb){S.brief=S.briefs[0]||null;ls.set('bb-active',S.brief?.id||'');await loadAssets()}render()})}
+async function dupBrief(src){const srcA=src.id===S.brief?.id?S.assets:await store.assets(src.id);const nb=await store.addBrief({name:src.name+' (copy)',deadline_mode:src.deadline_mode,settings:{...(src.settings||{}),origin:'copy'}});
+  if(srcA.length)await store.addAssets(srcA.map(a=>{const {id,created_at,updated_at,clickup_task_id,clickup_url,clickup_status,clickup_synced_at,...rest}=a;return {...rest,brief_id:nb.id}}));S.briefs.unshift(nb);say('Duplicated as “'+nb.name+'”');return nb}
 
 /* ---------- render ---------- */
 const fmtD=d=>d?new Date(d+'T12:00').toLocaleDateString('en-CA',{weekday:'short',day:'numeric',month:'short'}):'';
@@ -152,12 +228,11 @@ function row(a,i){const isV=/video|motion/i.test(a.format);const rec=[...new Set
 function render(){const el=$('#v-brief');if(!el)return;
   if(!S.loaded){el.innerHTML='<div class="bb"><div class="note">Loading briefs…</div></div>';return}
   const b=cur();const sel=`<select id="bb-sel" aria-label="Brief">${S.briefs.map(x=>`<option value="${x.id}" ${b&&x.id===b.id?'selected':''}>${E(x.name)}</option>`).join('')}</select>`;
-  if(!b){el.innerHTML=`<div class="bb"><div class="bb-top">${S.briefs.length?sel:''}<button class="btn y" id="bb-new">+ New brief</button></div>
-    <div class="bb-empty"><div class="disp" style="font-size:44px;color:var(--y)">Build a brief</div><p>Start a brief, then add assets from the Messaging Matrix, JD Mockups or the Library with the “+ Brief” buttons, or add blank assets here.</p></div>${modeNote()}</div>`;return}
+  if(!b||S.start){startPage(el);if(!S._cnt){S._cnt=1;store.counts().then(c=>{S.counts=c;S._cnt=0;if(S.start||!cur())startPage(el)}).catch(()=>{S._cnt=0})}return}
   const st=b.settings||{};const A=S.assets;const deliv=A.reduce((n,a)=>n+(a.sizes||[]).length*(st.fr===false?1:2),0);
   const vids=A.filter(a=>/video|motion/i.test(a.format)).length;const dates=A.map(a=>b.deadline_mode==='single'?st.single:a.deadline).filter(Boolean).sort();
   el.innerHTML=`<div class="bb">
-  <div class="bb-top">${sel}<button class="btn g" id="bb-new">+ New brief</button><button class="btn g" id="bb-dupb">Duplicate brief</button><span class="sp" style="flex:1"></span><span class="bb-mode">${MODE==='remote'?'● Saved for the team':'● Saved in this browser only'}</span></div>
+  <div class="bb-top">${sel}<button class="btn g" id="bb-new">← All briefs</button><button class="btn g" id="bb-dupb">Duplicate brief</button><span class="sp" style="flex:1"></span><span class="bb-mode">${MODE==='remote'?'● Saved for the team':'● Saved in this browser only'}</span></div>
   <input class="bb-title" id="bb-name" value="${E(b.name)}" aria-label="Brief name">
   <div class="bb-kpis"><div class="bb-kpi"><span class="lbl">Assets</span><b>${A.length}</b></div><div class="bb-kpi"><span class="lbl">Deliverables (sizes${st.fr===false?'':' × EN/FR'})</span><b>${deliv}</b></div><div class="bb-kpi"><span class="lbl">Videos</span><b>${vids}</b></div><div class="bb-kpi"><span class="lbl">First / last deadline</span><b style="font-size:26px">${dates.length?E(fmtD(dates[0]))+' → '+E(fmtD(dates.at(-1))):'–'}</b></div></div>
   <div class="bb-panel"><div class="row"><span class="lbl">Deadlines</span><div class="bb-seg" role="group">${[['single','One date'],['per','Per asset'],['waterfall','Waterfall']].map(([k,t])=>`<button type="button" data-mode="${k}" aria-pressed="${b.deadline_mode===k}">${t}</button>`).join('')}</div>
@@ -198,8 +273,8 @@ function bind(){const el=$('#v-brief');
  el.addEventListener('focusout',e=>{if(e.target.dataset.tagin)setTimeout(()=>e.target.parentElement?.querySelector('.bb-sug')?.remove(),180)});
  el.addEventListener('click',async e=>{const t=e.target.closest('button,[data-sug]');if(!t)return;const b=cur();
    if(t.dataset.sug!==undefined){const inp=t.closest('.bb-tagin').querySelector('input');addTag(inp.dataset.tagin,{name:t.dataset.n,url:t.dataset.u});return}
-   if(t.id==='bb-new'){const n=prompt2('Brief name','BFCM 2026 · '+new Date().toLocaleDateString('en-CA',{month:'short',day:'numeric'})+' brief');const nb=await store.addBrief({name:n});S.briefs.unshift(nb);S.brief=nb;ls.set('bb-active',nb.id);S.assets=[];S.queue=[];render();return}
-   if(t.id==='bb-dupb'){const nb=await store.addBrief({name:b.name+' (copy)',deadline_mode:b.deadline_mode,settings:b.settings});for(const a of S.assets){const {id,created_at,updated_at,clickup_task_id,clickup_url,clickup_status,clickup_synced_at,...rest}=a;await store.addAsset({...rest,brief_id:nb.id})}S.briefs.unshift(nb);S.brief=nb;ls.set('bb-active',nb.id);await loadAssets();render();say('Brief duplicated');return}
+   if(t.id==='bb-new'){S.start=true;render();window.scrollTo({top:$('#v-brief').offsetTop-80});return}
+   if(t.id==='bb-dupb'){const nb=await dupBrief(b);S.brief=nb;ls.set('bb-active',nb.id);await loadAssets();render();return}
    if(t.id==='bb-delb'){if(!t.dataset.sure){t.dataset.sure=1;t.textContent='Click again to delete';t.style.background='#FF6B6B';t.style.color='#000';setTimeout(()=>{if(t.isConnected){delete t.dataset.sure;t.textContent='Delete this brief';t.style.cssText='margin-left:auto'}},3000);return}
      await store.delBrief(b.id);S.briefs=S.briefs.filter(x=>x.id!==b.id);S.brief=S.briefs[0]||null;ls.set('bb-active',S.brief?.id||'');await loadAssets();render();return}
    if(t.dataset.mode){b.deadline_mode=t.dataset.mode;await store.patchBrief(b.id,{deadline_mode:b.deadline_mode});render();return}
