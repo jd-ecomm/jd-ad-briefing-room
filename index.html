@@ -269,7 +269,7 @@ const PLAB={'FB':'FB','IG':'IG','AN':'AN','Messenger':'MSG','Threads':'THR','Ins
 const plats=i=>(i.platforms&&i.platforms!=='n/a'?i.platforms.split(/,\s*/):[]).map(x=>PLAB[x]||x);
 const runLbl=i=>i.days==null?'':(i.days?`${i.days}d live`:'<1d live');
 const reuseLbl=i=>i.variants==null?'':(i.variants>1?`×${i.variants} reuse`:'Unique');
-const PRIB=new Set(['JD Sports','Gymshark','Alo Yoga','Comfrt','SKIMS','Vuori','Abercrombie & Fitch']);
+const PRIB=new Set(['JD Sports','Gymshark','Alo Yoga','Comfrt','lululemon',"Arc'teryx",'Represent','SKIMS','Vuori','Abercrombie & Fitch','Salomon','HAVEN','Bandit Running']);
 const isPan=i=>!i.mp4&&!!i.img&&(i.format==='Carousel'||i.cards>1);
 const FACETS=[['brand','Brand',i=>[i.brand]],['lang','Language',i=>[LANG(i)]],['signal','Performance signal',i=>[i.signal||'n/a']],['src','Source',i=>[i.src]],['format','Format',i=>[i.video?'Video':'Static / carousel']],['group','Brand group',i=>[i.group]],['phases','Phase fit',i=>i.phases],['angles','Message angle',i=>i.angles],['styles','Creative style',i=>i.styles]];
 const label=(k,v)=>k==='angles'?ANG[v]?.name:k==='styles'?STY[v]?.name:k==='phases'?(PH[v]?.name+' · '+PH[v]?.dates):v;
