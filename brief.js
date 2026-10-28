@@ -10,10 +10,11 @@ const say=t=>{try{toast(t)}catch(e){}};
 const uid=()=>([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16));
 
 /* ---------- constants ---------- */
-const SIZES={'1:1':'1080×1080','4:5':'1080×1350','9:16':'1080×1920','1.91:1':'1200×628'};
-const PLATS={'FB/IG Feed':['4:5','1:1'],'Stories':['9:16'],'Reels':['9:16'],'TikTok':['9:16'],'Catalogue (DPA)':['1:1']};
+const SIZES={'1:1':'1080×1080','4:5':'1080×1350','9:16':'1080×1920','16:9':'1920×1080'};
+const PLATS={'FB/IG Feed':['4:5','1:1'],'Stories':['9:16'],'Reels':['9:16'],'TikTok':['9:16'],'Catalogue (DPA)':['1:1'],'YouTube':['16:9','9:16']};
 const VLEN=['','6s','10s','15s','20s','30s','45s+'];
-const VREC={'FB/IG Feed':'6–15s','Stories':'6–15s','Reels':'9–15s','TikTok':'9–21s','Catalogue (DPA)':'n/a'};
+const isVid=a=>/video|motion/i.test(a.format||'');const conceptKey=a=>String(a.headline||a.overlay||a.name||'').toUpperCase().replace(/[^A-Z0-9%$]+/g,' ').trim();
+const VREC={'FB/IG Feed':'6–15s','Stories':'6–15s','Reels':'9–15s','TikTok':'9–21s','Catalogue (DPA)':'n/a','YouTube':'6s bumper · 15–30s'};
 const FORMATS=['Static','Video','Carousel','Motion (GIF)','Catalogue frame'];
 const CTAS=['Shop Now','Shop the sale','Learn More','Get notified','Download app','Sign up'];
 const STATUS=['Not started','Briefed','In design','In review','Approved','Live'];
@@ -55,7 +56,7 @@ const store={
  async enqueue(q){q={id:uid(),created_at:now(),status:'queued',requested_by:ME,...q};if(MODE==='remote')return (await api('bb_queue',{method:'POST',body:JSON.stringify(q)}))[0];const d=LS.db();d.queue.push(q);LS.save(d);return q},
  async cancel(id){if(MODE==='remote')return api('bb_queue?id=eq.'+id,{method:'PATCH',body:JSON.stringify({status:'cancelled'})});const d=LS.db();(d.queue.find(x=>x.id===id)||{}).status='cancelled';LS.save(d)}
 };
-const BLANK=()=>({name:'New asset',source_type:null,source_id:null,source_url:null,format:'Static',sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories'],video_len:null,headline:'',overlay:'',primary_text:'',fr_text:'',cta:'Shop Now',cta_note:'',landing_url:'',landing_note:'',products:[],priority:3,impact:3,deadline:null,batch:null,notes:'',status:'Not started'});
+const BLANK=()=>({theme:null,name:'New asset',source_type:null,source_id:null,source_url:null,format:'Static',sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories'],video_len:null,headline:'',overlay:'',primary_text:'',fr_text:'',cta:'Shop Now',cta_note:'',landing_url:'',landing_note:'',products:[],priority:3,impact:3,deadline:null,batch:null,notes:'',status:'Not started'});
 
 /* ---------- email gate ---------- */
 function gate(){
@@ -78,7 +79,7 @@ async function hello(){
 }
 
 /* ---------- state ---------- */
-const S={briefs:[],brief:null,assets:[],queue:[],loaded:false,poll:null,start:true,counts:{}};
+const S={briefs:[],brief:null,assets:[],queue:[],loaded:false,poll:null,start:true,counts:{},closed:new Set()};
 const cur=()=>S.brief;
 async function loadBriefs(){
   try{S.briefs=await store.briefs()}catch(e){MODE='local';S.briefs=await store.briefs()}
@@ -88,15 +89,23 @@ async function loadAssets(){if(!S.brief)return;S.assets=await store.assets(S.bri
 async function ensureBrief(){if(S.brief)return S.brief;const b=await store.addBrief({name:'BFCM 2026 · Paid social brief'});S.briefs.unshift(b);S.brief=b;ls.set('bb-active',b.id);S.assets=[];return b}
 
 /* ---------- add from sources ---------- */
-function fromVar(v){return{name:`${v.id} · ${v.headline}`.slice(0,90),source_type:'matrix',source_id:v.id,headline:v.headline,overlay:v.headline,primary_text:v.primary,fr_text:v.fr||'',cta:v.cta||'Shop Now',landing_url:absUrl(v.lp),landing_note:v.sub||'',notes:v.kw&&!/no search/i.test(v.kw)?'Search demand: '+v.kw:''}}
-function fromAngle(a){return{name:`${a.id} · ${a.name}`,source_type:'angle',source_id:a.id,headline:a.headline,overlay:a.headline,primary_text:a.primary,cta:a.cta||'Shop Now',landing_note:a.sub||''}}
+/* message themes */
+const THEMES=()=>(D.house?.themes||[]);
+const VS_T={VS01:'T11',VS02:'T11',VS03:'T9',VS04:'T12',VS05:'T12',VS06:'T13',VS07:'T13',VS08:'T14',VS09:'T14',VS10:'T14',VS11:'T9',VS12:'T9'};
+const FAM_T={VB:'T5',VC:'T7',VG:'T8',VD:'T15'};
+const GRP_T={'Catalogue':'T10','Gifting':'T8','Brand':'T5','Category':'T7','Persona':'T4','Product hero':'T6','Drop 2':'T15','Lo-fi':'T9','Social-first':'T9','Cyber Monday':'T1','French':'T1'};
+const tByAngle=ids=>{for(const id of ids||[]){const t=THEMES().find(t=>t.angles.includes(id));if(t)return t.id}return null};
+const tByVar=id=>VS_T[id]||FAM_T[String(id).slice(0,2)]||null;
+const themeName=id=>THEMES().find(t=>t.id===id)?.name||'';
+function fromVar(v){return{theme:tByVar(v.id),name:`${v.id} · ${v.headline}`.slice(0,90),source_type:'matrix',source_id:v.id,headline:v.headline,overlay:v.headline,primary_text:v.primary,fr_text:v.fr||'',cta:v.cta||'Shop Now',landing_url:absUrl(v.lp),landing_note:v.sub||'',notes:v.kw&&!/no search/i.test(v.kw)?'Search demand: '+v.kw:''}}
+function fromAngle(a){return{theme:tByAngle([a.id]),name:`${a.id} · ${a.name}`,source_type:'angle',source_id:a.id,headline:a.headline,overlay:a.headline,primary_text:a.primary,cta:a.cta||'Shop Now',landing_note:a.sub||''}}
 function fromMock(s){const sz=s.size.includes('1920')?['9:16']:s.size.includes('1080×1080')?['1:1']:['4:5'];const v=s.variation&&VAR[s.variation];
   const prods=catalog().filter(p=>s.products.toLowerCase().includes(p.name.toLowerCase().split(' (')[0].replace(/^(nike|adidas|puma|asics|new balance|tnf|the north face|ugg)\s+/i,'').slice(0,10).toLowerCase()));
-  return{name:s.title,source_type:'mockup',source_id:s.sid,source_url:'studio/'+s.file+'.png',format:'Static',sizes:sz,platforms:sz[0]==='9:16'?['Stories','Reels']:sz[0]==='1:1'?['FB/IG Feed','Catalogue (DPA)']:['FB/IG Feed'],
+  return{theme:(s.variation&&tByVar(s.variation))||GRP_T[s.group]||tByAngle(s.angles),name:s.title,source_type:'mockup',source_id:s.sid,source_url:'studio/'+s.file+'.png',format:'Static',sizes:sz,platforms:sz[0]==='9:16'?['Stories','Reels']:sz[0]==='1:1'?['FB/IG Feed','Catalogue (DPA)']:['FB/IG Feed'],
    headline:v?v.headline:'',overlay:s.title,primary_text:v?v.primary:(ANG[s.angles[0]]?.primary||''),fr_text:v?v.fr:'',cta:v?.cta||ANG[s.angles[0]]?.cta||'Shop Now',landing_url:v?absUrl(v.lp):'',
    products:prods.slice(0,4),notes:'Products in mockup: '+s.products+'. Prices are placeholders until 10 Nov.'}}
 function fromAd(i){const vl=i.vlen?(i.vlen<=7?'6s':i.vlen<=11?'10s':i.vlen<=16?'15s':i.vlen<=24?'20s':i.vlen<=35?'30s':'45s+'):null;
-  return{name:`Inspired by ${i.brand} (${i.sid})`,source_type:'example',source_id:i.sid,source_url:i.img||null,format:i.video?'Video':(i.format==='Carousel'?'Carousel':'Static'),video_len:vl,
+  return{theme:(THEMES().find(t=>t.refs.includes(i.sid))?.id)||tByAngle(i.angles),name:`Inspired by ${i.brand} (${i.sid})`,source_type:'example',source_id:i.sid,source_url:i.img||null,format:i.video?'Video':(i.format==='Carousel'?'Carousel':'Static'),video_len:vl,
    sizes:['4:5','9:16'],platforms:['FB/IG Feed','Reels'],headline:'',overlay:i.headline||'',primary_text:'',notes:`Reference: ${i.brand} ${i.sid}. ${i.why||''}`.trim()}}
 async function addFrom(kind,id){await ensureBrief();let a;
   if(kind==='var'){const v=VAR[id];if(!v)return;a=fromVar(v)}
@@ -122,33 +131,33 @@ const MVP={name:'BFCM 2026 · MVP paid social brief',settings:{wf_start:'2026-11
  batches:[['2026-11-03','Launch essentials · live 14 Nov'],['2026-11-06','Tier-1 personas · live 14 Nov'],['2026-11-10','Creator, brand & product heroes · add by 17 Nov'],['2026-11-13','Drop 2 & BF weekend · live 26 Nov'],['2026-11-17','Ends soon & Cyber Monday · live 27–30 Nov']],
  rows:[
  // batch 1
- {sid:'JD-01',b:1,p:5,i:5,sizes:['4:5','9:16','1:1'],platforms:['FB/IG Feed','Stories','Reels'],headline:'UP TO 60% OFF',fr:"JUSQU'À 60 % DE RABAIS",lp:BF,why:'Core offer (T1). The always-on workhorse for prospecting and retargeting across all five phases. Story cut-down = JD-02.'},
- {sid:'JD-40',b:1,p:5,i:5,format:'Motion (GIF)',video_len:'6s',sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories','Reels'],headline:"IT'S ON.",fr:"C'EST PARTI. JUSQU'À 60 % DE RABAIS",lp:BF,why:"Launch announcer (T2). Runs 14–16 Nov only, so it has to be first off the line."},
- {sid:'JD-31',b:1,p:5,i:5,headline:'BLACK FRIDAY · UP TO 60% OFF',fr:'VENDREDI FOU · JUSQU’À 60 % DE RABAIS',lp:BF,why:'Catalogue (DPA) frame (T10). Highest-spend placement in 2025, so the frame must be approved before launch.'},
- {sid:'JD-03',b:1,p:5,i:4,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories'],headline:'OUR BIGGEST SALE OF THE YEAR',fr:"NOTRE PLUS GRANDE SOLDE DE L'ANNÉE",lp:BF,why:'Brand-level launch line (A01). Story cut-down = JD-37.'},
+ {sid:'JD-01',t:'T1',b:1,p:5,i:5,sizes:['4:5','9:16','1:1'],platforms:['FB/IG Feed','Stories','Reels'],headline:'UP TO 60% OFF',fr:"JUSQU'À 60 % DE RABAIS",lp:BF,why:'Core offer (T1). The always-on workhorse for prospecting and retargeting across all five phases. Story cut-down = JD-02.'},
+ {sid:'JD-40',t:'T2',b:1,p:5,i:5,format:'Motion (GIF)',video_len:'6s',sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories','Reels'],headline:"IT'S ON.",fr:"C'EST PARTI. JUSQU'À 60 % DE RABAIS",lp:BF,why:"Launch announcer (T2). Runs from Early Access (14 Nov) through the online-only launch (15–18 Nov), so it has to be first off the line."},
+ {sid:'JD-31',t:'T10',b:1,p:5,i:5,headline:'BLACK FRIDAY · UP TO 60% OFF',fr:'VENDREDI FOU · JUSQU’À 60 % DE RABAIS',lp:BF,why:'Catalogue (DPA) frame (T10). Highest-spend placement in 2025, so the frame must be approved before launch.'},
+ {sid:'JD-03',t:'T1',b:1,p:5,i:4,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories'],headline:'OUR BIGGEST SALE OF THE YEAR',fr:"NOTRE PLUS GRANDE SOLDE DE L'ANNÉE",lp:BF,why:'Brand-level launch line (A01). Story cut-down = JD-37.'},
  // batch 2
- {sid:'JD-45',b:2,p:4,i:5,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Reels'],why:'Persona: sneakerhead (T4, tier 1). Biggest BFCM revenue persona.'},
- {sid:'JD-60',b:2,p:4,i:5,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories'],why:'Persona: winter (T13 winter wardrobe). Outerwear and fleece demand peaks in BFCM week.'},
- {sid:'JD-43',b:2,p:4,i:4,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories'],why:"Persona: runner (T4, tier 1)."},
- {sid:'JD-51',b:2,p:4,i:4,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories'],why:"Persona: women's (T4, tier 1). Check the gifts-for-her page is relaunched before this goes live."},
+ {sid:'JD-45',t:'T4',b:2,p:4,i:5,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Reels'],why:'Persona: sneakerhead (T4, tier 1). Biggest BFCM revenue persona.'},
+ {sid:'JD-60',t:'T13',b:2,p:4,i:5,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories'],why:'Persona: winter (T13 winter wardrobe). Outerwear and fleece demand peaks in BFCM week.'},
+ {sid:'JD-43',t:'T4',b:2,p:4,i:4,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories'],why:"Persona: runner (T4, tier 1)."},
+ {sid:'JD-51',t:'T4',b:2,p:4,i:4,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories'],why:"Persona: women's (T4, tier 1). Check the gifts-for-her page is relaunched before this goes live."},
  // batch 3
- {sid:'JD-62',b:3,p:4,i:4,format:'Video',video_len:'15s',sizes:['9:16','4:5'],platforms:['Reels','TikTok','Stories'],why:'Creator launch video (T9 + T14 native creator lines). Brief one creator, 2 hooks; the static mockup is the end-card reference.'},
- {sid:'JD-15',b:3,p:3,i:4,why:'Brand co-op (T5). Nike first; duplicate the row for adidas (JD-16) and New Balance (JD-17) once co-op terms are confirmed.'},
- {sid:'JD-46',b:3,p:3,i:4,sizes:['4:5','1:1'],platforms:['FB/IG Feed','Catalogue (DPA)'],why:'Product hero (T6). Swap in the confirmed top seller and real price on 10 Nov.'},
- {sid:'JD-20',b:3,p:3,i:4,why:'Gifting starts (T8). Under-$50 and gifts-for-him/her can follow as duplicates.'},
+ {sid:'JD-62',t:'T9',b:3,p:4,i:4,format:'Video',video_len:'15s',sizes:['9:16','4:5'],platforms:['Reels','TikTok','Stories'],why:'Creator launch video (T9 + T14 native creator lines). Brief one creator, 2 hooks; the static mockup is the end-card reference.'},
+ {sid:'JD-15',t:'T5',b:3,p:3,i:4,why:'Brand co-op (T5). Nike first; duplicate the row for adidas (JD-16) and New Balance (JD-17) once co-op terms are confirmed.'},
+ {sid:'JD-46',t:'T6',b:3,p:3,i:4,sizes:['4:5','1:1'],platforms:['FB/IG Feed','Catalogue (DPA)'],why:'Product hero (T6). Swap in the confirmed top seller and real price on 10 Nov.'},
+ {sid:'JD-20',t:'T8',b:3,p:3,i:4,why:'Gifting starts (T8). Under-$50 and gifts-for-him/her can follow as duplicates.'},
  // batch 4
- {sid:'JD-76',b:4,p:3,i:4,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories','Reels'],why:'Drop 2 announcer (T15). Gives lapsed visitors a new reason to come back on 26 Nov.'},
- {sid:'JD-77',b:4,p:3,i:3,format:'Motion (GIF)',video_len:'6s',why:'Drop 2 Story/Reels version. Quick motion cut of the line-up.'},
- {sid:'JD-07',b:4,p:3,i:3,headline:'LAST SIZES',fr:'DERNIÈRES TAILLES',lp:BF,why:'Scarcity (T3) for BF weekend retargeting. Feed the real low-stock SKUs.'},
- {sid:'JD-59',b:4,p:3,i:3,why:"Social proof (T12). Confirm Canada's #1 sneaker from sales data before final."},
+ {sid:'JD-76',t:'T15',b:4,p:3,i:4,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories','Reels'],why:'Drop 2 announcer (T15). Gives lapsed visitors a new reason to come back on 26 Nov.'},
+ {sid:'JD-77',t:'T15',b:4,p:3,i:3,format:'Motion (GIF)',video_len:'6s',why:'Drop 2 Story/Reels version. Quick motion cut of the line-up.'},
+ {sid:'JD-07',t:'T3',b:4,p:3,i:3,headline:'LAST SIZES',fr:'DERNIÈRES TAILLES',lp:BF,why:'Scarcity (T3) for BF weekend retargeting. Feed the real low-stock SKUs.'},
+ {sid:'JD-59',t:'T12',b:4,p:3,i:3,why:"Social proof (T12). Confirm Canada's #1 sneaker from sales data before final."},
  // batch 5
- {sid:'JD-55',b:5,p:3,i:3,format:'Video',video_len:'10s',sizes:['9:16'],platforms:['Reels','TikTok','Stories'],why:'Ends soon (T11) native creator caption. FR version = JD-57.'},
- {sid:'JD-12',b:5,p:2,i:4,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories'],headline:'EXTRA 20% OFF',fr:'20 % DE RABAIS SUPPLÉMENTAIRE',lp:BF,why:'Cyber Monday stack (P5). Show the price maths. Story = JD-13, FR = JD-36.'},
- {sid:'JD-32',b:5,p:2,i:4,headline:'CYBER MONDAY · EXTRA 20% OFF',fr:'CYBERLUNDI · 20 % DE RABAIS SUPPLÉMENTAIRE',lp:BF,why:'Cyber Monday catalogue frame (T10). Swaps in on 30 Nov.'},
- {sid:'JD-14',b:5,p:2,i:3,headline:'ENDS TONIGHT',fr:'SE TERMINE CE SOIR',lp:BF,why:'Hard deadline for the final 24 hours of Cyber Monday.'}
+ {sid:'JD-55',t:'T11',b:5,p:3,i:3,format:'Video',video_len:'10s',sizes:['9:16'],platforms:['Reels','TikTok','Stories'],why:'Ends soon (T11) native creator caption. FR version = JD-57.'},
+ {sid:'JD-12',t:'T1',b:5,p:2,i:4,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories'],headline:'EXTRA 20% OFF',fr:'20 % DE RABAIS SUPPLÉMENTAIRE',lp:BF,why:'Cyber Monday stack (P5). Show the price maths. Story = JD-13, FR = JD-36.'},
+ {sid:'JD-32',t:'T10',b:5,p:2,i:4,headline:'CYBER MONDAY · EXTRA 20% OFF',fr:'CYBERLUNDI · 20 % DE RABAIS SUPPLÉMENTAIRE',lp:BF,why:'Cyber Monday catalogue frame (T10). Swaps in on 30 Nov.'},
+ {sid:'JD-14',t:'T2',b:5,p:2,i:3,headline:'ENDS TONIGHT',fr:'SE TERMINE CE SOIR',lp:BF,why:'Hard deadline for the final 24 hours of Cyber Monday.'}
  ]};
 function mvpAssets(bid){return MVP.rows.map((r,k)=>{const s=D.studio.find(x=>x.sid===r.sid);const a=s?fromMock(s):{name:r.sid};
-  const o={...a,brief_id:bid,ord:k+1,priority:r.p,impact:r.i,batch:r.b,deadline:MVP.batches[r.b-1][0],status:'Not started'};
+  const o={...a,theme:r.t||a.theme||null,brief_id:bid,ord:k+1,priority:r.p,impact:r.i,batch:r.b,deadline:MVP.batches[r.b-1][0],status:'Not started'};
   ['format','video_len','sizes','platforms'].forEach(f=>{if(r[f])o[f]=r[f]});
   if(r.headline){o.headline=r.headline;if(!o.overlay)o.overlay=r.headline}if(r.fr&&!o.fr_text)o.fr_text=r.fr;if(r.lp&&!o.landing_url)o.landing_url=r.lp;if(!o.landing_url)o.landing_url=BF;
   if(!o.headline)o.headline=(s&&ANG[s.angles[0]]?.headline)||'';
@@ -197,34 +206,51 @@ function srcCell(a){let thumb='',link='';
   else if(a.source_type==='example'){const i=D.items.find(x=>x.sid===a.source_id);if(i){thumb=i.img?`<img src="${i.img}" alt="">`:'';link=`<a href="#${i.sid}">${i.sid} example ↗</a>`}}
   else if(a.source_type==='matrix')link=`<a href="#messaging">${E(a.source_id)} matrix ↗</a>`;
   else if(a.source_type==='angle')link=`<a href="#messaging">${E(a.source_id)} angle ↗</a>`;
-  return `<div class="bb-src">${thumb}<div style="flex:1;min-width:0"><textarea rows="2" class="hlx" data-f="name" data-id="${a.id}">${E(a.name)}</textarea>${link}</div></div>`}
+  const L=cur()?.settings?.fr===false?1:2,n=(a.sizes||[]).length*L;
+  return `<div class="bb-src">${thumb}<div style="flex:1;min-width:0"><textarea rows="2" class="hlx" data-f="name" data-id="${a.id}">${E(a.name)}</textarea>${link}<div class="bb-files ${isVid(a)?'v':'i'}">${isVid(a)?'▶ Video':'▣ Image'} · ${(a.sizes||[]).length} size${(a.sizes||[]).length===1?'':'s'}${L>1?' × EN/FR':''} = <b>${n}</b> file${n===1?'':'s'}</div></div></div>`}
 function tagCell(a){return `<div class="bb-chips">${(a.products||[]).map((p,k)=>`<span class="bb-tag"><a href="${E(p.url)}" target="_blank" rel="noopener" title="${E(p.url)}">${E(p.name)}</a><button type="button" data-untag="${a.id}" data-k="${k}" aria-label="Remove">×</button></span>`).join('')}</div>
   <div class="bb-tagin"><input type="text" data-tagin="${a.id}" placeholder="+ product or paste URL" autocomplete="off"></div>`}
 function stCell(a){const s=a.clickup_status||a.status||'Not started';const c=/live|approved|complete|done/i.test(s)?'done':/design|review|progress|briefed/i.test(s)?'prog':'';
   return `<span class="bb-st ${c}">${E(s)}</span>${a.clickup_url?`<div><a class="sm" href="${E(a.clickup_url)}" target="_blank" rel="noopener" style="color:var(--y)">ClickUp ↗</a></div>`:''}
   <select data-f="status" data-id="${a.id}" style="margin-top:6px" aria-label="Status">${STATUS.map(x=>`<option ${x===a.status?'selected':''}>${x}</option>`).join('')}</select>`}
-function row(a,i){const isV=/video|motion/i.test(a.format);const rec=[...new Set((a.platforms||[]).map(p=>VREC[p]).filter(x=>x&&x!=='n/a'))].join(' · ');
-  const dims=(a.sizes||[]).map(s=>SIZES[s]).filter(Boolean).join(' · ');const mode=cur().deadline_mode;
-  return `<tr data-row="${a.id}">
-  <td class="stick" style="min-width:250px"><div style="display:flex;gap:6px"><span class="cnt" style="padding-top:8px;min-width:18px">${i+1}</span><div style="flex:1;min-width:0">${srcCell(a)}</div></div></td>
-  <td style="min-width:130px"><select data-f="format" data-id="${a.id}">${FORMATS.map(f=>`<option ${f===a.format?'selected':''}>${f}</option>`).join('')}</select></td>
-  <td style="min-width:200px">${chips('platforms',Object.keys(PLATS),a.platforms||[],a.id)}</td>
-  <td style="min-width:150px">${chips('sizes',Object.keys(SIZES),a.sizes||[],a.id)}<div class="bb-dim">${E(dims)}</div></td>
-  <td style="min-width:110px">${isV?`<select data-f="video_len" data-id="${a.id}">${VLEN.map(v=>`<option value="${v}" ${v===(a.video_len||'')?'selected':''}>${v||'–'}</option>`).join('')}</select>${rec?`<div class="bb-hint">Rec: ${E(rec)}</div>`:''}`:'<span class="cnt">Static</span>'}</td>
-  <td style="min-width:200px"><textarea rows="2" class="hlx" data-f="headline" data-id="${a.id}" placeholder="Headline">${E(a.headline)}</textarea></td>
-  <td style="min-width:200px"><textarea rows="2" data-f="overlay" data-id="${a.id}" placeholder="Text on image / supers">${E(a.overlay)}</textarea></td>
-  <td style="min-width:260px"><textarea rows="3" data-f="primary_text" data-id="${a.id}" placeholder="Primary text">${E(a.primary_text)}</textarea></td>
-  <td style="min-width:200px"><textarea rows="2" data-f="fr_text" data-id="${a.id}" placeholder="French version">${E(a.fr_text)}</textarea></td>
-  <td style="min-width:170px"><select data-f="cta" data-id="${a.id}">${[...new Set([a.cta,...CTAS])].filter(Boolean).map(c=>`<option ${c===a.cta?'selected':''}>${E(c)}</option>`).join('')}</select><textarea rows="2" class="sm" data-f="cta_note" data-id="${a.id}" placeholder="CTA note">${E(a.cta_note)}</textarea></td>
-  <td style="min-width:230px"><input type="url" data-f="landing_url" data-id="${a.id}" placeholder="https://jdsports.ca/…" value="${E(a.landing_url)}"><textarea rows="2" class="sm" data-f="landing_note" data-id="${a.id}" placeholder="Landing page note">${E(a.landing_note)}</textarea>${a.landing_url?`<a class="sm" style="color:var(--y)" href="${E(a.landing_url)}" target="_blank" rel="noopener">Open ↗</a>`:''}</td>
-  <td style="min-width:240px">${tagCell(a)}</td>
-  <td style="min-width:74px"><select data-f="priority" data-id="${a.id}" aria-label="Priority">${[5,4,3,2,1].map(n=>`<option value="${n}" ${n==a.priority?'selected':''}>${n}${n===5?' high':n===1?' low':''}</option>`).join('')}</select></td>
-  <td style="min-width:74px"><select data-f="impact" data-id="${a.id}" aria-label="Impact">${[5,4,3,2,1].map(n=>`<option value="${n}" ${n==a.impact?'selected':''}>${n}</option>`).join('')}</select></td>
-  <td style="min-width:56px"><span class="bb-score">${score(a)}</span></td>
-  <td style="min-width:150px">${mode==='waterfall'&&a.batch?`<span class="bb-batch">Batch ${a.batch}</span>`:''}${mode==='single'?`<div class="sm" style="padding:6px 0">${E(fmtD(cur().settings?.single)||'Set date above')}</div>`:`<input type="date" data-f="deadline" data-id="${a.id}" value="${E(a.deadline||'')}">`}</td>
-  <td style="min-width:140px">${stCell(a)}</td>
-  <td style="min-width:220px"><textarea rows="3" data-f="notes" data-id="${a.id}" placeholder="Notes for design">${E(a.notes)}</textarea></td>
-  <td style="min-width:150px"><div class="bb-act"><button type="button" class="bb-ib" data-gen="${a.id}">✨ Generate mockup</button><button type="button" class="bb-ib" data-dup="${a.id}">⧉ Duplicate</button><button type="button" class="bb-ib" data-up="${a.id}">↑ Move up</button><button type="button" class="bb-ib" data-del="${a.id}">🗑 Remove</button></div></td></tr>`}
+function sizeChips(a){return `<div class="bb-chips">${Object.keys(SIZES).map(o=>`<button type="button" class="bb-chip bb-sz" data-chip="sizes" data-id="${a.id}" data-v="${o}" aria-pressed="${(a.sizes||[]).includes(o)}"><b>${o}</b><span>${SIZES[o]}</span></button>`).join('')}</div>`}
+function fld(label,html,cls=''){return `<label class="bc-f ${cls}"><span class="lbl">${label}</span>${html}</label>`}
+function row(a,i){const isV=isVid(a);const rec=[...new Set((a.platforms||[]).map(p=>VREC[p]).filter(x=>x&&x!=='n/a'))].join(' · ');
+  const mode=cur().deadline_mode;const L=cur()?.settings?.fr===false?1:2,n=(a.sizes||[]).length*L;const open=!S.closed.has(a.id);
+  let thumb='',link='';
+  if(a.source_type==='mockup'){const s=D.studio.find(x=>x.sid===a.source_id);if(s){thumb=`<img src="studio/${s.file}.jpg" alt="">`;link=`<a href="#${s.sid}">${s.sid} mockup ↗</a>`}}
+  else if(a.source_type==='example'){const it=D.items.find(x=>x.sid===a.source_id);if(it){thumb=it.img?`<img src="${it.img}" alt="">`:'';link=`<a href="#${it.sid}">${it.sid} example ↗</a>`}}
+  else if(a.source_type==='matrix'||a.source_type==='angle')link=`<a href="#messaging">${E(a.source_id)} matrix ↗</a>`;
+  return `<article class="bb-card" data-row="${a.id}">
+  <div class="bc-head">
+   <span class="bc-n">${i+1}</span>
+   <div class="bc-thumb">${thumb||`<span>${isV?'▶':'▣'}</span>`}</div>
+   <div class="bc-name"><textarea rows="1" class="hlx" data-f="name" data-id="${a.id}" aria-label="Asset name">${E(a.name)}</textarea>
+    <div class="bc-meta">${link}<span class="bb-files ${isV?'v':'i'}">${isV?'▶ Video':'▣ Image'} · <b>${n}</b> file${n===1?'':'s'}</span></div></div>
+   ${fld('Message theme',`<select data-f="theme" data-id="${a.id}" class="bb-theme${a.theme?'':' none'}"><option value="">– Pick a theme –</option>${THEMES().map(t=>`<option value="${t.id}" ${t.id===a.theme?'selected':''}>${t.id} · ${E(t.name)}</option>`).join('')}</select>`,'w-theme')}
+   <div class="bc-pi">${fld('Priority',`<select data-f="priority" data-id="${a.id}">${[5,4,3,2,1].map(k=>`<option value="${k}" ${k==a.priority?'selected':''}>${k}</option>`).join('')}</select>`)}${fld('Impact',`<select data-f="impact" data-id="${a.id}">${[5,4,3,2,1].map(k=>`<option value="${k}" ${k==a.impact?'selected':''}>${k}</option>`).join('')}</select>`)}<div class="bc-f"><span class="lbl">Score</span><span class="bb-score">${score(a)}</span></div></div>
+   ${fld('Deadline'+(mode==='waterfall'&&a.batch?` <span class="bb-batch">Batch ${a.batch}</span>`:''),mode==='single'?`<div class="sm" style="padding:7px 0">${E(fmtD(cur().settings?.single)||'Set date above')}</div>`:`<input type="date" data-f="deadline" data-id="${a.id}" value="${E(a.deadline||'')}">`,'w-date')}
+   <div class="bc-f w-st"><span class="lbl">Status</span>${stCell(a)}</div>
+   <div class="bc-act"><button type="button" class="bb-ib" data-gen="${a.id}" title="Generate mockup">✨ Mockup</button><button type="button" class="bb-ib" data-dup="${a.id}" title="Duplicate">⧉</button><button type="button" class="bb-ib" data-up="${a.id}" title="Move up">↑</button><button type="button" class="bb-ib" data-del="${a.id}" title="Remove">🗑</button></div>
+  </div>
+  <div class="bc-spec">
+   ${fld('Format',`<select data-f="format" data-id="${a.id}">${FORMATS.map(f=>`<option ${f===a.format?'selected':''}>${f}</option>`).join('')}</select>`,'w-fmt')}
+   <div class="bc-f w-ch"><span class="lbl">Channels</span>${chips('platforms',Object.keys(PLATS),a.platforms||[],a.id)}</div>
+   <div class="bc-f w-sz"><span class="lbl">Sizes</span>${sizeChips(a)}</div>
+   <div class="bc-f w-vl"><span class="lbl">Video length</span>${isV?`<select data-f="video_len" data-id="${a.id}">${VLEN.map(v=>`<option value="${v}" ${v===(a.video_len||'')?'selected':''}>${v||'– set length –'}</option>`).join('')}</select>${rec?`<div class="bb-hint">Recommended: ${E(rec)}</div>`:''}`:`<div class="sm" style="padding:7px 0">Static image · no video</div>`}</div>
+   <div class="bc-f w-dl"><span class="lbl">Deliverables</span><div class="bc-dl"><b>${n}</b> ${isV?'video':'image'} file${n===1?'':'s'}</div><div class="bb-dim">${(a.sizes||[]).length} size${(a.sizes||[]).length===1?'':'s'}${L>1?' × EN/FR':''}</div></div>
+  </div>
+  <details class="bc-copy" data-cid="${a.id}" ${open?'open':''}><summary><span>Copy, CTA, landing page &amp; products</span><span class="cnt">${E((a.headline||'').slice(0,60))}</span></summary>
+   <div class="bc-grid">
+    ${fld('Headline',`<textarea rows="2" class="hlx" data-f="headline" data-id="${a.id}" placeholder="Headline">${E(a.headline)}</textarea>`)}
+    ${fld('Text overlay / supers',`<textarea rows="2" data-f="overlay" data-id="${a.id}" placeholder="Text on image">${E(a.overlay)}</textarea>`)}
+    ${fld('Primary text',`<textarea rows="3" data-f="primary_text" data-id="${a.id}" placeholder="Primary text">${E(a.primary_text)}</textarea>`,'w2')}
+    ${fld('French',`<textarea rows="3" data-f="fr_text" data-id="${a.id}" placeholder="French version">${E(a.fr_text)}</textarea>`)}
+    ${fld('CTA',`<select data-f="cta" data-id="${a.id}">${[...new Set([a.cta,...CTAS])].filter(Boolean).map(c=>`<option ${c===a.cta?'selected':''}>${E(c)}</option>`).join('')}</select><textarea rows="2" class="sm" data-f="cta_note" data-id="${a.id}" placeholder="CTA note">${E(a.cta_note)}</textarea>`)}
+    ${fld('Landing page'+(a.landing_url?` <a href="${E(a.landing_url)}" target="_blank" rel="noopener" style="color:var(--y)">Open ↗</a>`:''),`<input type="url" data-f="landing_url" data-id="${a.id}" placeholder="https://jdsports.ca/…" value="${E(a.landing_url)}"><textarea rows="2" class="sm" data-f="landing_note" data-id="${a.id}" placeholder="Landing page note">${E(a.landing_note)}</textarea>`)}
+    <div class="bc-f"><span class="lbl">Product tags</span>${tagCell(a)}</div>
+    ${fld('Notes for design',`<textarea rows="3" data-f="notes" data-id="${a.id}" placeholder="Notes for design">${E(a.notes)}</textarea>`,'w2')}
+   </div></details></article>`}
 function render(){const el=$('#v-brief');if(!el)return;
   if(!S.loaded){el.innerHTML='<div class="bb"><div class="note">Loading briefs…</div></div>';return}
   const b=cur();const sel=`<select id="bb-sel" aria-label="Brief">${S.briefs.map(x=>`<option value="${x.id}" ${b&&x.id===b.id?'selected':''}>${E(x.name)}</option>`).join('')}</select>`;
@@ -234,7 +260,8 @@ function render(){const el=$('#v-brief');if(!el)return;
   el.innerHTML=`<div class="bb">
   <div class="bb-top">${sel}<button class="btn g" id="bb-new">← All briefs</button><button class="btn g" id="bb-dupb">Duplicate brief</button><span class="sp" style="flex:1"></span><span class="bb-mode">${MODE==='remote'?'● Saved for the team':'● Saved in this browser only'}</span></div>
   <input class="bb-title" id="bb-name" value="${E(b.name)}" aria-label="Brief name">
-  <div class="bb-kpis"><div class="bb-kpi"><span class="lbl">Assets</span><b>${A.length}</b></div><div class="bb-kpi"><span class="lbl">Deliverables (sizes${st.fr===false?'':' × EN/FR'})</span><b>${deliv}</b></div><div class="bb-kpi"><span class="lbl">Videos</span><b>${vids}</b></div><div class="bb-kpi"><span class="lbl">First / last deadline</span><b style="font-size:26px">${dates.length?E(fmtD(dates[0]))+' → '+E(fmtD(dates.at(-1))):'–'}</b></div></div>
+  ${kpis(A,st,dates)}
+  ${diversity(A)}
   <div class="bb-panel"><div class="row"><span class="lbl">Deadlines</span><div class="bb-seg" role="group">${[['single','One date'],['per','Per asset'],['waterfall','Waterfall']].map(([k,t])=>`<button type="button" data-mode="${k}" aria-pressed="${b.deadline_mode===k}">${t}</button>`).join('')}</div>
    <label class="row" style="gap:6px;margin-left:auto;font:600 12px var(--body);color:var(--fg2)"><input type="checkbox" id="bb-fr" ${st.fr===false?'':'checked'}> French version of every asset</label></div>
    ${b.deadline_mode==='single'?`<div class="bb-fields"><label>All assets due<input type="date" id="bb-single" value="${E(st.single||'')}"></label></div>`:''}
@@ -243,27 +270,45 @@ function render(){const el=$('#v-brief');if(!el)return;
    <div class="cnt">Ranks assets by Priority × Impact (both editable in the table), groups them into batches and spaces the dates to fit your window. Edit any date afterwards.</div>`:''}</div>
   <div class="row"><button class="btn y" id="bb-add">+ Add assets</button><button class="btn g" id="bb-blank">+ Blank asset</button><span style="flex:1"></span>
    <button class="btn" id="bb-sheet">⤓ Export to Google Sheet</button><button class="btn" id="bb-cu">➜ Send to ClickUp</button></div>
-  ${A.length?`<div class="bb-tbl"><table><thead><tr><th class="stick">Asset · source</th><th>Format</th><th>Channels</th><th>Sizes</th><th>Video length</th><th>Headline</th><th>Text overlay</th><th>Primary text</th><th>French</th><th>CTA · note</th><th>Landing page · note</th><th>Product tags</th><th title="5 = most important">Priority</th><th title="Expected impact">Impact</th><th>Score</th><th>Deadline</th><th>Status</th><th>Notes</th><th></th></tr></thead><tbody>${A.map(row).join('')}</tbody></table></div>`
+  ${A.length?`<div class="row bb-cardbar"><span class="cnt">${A.length} assets</span><span style="flex:1"></span><button type="button" class="btn g" id="bb-collapse">${S.closed.size>=A.length?'Expand all copy':'Collapse all copy'}</button></div><div class="bb-cards">${A.filter(a=>!S.tf||(S.tf==='none'?!a.theme:a.theme===S.tf)).map(row).join('')}</div>`
    :`<div class="bb-empty">No assets yet. Use <b>+ Add assets</b>, or the <b>+ Brief</b> buttons on the Messaging Matrix, JD Mockups and Library.</div>`}
   ${qPanel()}${modeNote()}
   <div class="row"><button class="btn g" id="bb-delb" style="margin-left:auto">Delete this brief</button></div></div>`;
   autosize(el)}
+function kpis(A,st,dates){const L=st.fr===false?1:2,f=a=>(a.sizes||[]).length*L;
+  const con=new Set(A.map(conceptKey).filter(Boolean)),iA=A.filter(a=>!isVid(a)),vA=A.filter(isVid);
+  const iC=new Set(iA.map(conceptKey).filter(Boolean)).size,vC=new Set(vA.map(conceptKey).filter(Boolean)).size;
+  const iD=iA.reduce((t,a)=>t+f(a),0),vD=vA.reduce((t,a)=>t+f(a),0),tot=iD+vD,pct=tot?Math.round(iD/tot*100):0;
+  return `<div class="bb-kpis k5">
+   <div class="bb-kpi"><span class="lbl">Ad variations</span><b>${con.size}</b><small>Unique message concepts</small></div>
+   <div class="bb-kpi"><span class="lbl">Total deliverables</span><b>${tot}</b><small>${A.length} asset${A.length===1?'':'s'} × sizes${L>1?' × EN/FR':''}</small></div>
+   <div class="bb-kpi"><span class="lbl">▣ Image</span><b>${iC}<i> var</i> · ${iD}<i> files</i></b><small>${iA.length} image asset${iA.length===1?'':'s'}</small></div>
+   <div class="bb-kpi"><span class="lbl">▶ Video</span><b>${vC}<i> var</i> · ${vD}<i> files</i></b><small>${vA.length} video asset${vA.length===1?'':'s'}</small></div>
+   <div class="bb-kpi"><span class="lbl">First / last deadline</span><b style="font-size:26px">${dates.length?E(fmtD(dates[0]))+' → '+E(fmtD(dates.at(-1))):'–'}</b></div>
+   <div class="bb-split" title="Image vs video share of deliverables"><span style="width:${pct}%"></span><em>Image ${pct}% · Video ${tot?100-pct:0}% of deliverables</em></div></div>`}
+function diversity(A){const T=THEMES();if(!T.length)return '';const c={};A.forEach(a=>{if(a.theme)c[a.theme]=(c[a.theme]||0)+1});
+  const cov=T.filter(t=>c[t.id]).length,none=A.filter(a=>!a.theme).length,max=Math.max(1,...Object.values(c));const heavy=T.filter(t=>A.length>=6&&c[t.id]/A.length>0.3);
+  return `<div class="bb-panel bb-div"><div class="row" style="justify-content:space-between;gap:10px"><div><span class="lbl">Creative diversity · message themes</span><div class="bb-cov"><b>${cov}</b>/${T.length} themes covered${none?` · <button type="button" class="bb-link" data-tf="none">${none} untagged</button>`:''}</div></div>
+   <div class="cnt">${S.tf?`Showing ${S.tf==='none'?'untagged assets':E(S.tf+' · '+themeName(S.tf))} · <button type="button" class="bb-link" data-tf="">Show all</button>`:'Click a theme to filter the table.'}</div></div>
+   <div class="bb-themes">${T.map(t=>{const n=c[t.id]||0;return `<button type="button" class="bb-th${n?' on':''}${S.tf===t.id?' sel':''}" data-tf="${t.id}" title="${E(t.name)}: ${n} asset${n===1?'':'s'}"><span class="ck">${n?'✓':''}</span><span class="nm"><i>${t.id}</i> ${E(t.name)}</span><span class="ct">${n}</span><span class="br"><span style="width:${n/max*100}%"></span></span></button>`}).join('')}</div>
+   ${heavy.length?`<div class="cnt" style="color:#FF6B6B">Heavy on ${heavy.map(t=>E(t.name)).join(', ')} (over 30% of assets). Consider swapping some for uncovered themes.</div>`:''}</div>`}
 function qPanel(){if(!S.queue.length)return '';const T={export_sheet:'Google Sheet export',generate_mockup:'New mockup',send_clickup:'Send to ClickUp'};
   return `<div class="bb-panel"><span class="lbl">Requests to Claude</span><div class="bb-q">${S.queue.map(q=>`<div class="bb-qi"><b>${T[q.kind]||q.kind}</b>${q.payload?.asset_name?' · '+E(q.payload.asset_name):''}<span class="bb-st ${q.status==='done'?'done':q.status==='queued'?'':'prog'}">${E(q.status)}</span><span class="cnt">${new Date(q.created_at).toLocaleString('en-CA',{dateStyle:'medium',timeStyle:'short'})} · ${E(q.requested_by||'')}</span>${q.result_url?`<a href="${E(q.result_url)}" target="_blank" rel="noopener">Open result ↗</a>`:''}${q.result_note?`<span>${E(q.result_note)}</span>`:''}${q.status==='queued'?`<button class="bb-ib" data-cancel="${q.id}" style="margin-left:auto">Cancel</button>`:''}</div>`).join('')}</div>
   <div class="cnt">Claude picks these up when Ryan runs the queue (and on the scheduled check). ClickUp tasks are created only after Ryan approves.</div></div>`}
 function modeNote(){return MODE==='local'?`<div class="bb-warn"><b>Browser-only mode.</b> This copy of the Briefing Room can't reach the team database, so briefs are saved in this browser only. Open the team site (jd-ecomm.github.io/jd-ad-briefing-room) to share briefs and send requests to Claude.</div>`:''}
-function autosize(root){root.querySelectorAll('.bb-tbl textarea').forEach(t=>{t.style.height='auto';t.style.height=Math.min(240,t.scrollHeight+2)+'px'})}
+function autosize(root){root.querySelectorAll('.bb-card textarea').forEach(t=>{t.style.height='auto';t.style.height=Math.min(240,t.scrollHeight+2)+'px'})}
 
 /* ---------- events ---------- */
 const deb={};function saveField(id,f,v){clearTimeout(deb[id+f]);deb[id+f]=setTimeout(async()=>{try{await store.patchAsset(id,{[f]:v})}catch(e){say('Save failed: '+e.message)}},450)}
 function A_(id){return S.assets.find(a=>a.id===id)}
 function bind(){const el=$('#v-brief');
+ el.addEventListener('toggle',e=>{const d=e.target;if(!d.dataset||!d.dataset.cid)return;if(d.open)S.closed.delete(d.dataset.cid);else S.closed.add(d.dataset.cid);const b=$('#bb-collapse');if(b)b.textContent=S.closed.size>=S.assets.length?'Expand all copy':'Collapse all copy';if(d.open)autosize(d)},true);
  el.addEventListener('input',e=>{const t=e.target;
    if(t.dataset.f&&t.dataset.id){const a=A_(t.dataset.id);if(!a)return;let v=t.value;if(t.dataset.f==='priority'||t.dataset.f==='impact')v=+v;a[t.dataset.f]=v===''&&t.dataset.f==='deadline'?null:v;saveField(a.id,t.dataset.f,a[t.dataset.f]);if(t.tagName==='TEXTAREA'){t.style.height='auto';t.style.height=Math.min(240,t.scrollHeight+2)+'px'}}
    if(t.id==='bb-name'){cur().name=t.value;clearTimeout(deb.bn);deb.bn=setTimeout(()=>store.patchBrief(cur().id,{name:t.value}).then(()=>{const o=$('#bb-sel option:checked');if(o)o.textContent=t.value}),500)}
    if(t.dataset.tagin)suggest(t)});
  el.addEventListener('change',async e=>{const t=e.target;
-   if(t.dataset.f&&(t.tagName==='SELECT'||t.type==='date')){if(['format','priority','impact','status'].includes(t.dataset.f))render()}
+   if(t.dataset.f&&(t.tagName==='SELECT'||t.type==='date')){if(['format','priority','impact','status','theme'].includes(t.dataset.f))render()}
    if(t.id==='bb-sel'){S.brief=S.briefs.find(b=>b.id===t.value);ls.set('bb-active',S.brief.id);await loadAssets();render()}
    if(t.id==='bb-single'||/^wf_/.test(t.id)||t.id==='bb-fr'){const st={...(cur().settings||{})};if(t.id==='bb-single')st.single=t.value;else if(t.id==='bb-fr')st.fr=t.checked;else st[t.id]=t.value;cur().settings=st;await store.patchBrief(cur().id,{settings:st});if(t.id!=='bb-single'||true)render()}});
  el.addEventListener('keydown',e=>{const t=e.target;if(!t.dataset.tagin)return;const box=t.parentElement.querySelector('.bb-sug');
@@ -280,6 +325,8 @@ function bind(){const el=$('#v-brief');
    if(t.dataset.mode){b.deadline_mode=t.dataset.mode;await store.patchBrief(b.id,{deadline_mode:b.deadline_mode});render();return}
    if(t.id==='wf_go'){const st=b.settings||{};if(!st.wf_start){say('Set the first batch date');return}const plan=waterfall(st);for(const p of plan){const a=A_(p.id);a.batch=p.batch;a.deadline=p.deadline;await store.patchAsset(a.id,{batch:p.batch,deadline:p.deadline})}
      S.assets.sort((x,y)=>(x.batch||99)-(y.batch||99)||score(y)-score(x));for(let k=0;k<S.assets.length;k++){if(S.assets[k].ord!==k+1){S.assets[k].ord=k+1;store.patchAsset(S.assets[k].id,{ord:k+1})}}render();say(`Planned ${Math.max(...plan.map(p=>p.batch))} batches`);return}
+   if(t.dataset.tf!==undefined){S.tf=(S.tf===t.dataset.tf?'':t.dataset.tf);render();return}
+   if(t.id==='bb-collapse'){if(S.closed.size>=S.assets.length)S.closed.clear();else S.assets.forEach(a=>S.closed.add(a.id));render();return}
    if(t.id==='bb-add'){picker();return}
    if(t.id==='bb-blank'){await addFrom('blank');return}
    if(t.dataset.chip){const a=A_(t.dataset.id);const f=t.dataset.chip;const v=t.dataset.v;let arr=[...(a[f]||[])];arr=arr.includes(v)?arr.filter(x=>x!==v):[...arr,v];
@@ -347,7 +394,7 @@ function inject(){
     const k=id.startsWith('JD-')?'mock':'ad';const b=document.createElement('button');b.className='btn y';b.dataset.addbrief=k+':'+id;b.textContent='+ Add to brief';row.prepend(b)}).observe(dr,{childList:true});
 }
 /* router hook: wrap the hub's show() */
-function hook(){const _show=window.show;window.show=function(tab){if(tab==='brief'){['library','house','messaging','studio','ours'].forEach(t=>{$('#v-'+t).hidden=true;$('#t-'+t).setAttribute('aria-pressed',false)});$('#v-brief').hidden=false;$('#t-brief').setAttribute('aria-pressed',true);render();startPoll();return}
+function hook(){const _show=window.show;window.show=function(tab){if(tab==='brief'){document.querySelectorAll('main > section').forEach(x=>x.hidden=true);document.querySelectorAll('nav.bar [data-tab]').forEach(x=>x.setAttribute('aria-pressed',false));$('#v-brief').hidden=false;$('#t-brief').setAttribute('aria-pressed',true);render();startPoll();return}
    $('#v-brief').hidden=true;$('#t-brief').setAttribute('aria-pressed',false);stopPoll();return _show(tab)};
   const _route=window.route;window.route=function(){if(location.hash==='#brief'){$('#drawer').hidden=true;$('#scrim').hidden=true;show('brief');return}return _route()};
   window.removeEventListener('hashchange',_route);window.addEventListener('hashchange',window.route)}
