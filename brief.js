@@ -91,7 +91,7 @@ async function ensureBrief(){if(S.brief)return S.brief;const b=await store.addBr
 /* ---------- add from sources ---------- */
 /* message themes */
 const THEMES=()=>(D.house?.themes||[]);
-const VS_T={VS01:'T11',VS02:'T11',VS03:'T9',VS04:'T12',VS05:'T12',VS06:'T13',VS07:'T13',VS08:'T14',VS09:'T14',VS10:'T14',VS11:'T9',VS12:'T9'};
+const VS_T={VS01:'T2',VS02:'T2',VS03:'T9',VS04:'T12',VS05:'T12',VS06:'T13',VS07:'T13',VS08:'T14',VS09:'T14',VS10:'T14',VS11:'T9',VS12:'T9'};
 const FAM_T={VB:'T5',VC:'T7',VG:'T8',VD:'T15'};
 const GRP_T={'Catalogue':'T10','Gifting':'T8','Brand':'T5','Category':'T7','Persona':'T4','Product hero':'T6','Drop 2':'T15','Lo-fi':'T9','Social-first':'T9','Cyber Monday':'T1','French':'T1'};
 const tByAngle=ids=>{for(const id of ids||[]){const t=THEMES().find(t=>t.angles.includes(id));if(t)return t.id}return null};
@@ -151,7 +151,7 @@ const MVP={name:'BFCM 2026 · MVP paid social brief',settings:{wf_start:'2026-11
  {sid:'JD-07',t:'T3',b:4,p:3,i:3,headline:'LAST SIZES',fr:'DERNIÈRES TAILLES',lp:BF,why:'Scarcity (T3) for BF weekend retargeting. Feed the real low-stock SKUs.'},
  {sid:'JD-59',t:'T12',b:4,p:3,i:3,why:"Social proof (T12). Confirm Canada's #1 sneaker from sales data before final."},
  // batch 5
- {sid:'JD-55',t:'T11',b:5,p:3,i:3,format:'Video',video_len:'10s',sizes:['9:16'],platforms:['Reels','TikTok','Stories'],why:'Ends soon (T11) native creator caption. FR version = JD-57.'},
+ {sid:'JD-55',t:'T2',b:5,p:3,i:3,format:'Video',video_len:'10s',sizes:['9:16'],platforms:['Reels','TikTok','Stories'],why:'Urgency / ends soon (T2) native creator caption. FR version = JD-57.'},
  {sid:'JD-12',t:'T1',b:5,p:2,i:4,sizes:['4:5','9:16'],platforms:['FB/IG Feed','Stories'],headline:'EXTRA 20% OFF',fr:'20 % DE RABAIS SUPPLÉMENTAIRE',lp:BF,why:'Cyber Monday stack (P5). Show the price maths. Story = JD-13, FR = JD-36.'},
  {sid:'JD-32',t:'T10',b:5,p:2,i:4,headline:'CYBER MONDAY · EXTRA 20% OFF',fr:'CYBERLUNDI · 20 % DE RABAIS SUPPLÉMENTAIRE',lp:BF,why:'Cyber Monday catalogue frame (T10). Swaps in on 30 Nov.'},
  {sid:'JD-14',t:'T2',b:5,p:2,i:3,headline:'ENDS TONIGHT',fr:'SE TERMINE CE SOIR',lp:BF,why:'Hard deadline for the final 24 hours of Cyber Monday.'}
