@@ -6,7 +6,7 @@ function render(){const P=D.project||{},el=document.getElementById('v-project');
  const ms=P.milestones||[],next=ms.find(m=>m.date>=today);const days=next?Math.round((new Date(next.date+'T12:00')-new Date(today+'T12:00'))/864e5):null;
  el.innerHTML=`<div class="pj-wrap">
  <div class="pj-hero"><div class="pj-hl"><span class="lbl" style="color:var(--y)">Project inputs · ${E(P.season||'')}</span><h2 class="disp">${E(P.name)}</h2><p>${E(P.summary||'')}</p>
-   <div class="row" style="gap:8px"><a class="btn y" href="#brief">Build the paid brief →</a>${P.clickup?`<a class="btn" href="${E(P.clickup)}" target="_blank" rel="noopener">Open in ClickUp ↗</a>`:''}</div></div>
+   <div class="row" style="gap:8px"><a class="btn y" href="#brief">Open the paid brief →</a>${P.clickup?`<a class="btn" href="${E(P.clickup)}" target="_blank" rel="noopener">Open in ClickUp ↗</a>`:''}</div></div>
   <dl class="pj-facts"><div><dt>Status</dt><dd>${E(P.status||'–')}</dd></div><div><dt>Window</dt><dd>${E(P.window||P.dates||'')}</dd></div><div><dt>Offer</dt><dd>${E(P.offer||'')}</dd></div><div><dt>Owner</dt><dd>${E(P.owner||'')}</dd></div>
    ${next?`<div class="pj-next"><dt>Next milestone</dt><dd><b>${days===0?'Today':days+' day'+(days===1?'':'s')}</b> ${E(next.name)} · ${E(fd(next.date))}</dd></div>`:''}</dl></div>
 

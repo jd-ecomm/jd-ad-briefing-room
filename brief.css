@@ -298,3 +298,10 @@ button.bs-card{cursor:pointer}
 .dv-lbi{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px;min-height:0;flex:1}
 .dv-lbi figure{position:relative;margin:0;min-width:0;display:flex}
 .dv-lbi img{max-height:70vh;max-width:100%;width:auto;border-radius:10px;display:block}
+/* submitted marker */
+.bb-sub{display:inline-flex;align-items:center;gap:6px;font:800 11px var(--body);letter-spacing:.06em;text-transform:uppercase;padding:4px 10px 4px 8px;border-radius:999px;background:rgba(52,210,123,.14);color:#34D27B;border:1px solid rgba(52,210,123,.55);white-space:nowrap}
+.bb-sub i{width:9px;height:9px;border-radius:50%;background:#34D27B;box-shadow:0 0 0 3px rgba(52,210,123,.25)}
+.bb-sub.off{background:transparent;color:var(--mut);border-color:var(--line2)}.bb-sub.off i{background:var(--mut);box-shadow:none}
+.bb-subbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font:600 13px var(--body);color:var(--fg2);margin:-4px 0 4px}
+.bb-subbar a{color:var(--y)}.bb-subbar .bb-link{margin-left:auto}
+.bc-f.w-lang{flex:0 0 130px}

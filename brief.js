@@ -12,10 +12,11 @@ const uid=()=>([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,c=>(c^crypto.getRand
 /* ---------- constants ---------- */
 const SIZES={'1:1':'1080×1080','4:5':'1080×1350','9:16':'1080×1920','16:9':'1920×1080'};
 const PLATS={'FB/IG Feed':['4:5','1:1'],'Stories':['9:16'],'Reels':['9:16'],'TikTok':['9:16'],'Catalogue (DPA)':['1:1'],'YouTube':['16:9','9:16']};
-const VLEN=['','6s','10s','15s','20s','30s','45s+'];
+const VLEN=['','6s','10s','15s','15–30s','20s','30s','45s+'];
+const LA=(a,st)=>a&&a.langs?+a.langs:((st||cur()?.settings||{}).fr===false?1:2);
 const isVid=a=>/video|motion/i.test(a.format||'');const conceptKey=a=>String(a.headline||a.overlay||a.name||'').toUpperCase().replace(/[^A-Z0-9%$]+/g,' ').trim();
 const VREC={'FB/IG Feed':'6–15s','Stories':'6–15s','Reels':'9–15s','TikTok':'9–21s','Catalogue (DPA)':'n/a','YouTube':'6s bumper · 15–30s'};
-const FORMATS=['Static','Video','Carousel','Motion (GIF)','Catalogue frame'];
+const FORMATS=['Static','Video','Motion video','UGC video','Carousel','Motion (GIF)','Catalogue frame'];
 const CTAS=['Shop Now','Shop the sale','Learn More','Get notified','Download app','Sign up'];
 const STATUS=['Not started','Briefed','In design','In review','Approved','Live'];
 const EXTRA=[
@@ -82,9 +83,10 @@ async function hello(){
 const S={briefs:[],brief:null,assets:[],queue:[],loaded:false,poll:null,start:true,counts:{},closed:new Set()};
 const cur=()=>S.brief;
 async function loadBriefs(){
-  try{S.briefs=await store.briefs()}catch(e){MODE='local';S.briefs=await store.briefs()}
+  try{S.briefs=await store.briefs()}catch(e){MODE='local';await seedLocal();S.briefs=await store.briefs()}
   const want=ls.get('bb-active','');S.brief=S.briefs.find(b=>b.id===want)||S.briefs[0]||null;
-  if(S.brief)await loadAssets();S.loaded=true}
+  if(S.brief){await loadAssets();S.start=false}S.loaded=true}
+async function seedLocal(){if(ls.get('bb-seed','')==='sheet-v1')return;try{const r=await fetch('brief-seed.json',{cache:'no-cache'});if(!r.ok)return;const j=await r.json();LS.save({briefs:[j.brief],assets:j.assets,queue:[]});ls.set('bb-active',j.brief.id);ls.set('bb-seed','sheet-v1')}catch(e){}}
 async function loadAssets(){if(!S.brief)return;S.assets=await store.assets(S.brief.id);try{S.queue=await store.queue(S.brief.id)}catch(e){S.queue=[]}}
 async function ensureBrief(){if(S.brief)return S.brief;const b=await store.addBrief({name:'BFCM 2026 · Paid social brief'});S.briefs.unshift(b);S.brief=b;ls.set('bb-active',b.id);S.assets=[];return b}
 
@@ -185,7 +187,7 @@ function startPage(el){const n=MVP.rows.length;const deliv=MVP.rows.reduce((t,r)
      <button type="button" class="btn bs-go" id="bs-blank">Start empty brief →</button></div>
    </div>
    ${S.briefs.length?`<div class="bs-list"><div class="row" style="justify-content:space-between"><h3 class="disp" style="margin:0;font-size:34px">Your briefs <span class="cnt" style="font-family:var(--body)">${S.briefs.length}</span></h3><span class="cnt">Keep as many versions as you like. Load the MVP again or start another from scratch to compare.</span></div>
-    <div class="bs-grid">${S.briefs.map(x=>{const o=x.settings?.origin;return `<div class="bs-item${cur()&&x.id===cur().id?' on':''}"><div class="row" style="gap:6px"><span class="bs-tag ${o==='mvp'?'mvp':''}">${o==='mvp'?'Preloaded MVP':o==='scratch'?'From scratch':o==='copy'?'Copy':'Brief'}</span><span class="cnt">${S.counts[x.id]||0} assets</span></div>
+    <div class="bs-grid">${S.briefs.map(x=>{const o=x.settings?.origin;return `<div class="bs-item${cur()&&x.id===cur().id?' on':''}"><div class="row" style="gap:6px"><span class="bs-tag ${o==='mvp'?'mvp':''}">${o==='mvp'?'Preloaded MVP':o==='scratch'?'From scratch':o==='copy'?'Copy':o==='sheet'?'From Google Sheet':'Brief'}</span>${x.status==='Submitted'?subChip(x):''}<span class="cnt">${S.counts[x.id]||0} assets</span></div>
      <b>${E(x.name)}</b><span class="cnt">Updated ${new Date(x.updated_at).toLocaleString('en-CA',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}${x.updated_by||x.owner_email?' · '+E((x.updated_by||x.owner_email).split('@')[0]):''}</span>
      <div class="row" style="gap:6px;margin-top:auto"><button type="button" class="btn y" data-open="${x.id}">Open</button><button type="button" class="btn g" data-copyb="${x.id}">Duplicate</button><button type="button" class="btn g" data-delb="${x.id}">Delete</button></div></div>`}).join('')}</div></div>`:''}
    ${modeNote()}</div></div>`;
@@ -206,7 +208,7 @@ function srcCell(a){let thumb='',link='';
   else if(a.source_type==='example'){const i=D.items.find(x=>x.sid===a.source_id);if(i){thumb=i.img?`<img src="${i.img}" alt="">`:'';link=`<a href="#${i.sid}">${i.sid} example ↗</a>`}}
   else if(a.source_type==='matrix')link=`<a href="#messaging">${E(a.source_id)} matrix ↗</a>`;
   else if(a.source_type==='angle')link=`<a href="#messaging">${E(a.source_id)} angle ↗</a>`;
-  const L=cur()?.settings?.fr===false?1:2,n=(a.sizes||[]).length*L;
+  const L=LA(a),n=(a.sizes||[]).length*L;
   return `<div class="bb-src">${thumb}<div style="flex:1;min-width:0"><textarea rows="2" class="hlx" data-f="name" data-id="${a.id}">${E(a.name)}</textarea>${link}<div class="bb-files ${isVid(a)?'v':'i'}">${isVid(a)?'▶ Video':'▣ Image'} · ${(a.sizes||[]).length} size${(a.sizes||[]).length===1?'':'s'}${L>1?' × EN/FR':''} = <b>${n}</b> file${n===1?'':'s'}</div></div></div>`}
 function tagCell(a){return `<div class="bb-chips">${(a.products||[]).map((p,k)=>`<span class="bb-tag"><a href="${E(p.url)}" target="_blank" rel="noopener" title="${E(p.url)}">${E(p.name)}</a><button type="button" data-untag="${a.id}" data-k="${k}" aria-label="Remove">×</button></span>`).join('')}</div>
   <div class="bb-tagin"><input type="text" data-tagin="${a.id}" placeholder="+ product or paste URL" autocomplete="off"></div>`}
@@ -216,7 +218,7 @@ function stCell(a){const s=a.clickup_status||a.status||'Not started';const c=/li
 function sizeChips(a){return `<div class="bb-chips">${Object.keys(SIZES).map(o=>`<button type="button" class="bb-chip bb-sz" data-chip="sizes" data-id="${a.id}" data-v="${o}" aria-pressed="${(a.sizes||[]).includes(o)}"><b>${o}</b><span>${SIZES[o]}</span></button>`).join('')}</div>`}
 function fld(label,html,cls=''){return `<label class="bc-f ${cls}"><span class="lbl">${label}</span>${html}</label>`}
 function row(a,i){const isV=isVid(a);const rec=[...new Set((a.platforms||[]).map(p=>VREC[p]).filter(x=>x&&x!=='n/a'))].join(' · ');
-  const mode=cur().deadline_mode;const L=cur()?.settings?.fr===false?1:2,n=(a.sizes||[]).length*L;const open=!S.closed.has(a.id);
+  const mode=cur().deadline_mode;const L=LA(a),n=(a.sizes||[]).length*L;const open=!S.closed.has(a.id);
   let thumb='',link='';
   if(a.source_type==='mockup'){const s=D.studio.find(x=>x.sid===a.source_id);if(s){thumb=`<img src="studio/${s.file}.jpg" alt="">`;link=`<a href="#${s.sid}">${s.sid} mockup ↗</a>`}}
   else if(a.source_type==='example'){const it=D.items.find(x=>x.sid===a.source_id);if(it){thumb=it.img?`<img src="${it.img}" alt="">`:'';link=`<a href="#${it.sid}">${it.sid} example ↗</a>`}}
@@ -238,6 +240,7 @@ function row(a,i){const isV=isVid(a);const rec=[...new Set((a.platforms||[]).map
    <div class="bc-f w-ch"><span class="lbl">Channels</span>${chips('platforms',Object.keys(PLATS),a.platforms||[],a.id)}</div>
    <div class="bc-f w-sz"><span class="lbl">Sizes</span>${sizeChips(a)}</div>
    <div class="bc-f w-vl"><span class="lbl">Video length</span>${isV?`<select data-f="video_len" data-id="${a.id}">${VLEN.map(v=>`<option value="${v}" ${v===(a.video_len||'')?'selected':''}>${v||'– set length –'}</option>`).join('')}</select>${rec?`<div class="bb-hint">Recommended: ${E(rec)}</div>`:''}`:`<div class="sm" style="padding:7px 0">Static image · no video</div>`}</div>
+   ${fld('Languages',`<select data-f="langs" data-id="${a.id}"><option value="1" ${L===1?'selected':''}>EN only</option><option value="2" ${L>1?'selected':''}>EN + FR</option></select>`,'w-lang')}
    <div class="bc-f w-dl"><span class="lbl">Deliverables</span><div class="bc-dl"><b>${n}</b> ${isV?'video':'image'} file${n===1?'':'s'}</div><div class="bb-dim">${(a.sizes||[]).length} size${(a.sizes||[]).length===1?'':'s'}${L>1?' × EN/FR':''}</div></div>
   </div>
   <details class="bc-copy" data-cid="${a.id}" ${open?'open':''}><summary><span>Copy, CTA, landing page &amp; products</span><span class="cnt">${E((a.headline||'').slice(0,60))}</span></summary>
@@ -251,19 +254,23 @@ function row(a,i){const isV=isVid(a);const rec=[...new Set((a.platforms||[]).map
     <div class="bc-f"><span class="lbl">Product tags</span>${tagCell(a)}</div>
     ${fld('Notes for design',`<textarea rows="3" data-f="notes" data-id="${a.id}" placeholder="Notes for design">${E(a.notes)}</textarea>`,'w2')}
    </div></details></article>`}
+function subChip(b){const d=b.settings?.submitted?.at;return `<span class="bb-sub" title="Submitted${d?' '+E(fmtD(d)):''}"><i></i>Submitted</span>`}
+function subBar(b){const sb=b.settings?.submitted||{};if(b.status==='Submitted')return `<div class="bb-subbar">${subChip(b)}<span>Shared ${sb.at?E(fmtD(sb.at)):''}${sb.by?' by '+E(sb.by):''}${sb.to?' · '+E(sb.to):''}</span>${sb.sheet?`<a href="${E(sb.sheet)}" target="_blank" rel="noopener">Google Sheet ↗</a>`:''}${sb.clickup?`<a href="${E(sb.clickup)}" target="_blank" rel="noopener">ClickUp ↗</a>`:''}<button type="button" class="bb-link" id="bb-unsub">Mark as draft</button></div>`;
+  return `<div class="bb-subbar draft"><span class="bb-sub off"><i></i>Draft</span><span>Not shared yet.</span><button type="button" class="btn g" id="bb-sub">Mark as submitted</button></div>`}
 function render(){const el=$('#v-brief');if(!el)return;
   if(!S.loaded){el.innerHTML='<div class="bb"><div class="note">Loading briefs…</div></div>';return}
   const b=cur();const sel=`<select id="bb-sel" aria-label="Brief">${S.briefs.map(x=>`<option value="${x.id}" ${b&&x.id===b.id?'selected':''}>${E(x.name)}</option>`).join('')}</select>`;
   if(!b||S.start){startPage(el);if(!S._cnt){S._cnt=1;store.counts().then(c=>{S.counts=c;S._cnt=0;if(S.start||!cur())startPage(el)}).catch(()=>{S._cnt=0})}return}
-  const st=b.settings||{};const A=S.assets;const deliv=A.reduce((n,a)=>n+(a.sizes||[]).length*(st.fr===false?1:2),0);
+  const st=b.settings||{};const A=S.assets;const deliv=A.reduce((n,a)=>n+(a.sizes||[]).length*LA(a,st),0);
   const vids=A.filter(a=>/video|motion/i.test(a.format)).length;const dates=A.map(a=>b.deadline_mode==='single'?st.single:a.deadline).filter(Boolean).sort();
   el.innerHTML=`<div class="bb">
   <div class="bb-top">${sel}<button class="btn g" id="bb-new">← All briefs</button><button class="btn g" id="bb-dupb">Duplicate brief</button><span class="sp" style="flex:1"></span><span class="bb-mode">${MODE==='remote'?'● Saved for the team':'● Saved in this browser only'}</span></div>
   <input class="bb-title" id="bb-name" value="${E(b.name)}" aria-label="Brief name">
+  ${subBar(b)}
   ${kpis(A,st,dates)}
   ${diversity(A)}
   <div class="bb-panel"><div class="row"><span class="lbl">Deadlines</span><div class="bb-seg" role="group">${[['single','One date'],['per','Per asset'],['waterfall','Waterfall']].map(([k,t])=>`<button type="button" data-mode="${k}" aria-pressed="${b.deadline_mode===k}">${t}</button>`).join('')}</div>
-   <label class="row" style="gap:6px;margin-left:auto;font:600 12px var(--body);color:var(--fg2)"><input type="checkbox" id="bb-fr" ${st.fr===false?'':'checked'}> French version of every asset</label></div>
+   <label class="row" style="gap:6px;margin-left:auto;font:600 12px var(--body);color:var(--fg2)"><input type="checkbox" id="bb-fr" ${st.fr===false?'':'checked'}> French by default <span class="cnt">(each asset can override)</span></label></div>
    ${b.deadline_mode==='single'?`<div class="bb-fields"><label>All assets due<input type="date" id="bb-single" value="${E(st.single||'')}"></label></div>`:''}
    ${b.deadline_mode==='per'?`<div class="cnt">Set a date on each row in the Deadline column.</div>`:''}
    ${b.deadline_mode==='waterfall'?`<div class="bb-fields"><label>First batch due<input type="date" id="wf_start" value="${E(st.wf_start||'')}"></label><label>Last batch due by<input type="date" id="wf_end" value="${E(st.wf_end||'')}"></label><label>Assets per batch<input type="number" min="1" id="wf_per" value="${E(st.wf_per||4)}" style="width:90px"></label><label>Days between batches<input type="number" min="1" id="wf_gap" value="${E(st.wf_gap||2)}" style="width:90px"></label><button class="btn y" id="wf_go" type="button">Plan batches</button></div>
@@ -275,13 +282,13 @@ function render(){const el=$('#v-brief');if(!el)return;
   ${qPanel()}${modeNote()}
   <div class="row"><button class="btn g" id="bb-delb" style="margin-left:auto">Delete this brief</button></div></div>`;
   autosize(el)}
-function kpis(A,st,dates){const L=st.fr===false?1:2,f=a=>(a.sizes||[]).length*L;
+function kpis(A,st,dates){const f=a=>(a.sizes||[]).length*LA(a,st);const L=A.some(a=>LA(a,st)>1)?2:1;const nFR=A.filter(a=>LA(a,st)>1).length;
   const con=new Set(A.map(conceptKey).filter(Boolean)),iA=A.filter(a=>!isVid(a)),vA=A.filter(isVid);
   const iC=new Set(iA.map(conceptKey).filter(Boolean)).size,vC=new Set(vA.map(conceptKey).filter(Boolean)).size;
   const iD=iA.reduce((t,a)=>t+f(a),0),vD=vA.reduce((t,a)=>t+f(a),0),tot=iD+vD,pct=tot?Math.round(iD/tot*100):0;
   return `<div class="bb-kpis k5">
    <div class="bb-kpi"><span class="lbl">Ad variations</span><b>${con.size}</b><small>Unique message concepts</small></div>
-   <div class="bb-kpi"><span class="lbl">Total deliverables</span><b>${tot}</b><small>${A.length} asset${A.length===1?'':'s'} × sizes${L>1?' × EN/FR':''}</small></div>
+   <div class="bb-kpi"><span class="lbl">Total deliverables</span><b>${tot}</b><small>${A.length} asset${A.length===1?'':'s'} × sizes${nFR?` · ${nFR===A.length?'all':nFR} EN/FR`:' · EN only'}</small></div>
    <div class="bb-kpi"><span class="lbl">▣ Image</span><b>${iC}<i> var</i> · ${iD}<i> files</i></b><small>${iA.length} image asset${iA.length===1?'':'s'}</small></div>
    <div class="bb-kpi"><span class="lbl">▶ Video</span><b>${vC}<i> var</i> · ${vD}<i> files</i></b><small>${vA.length} video asset${vA.length===1?'':'s'}</small></div>
    <div class="bb-kpi"><span class="lbl">First / last deadline</span><b style="font-size:26px">${dates.length?E(fmtD(dates[0]))+' → '+E(fmtD(dates.at(-1))):'–'}</b></div>
@@ -304,11 +311,11 @@ function A_(id){return S.assets.find(a=>a.id===id)}
 function bind(){const el=$('#v-brief');
  el.addEventListener('toggle',e=>{const d=e.target;if(!d.dataset||!d.dataset.cid)return;if(d.open)S.closed.delete(d.dataset.cid);else S.closed.add(d.dataset.cid);const b=$('#bb-collapse');if(b)b.textContent=S.closed.size>=S.assets.length?'Expand all copy':'Collapse all copy';if(d.open)autosize(d)},true);
  el.addEventListener('input',e=>{const t=e.target;
-   if(t.dataset.f&&t.dataset.id){const a=A_(t.dataset.id);if(!a)return;let v=t.value;if(t.dataset.f==='priority'||t.dataset.f==='impact')v=+v;a[t.dataset.f]=v===''&&t.dataset.f==='deadline'?null:v;saveField(a.id,t.dataset.f,a[t.dataset.f]);if(t.tagName==='TEXTAREA'){t.style.height='auto';t.style.height=Math.min(240,t.scrollHeight+2)+'px'}}
+   if(t.dataset.f&&t.dataset.id){const a=A_(t.dataset.id);if(!a)return;let v=t.value;if(t.dataset.f==='priority'||t.dataset.f==='impact'||t.dataset.f==='langs')v=+v;a[t.dataset.f]=v===''&&t.dataset.f==='deadline'?null:v;saveField(a.id,t.dataset.f,a[t.dataset.f]);if(t.tagName==='TEXTAREA'){t.style.height='auto';t.style.height=Math.min(240,t.scrollHeight+2)+'px'}}
    if(t.id==='bb-name'){cur().name=t.value;clearTimeout(deb.bn);deb.bn=setTimeout(()=>store.patchBrief(cur().id,{name:t.value}).then(()=>{const o=$('#bb-sel option:checked');if(o)o.textContent=t.value}),500)}
    if(t.dataset.tagin)suggest(t)});
  el.addEventListener('change',async e=>{const t=e.target;
-   if(t.dataset.f&&(t.tagName==='SELECT'||t.type==='date')){if(['format','priority','impact','status','theme'].includes(t.dataset.f))render()}
+   if(t.dataset.f&&(t.tagName==='SELECT'||t.type==='date')){if(['format','priority','impact','status','theme','langs'].includes(t.dataset.f))render()}
    if(t.id==='bb-sel'){S.brief=S.briefs.find(b=>b.id===t.value);ls.set('bb-active',S.brief.id);await loadAssets();render()}
    if(t.id==='bb-single'||/^wf_/.test(t.id)||t.id==='bb-fr'){const st={...(cur().settings||{})};if(t.id==='bb-single')st.single=t.value;else if(t.id==='bb-fr')st.fr=t.checked;else st[t.id]=t.value;cur().settings=st;await store.patchBrief(cur().id,{settings:st});if(t.id!=='bb-single'||true)render()}});
  el.addEventListener('keydown',e=>{const t=e.target;if(!t.dataset.tagin)return;const box=t.parentElement.querySelector('.bb-sug');
@@ -318,6 +325,7 @@ function bind(){const el=$('#v-brief');
  el.addEventListener('focusout',e=>{if(e.target.dataset.tagin)setTimeout(()=>e.target.parentElement?.querySelector('.bb-sug')?.remove(),180)});
  el.addEventListener('click',async e=>{const t=e.target.closest('button,[data-sug]');if(!t)return;const b=cur();
    if(t.dataset.sug!==undefined){const inp=t.closest('.bb-tagin').querySelector('input');addTag(inp.dataset.tagin,{name:t.dataset.n,url:t.dataset.u});return}
+   if(t.id==='bb-sub'||t.id==='bb-unsub'){const on=t.id==='bb-sub';const st={...(b.settings||{})};if(on)st.submitted={...(st.submitted||{}),at:new Date().toISOString().slice(0,10),by:ME};b.status=on?'Submitted':'Draft';b.settings=st;await store.patchBrief(b.id,{status:b.status,settings:st});render();return}
    if(t.id==='bb-new'){S.start=true;render();window.scrollTo({top:$('#v-brief').offsetTop-80});return}
    if(t.id==='bb-dupb'){const nb=await dupBrief(b);S.brief=nb;ls.set('bb-active',nb.id);await loadAssets();render();return}
    if(t.id==='bb-delb'){if(!t.dataset.sure){t.dataset.sure=1;t.textContent='Click again to delete';t.style.background='#FF6B6B';t.style.color='#000';setTimeout(()=>{if(t.isConnected){delete t.dataset.sure;t.textContent='Delete this brief';t.style.cssText='margin-left:auto'}},3000);return}
