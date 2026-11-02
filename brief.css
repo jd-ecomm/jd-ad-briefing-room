@@ -305,3 +305,4 @@ button.bs-card{cursor:pointer}
 .bb-subbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font:600 13px var(--body);color:var(--fg2);margin:-4px 0 4px}
 .bb-subbar a{color:var(--y)}.bb-subbar .bb-link{margin-left:auto}
 .bc-f.w-lang{flex:0 0 130px}
+.dv-pv img[src*="cb-"]{height:150px}@media (max-width:640px){.dv-pv img[src*="cb-"]{height:auto;width:100%}}

@@ -5,7 +5,7 @@ const fd=d=>d?new Date(d+'T12:00').toLocaleDateString('en-CA',{day:'numeric',mon
 const ST={'Live':'live','Delivered':'del','Approved':'del','Ready for review':'rev','In progress':'prog','Reference':'ref'};
 const F={lang:'All'};
 function render(){const el=document.getElementById('v-delivered');if(!el)return;const P=D.project||{};
- const all=(D.delivered||[]).filter(a=>a.project===P.id).sort((a,b)=>(b.previews?.length||0)-(a.previews?.length||0)||(b.delivered||'').localeCompare(a.delivered||''));
+ const all=(D.delivered||[]).filter(a=>a.project===P.id).sort((a,b)=>(b.delivered||'').localeCompare(a.delivered||'')||(b.previews?.length||0)-(a.previews?.length||0));
  const pv=all.flatMap(a=>a.previews||[]);const last=all.map(a=>a.delivered).filter(Boolean).sort().pop();
  const k=(lbl,n,sub)=>`<div class="bb-kpi"><span class="lbl">${lbl}</span><b>${n}</b>${sub?`<small>${sub}</small>`:''}</div>`;
  el.innerHTML=`<div class="dv">
