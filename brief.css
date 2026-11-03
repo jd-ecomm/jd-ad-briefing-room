@@ -326,3 +326,8 @@ button.bs-card{cursor:pointer}
 .tr-logo{width:30px;height:30px;border-radius:50%;object-fit:cover;flex:0 0 30px;background:var(--s3)}
 .tr-ini{display:flex;align-items:center;justify-content:center;font:800 13px var(--body);color:var(--y)}
 @media (max-width:640px){.tr-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tr-wk{width:100%}.tr-wk select{flex:1;min-width:0}}
+.tr-top{margin-left:auto;display:inline-flex;gap:8px;align-items:center}
+.tr-pj{cursor:pointer}.tr-pj .dv-dot{margin:0}
+.tr-pj.on .dv-dot{background:#000;box-shadow:none}
+.proj .pj.was{cursor:pointer}
+@media (max-width:640px){.tr-top{margin-left:0;width:100%}}
