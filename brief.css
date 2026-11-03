@@ -343,3 +343,14 @@ button.bs-card{cursor:pointer}
 .tr-lbi figure{margin:0;flex:1;min-width:0;position:relative;display:flex;justify-content:center;background:#000;border-radius:10px;overflow:hidden}
 .tr-lbi video,.tr-lbi img{display:block;max-width:100%;max-height:calc(100vh - 190px);max-height:calc(100dvh - 190px);width:auto;height:auto;object-fit:contain;cursor:default}
 @media (max-width:640px){.tr-lbi{padding:8px;gap:4px}.tr-lbi .bb-ib{width:32px;padding:0}}
+/* projects row: added project titles */
+button.pj{cursor:pointer;font:700 12px var(--body)}
+.proj .pj.soon{opacity:.75}.proj .pj.soon:hover{opacity:1;border-color:var(--y);color:var(--y)}
+.pj-x{gap:6px;padding-right:6px}
+.pj-del{background:none;border:0;color:#8A8B8C;font:700 14px var(--body);cursor:pointer;padding:0 4px;line-height:1;border-radius:6px}
+.pj-del:hover{color:#fff}.pj-del.sure{background:#FF6B6B;color:#000;font-size:11px;padding:3px 6px}
+.pj-form{padding:4px 4px 4px 10px;gap:4px;border-color:var(--y)}
+.pj-form input{background:transparent;border:0;color:#fff;font:700 12px var(--body);outline:none;width:170px;min-width:0}
+.pj-form button{background:var(--y);color:#000;border:0;border-radius:6px;font:800 11px var(--body);padding:5px 9px;cursor:pointer;text-transform:uppercase}
+.pj-form button[data-c]{background:none;color:#8A8B8C;font-size:14px;padding:2px 6px}
+.pj-form input{border:0!important;box-shadow:none!important;padding:2px 0!important;height:auto!important}
