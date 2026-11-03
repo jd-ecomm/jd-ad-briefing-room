@@ -2,7 +2,7 @@
 (()=>{
 const SB='https://cymkcvdsxoneojfisjgk.supabase.co/rest/v1/',K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5bWtjdmRzeG9uZW9qZmlzamdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxMTg0ODQsImV4cCI6MjEwODY5NDQ4NH0.rgRRRXCab-s5xy4ICFa_l511Gol8EMqPEjBHThnAC9I';
 const E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const CATS=[['apparel','Apparel'],['sports-fitness','Sports & Fitness'],['retail','Retail'],['accessories','Accessories']];
+const CATS=[['apparel','Apparel'],['sports-fitness','Sports & Fitness'],['retail','Retail'],['accessories','Accessories'],['health-wellness','Health & Wellness']];
 const CN=Object.fromEntries(CATS);
 const T={rows:null,err:null,week:null,cat:'all',kind:'all',slide:{}};
 const wk=d=>new Date(d+'T12:00').toLocaleDateString('en-CA',{day:'numeric',month:'short',year:'numeric'});
@@ -27,7 +27,7 @@ function render(){const el=document.getElementById('v-trending');if(!el||el.hidd
  <div class="row tr-f"><span class="lbl">Category</span>${[['all','All'],...CATS].map(([id,n])=>`<button class="pill" data-tc="${id}" aria-pressed="${T.cat===id}">${E(n)} <span class="cnt">${id==='all'?W.length:W.filter(r=>r.category===id).length}</span></button>`).join('')}
   <span class="lbl" style="margin-left:12px">Format</span>${[['all','All'],['video','Video'],['static','Image']].map(([id,n])=>`<button class="pill" data-tk="${id}" aria-pressed="${T.kind===id}">${n}</button>`).join('')}</div>
  <div class="tr-grid">${list.map(card).join('')||'<div class="bb-empty">No ads match these filters.</div>'}</div>`:(!T.err?'<div class="bb-empty">No trending ads captured yet.</div>':'')}
- <p class="cnt">Source: <a href="https://motionapp.com/trending/" target="_blank" rel="noopener" style="color:var(--y)">Runneth trending ads ↗</a> (Apparel, Sports &amp; Fitness, Retail, Accessories). Captured and stored every Monday afternoon. “Running” is how long Runneth shows the ad has been live.</p></div>`;
+ <p class="cnt">Source: <a href="https://motionapp.com/trending/" target="_blank" rel="noopener" style="color:var(--y)">Runneth trending ads ↗</a> (Apparel, Sports &amp; Fitness, Retail, Accessories, Health &amp; Wellness). Captured and stored every Monday afternoon. “Running” is how long Runneth shows the ad has been live.</p></div>`;
  function card(a){const imgs=a.images||[];const s=T.slide[key(a)]||0;const isn=isNew(a);
   const media=a.kind==='video'?`<img loading="lazy" class="tr-poster" src="${E(a.poster||imgs[0]||'')}" alt="${E(a.brand)} video ad"><video data-src="${E(a.video)}" muted playsinline loop preload="none"></video><span class="tr-play" aria-hidden="true">▶</span>`
    :`<img loading="lazy" src="${E(imgs[s]||imgs[0]||'')}" alt="${E(a.brand)} ad">${imgs.length>1?`<div class="tr-dots"><button class="tr-nav" data-sl="${E(key(a))}" data-d="-1" aria-label="Previous image">‹</button><span>${s+1}/${imgs.length}</span><button class="tr-nav" data-sl="${E(key(a))}" data-d="1" aria-label="Next image">›</button></div>`:''}`;
