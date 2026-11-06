@@ -16,7 +16,7 @@ async function shrink(u,max){const r=await fetch(u);if(!r.ok)throw new Error('sr
  c.getContext('2d').drawImage(bm,0,0,c.width,c.height);return c.convertToBlob({type:'image/jpeg',quality:.8})}
 async function put(blob,path,type){const up=await fetch(B+'storage/v1/object/inspo/'+path,{method:'POST',headers:{...H,'x-upsert':'true','Content-Type':type||'image/jpeg'},body:blob});
  if(!up.ok)throw new Error('upload '+up.status+' '+(await up.text()).slice(0,80));return B+'storage/v1/object/public/inspo/'+path}
-async function used(){const r=await rest('in_ads?select=video_bytes,media_bytes&or=(video_bytes.gt.0,media_bytes.gt.0)');let v=0,m=0;r.forEach(x=>{v+=x.video_bytes||0;m+=x.media_bytes||0});return {v,m}}
+async function used(){let v=0,m=0;for(let from=0;;from+=1000){const r=await fetch(B+'rest/v1/in_ads?select=video_bytes,media_bytes&or=(video_bytes.gt.0,media_bytes.gt.0)&order=id',{headers:{...H,Range:from+'-'+(from+999)}});const j=await r.json();j.forEach(x=>{v+=x.video_bytes||0;m+=x.media_bytes||0});if(j.length<1000)break}return {v,m}} /* pages past the 1,000-row API cap */
 async function saved(){const [f,b]=await Promise.all([rest('in_favs?select=ad_id'),rest('in_board_items?select=ad_id')]);return new Set([...f,...b].map(x=>x.ad_id))}
 window.__inspoStore=async(LIMIT=120,CONC=6)=>{
  if(location.hostname!=='motionswipefile.blob.core.windows.net')return 'WRONG PAGE: open a motionswipefile.blob.core.windows.net media URL first';
