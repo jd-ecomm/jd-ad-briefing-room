@@ -1,10 +1,12 @@
-/* JD Ad Briefing Room · Trending Ads (weekly top ads from Runneth's public trending pages, stored in Supabase tr_ads) */
+/* JD Ad Briefing Room · Discover Ads › Trending Ads Weekly (weekly top ads from Runneth's public trending pages, stored in Supabase tr_ads).
+   Discover Ads is the always-on top-level section; its sub tabs are Trending Ads Weekly (#trending) and Inspo (#inspo, inspo.js). */
 (()=>{
 const SB='https://cymkcvdsxoneojfisjgk.supabase.co/rest/v1/',K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5bWtjdmRzeG9uZW9qZmlzamdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxMTg0ODQsImV4cCI6MjEwODY5NDQ4NH0.rgRRRXCab-s5xy4ICFa_l511Gol8EMqPEjBHThnAC9I';
 const E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const CATS=[['apparel','Apparel'],['sports-fitness','Sports & Fitness'],['retail','Retail'],['accessories','Accessories'],['health-wellness','Health & Wellness']];
 const CN=Object.fromEntries(CATS);
 const T={rows:null,err:null,week:null,cat:'all',kind:'all',slide:{}};
+window.discoverTabs=cur=>`<div class="dc-tabs" role="tablist" aria-label="Discover Ads"><span class="lbl">Discover Ads</span>${[['trending','Trending Ads Weekly'],['inspo','Inspo']].map(([h,n])=>`<a role="tab" class="pill" href="#${h}" aria-selected="${cur===h}" aria-pressed="${cur===h}">${n}</a>`).join('')}</div>`;
 const wk=d=>new Date(d+'T12:00').toLocaleDateString('en-CA',{day:'numeric',month:'short',year:'numeric'});
 async function load(){try{let all=[],from=0;for(;;){const r=await fetch(SB+'tr_ads?select=week,category,rank,brand,age,kind,video,poster,images,logo,video_s,poster_s,images_s,logo_s&order=week.desc,category.asc,rank.asc',{headers:{apikey:K,Authorization:'Bearer '+K,Range:from+'-'+(from+999)}});if(!r.ok)throw new Error(r.status);const j=await r.json();all=all.concat(j);if(j.length<1000)break;from+=1000}all.forEach(r=>{if(r.video_s)r.video=r.video_s;if(r.poster_s)r.poster=r.poster_s;if(r.images_s&&r.images_s.length)r.images=r.images_s;if(r.logo_s)r.logo=r.logo_s;r.stored=!!(r.video_s||(r.images_s||[]).length)});T.rows=all;T.week=T.week||all[0]?.week||null}catch(e){T.err=e.message;T.rows=[]}render()}
 const key=a=>a.category+'|'+a.rank+'|'+a.week;const sig=a=>a.brand+'|'+a.kind+'|'+(a.age||'');
@@ -16,7 +18,7 @@ function render(){const el=document.getElementById('v-trending');if(!el||el.hidd
  const brands={};W.forEach(r=>brands[r.brand]=(brands[r.brand]||0)+1);const top=Object.entries(brands).sort((a,b)=>b[1]-a[1]).slice(0,3);
  const vids=W.filter(r=>r.kind==='video').length;const isNew=r=>weeks[wi+1]&&!prev.has(r.brand);const nNew=weeks[wi+1]?W.filter(isNew).length:null;
  const k=(l,n,s)=>`<div class="bb-kpi"><span class="lbl">${l}</span><b>${n}</b>${s?`<small>${s}</small>`:''}</div>`;
- el.innerHTML=`<div class="tr">
+ el.innerHTML=`<div class="tr">${window.discoverTabs('trending')}
  <div class="tr-head"><div><span class="lbl" style="color:var(--y)"><i class="dv-dot"></i> Updated weekly · Runneth</span><h2 class="disp">Trending Ads</h2>
   <p>The top 30 ads each week in the categories closest to JD, ranked by Runneth community saves. Every ad is copied into the Briefing Room when it's captured, so past weeks stay here after Runneth moves on. Hover a video to preview it; click any ad to open it full size.</p></div>
   <div class="tr-wk"><button class="bb-ib" data-wk="${wi+1}" ${wi+1>=weeks.length?'disabled':''} aria-label="Previous week">←</button>
@@ -54,11 +56,11 @@ function lightbox(list,i){let s=0;const w=document.createElement('div');w.classN
  const close=()=>{w.querySelector('video')?.pause();w.remove();document.removeEventListener('keydown',key);document.body.style.overflow=''};
  draw();document.body.appendChild(w);document.body.style.overflow='hidden';document.addEventListener('keydown',key);
  w.onclick=e=>{if(e.target===w||e.target.closest('[data-x]'))close();else if(e.target.closest('[data-n]'))move(1);else if(e.target.closest('[data-p]'))move(-1);else if(e.target.closest('[data-ss]')){const n=(list[i].images||[]).length;s=(s+(+e.target.closest('[data-ss]').dataset.ss)+n)%n;draw()}}}
-function inject(){if(!document.getElementById('t-trending')){const row=document.querySelector('.proj .wrap');const g=document.createElement('span');g.className='tr-top';g.innerHTML='<span class="lbl">Always on</span><button type="button" class="pj tr-pj" id="t-trending"><i class="dv-dot"></i>Trending Ads <i>Weekly · Runneth</i></button>';row.appendChild(g);g.querySelector('button').onclick=()=>location.hash='trending'}
+function inject(){if(!document.getElementById('t-trending')){const row=document.querySelector('.proj .wrap');const g=document.createElement('span');g.className='tr-top';g.innerHTML='<span class="lbl">Always on</span><button type="button" class="pj tr-pj" id="t-trending"><i class="dv-dot"></i>Discover Ads <i>Trending · Inspo</i></button>';row.appendChild(g);g.querySelector('button').onclick=()=>location.hash='trending'}
  if(!document.getElementById('v-trending')){const s=document.createElement('section');s.id='v-trending';s.className='wrap';s.hidden=true;document.querySelector('main').appendChild(s)}}
 function hook(){const _show=window.show;window.show=function(tab){const v=document.getElementById('v-trending'),t=document.getElementById('t-trending');
   const bar=document.querySelector('nav.bar'),pj=document.querySelector('.proj .pj.on, .proj .pj.was');
-  if(tab==='trending'){document.querySelectorAll('main > section').forEach(x=>x.hidden=true);document.querySelectorAll('nav.bar [data-tab]').forEach(x=>x.setAttribute('aria-pressed',false));v.hidden=false;t.classList.add('on');t.setAttribute('aria-current','true');if(pj){pj.classList.remove('on');pj.classList.add('was')}if(bar)bar.hidden=true;window.scrollTo({top:0});if(!T.rows&&!T.loading){T.loading=1;load()}render();return}
+  if(tab==='trending'||tab==='inspo'){document.querySelectorAll('main > section').forEach(x=>x.hidden=true);document.querySelectorAll('nav.bar [data-tab]').forEach(x=>x.setAttribute('aria-pressed',false));v.hidden=false;t.classList.add('on');t.setAttribute('aria-current','true');if(pj){pj.classList.remove('on');pj.classList.add('was')}if(bar)bar.hidden=true;window.scrollTo({top:0});if(!T.rows&&!T.loading){T.loading=1;load()}render();return}
   v.querySelectorAll('video').forEach(x=>x.pause());v.hidden=true;t.classList.remove('on');t.removeAttribute('aria-current');if(pj){pj.classList.add('on');pj.classList.remove('was')}if(bar)bar.hidden=false;return _show(tab)};
  const _route=window.route;window.route=function(){if(location.hash==='#trending'){document.getElementById('drawer').hidden=true;document.getElementById('scrim').hidden=true;show('trending');return}return _route()};
  window.removeEventListener('hashchange',_route);window.addEventListener('hashchange',window.route)}
