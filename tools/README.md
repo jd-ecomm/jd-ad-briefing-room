@@ -32,9 +32,13 @@ What it does, per `in_ads` row where `r2_at` is null and `is_english` is true or
 - Brand logo once per brand: `cd/logos/<brand_id>.jpg` (192px).
 - Writes the public URLs to `thumb_r2`, `images_r2` (an array of image URLs, or `{poster}` for videos), `video_r2`, `logo_r2`,
   plus `r2_bytes` and `r2_at`.
+- Rows that another run finished, or that were re-tagged non-English, after the queue loaded are re-checked and skipped.
 - Ads whose media is gone on both Motion and Supabase (404) are skipped and listed in `window.__r2.gone`; `r2_at` stays null.
 
 Uploads go through the Supabase edge function `cd-r2-sign` (presigned PUT URLs, valid 10 minutes, keys must start with `cd/`,
 types `image/jpeg`, `image/png`, `image/webp`, `video/mp4`). No Cloudflare credentials live in the browser.
 Public base: `https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev`. Bucket budget is 10 GB; videos stop at 9 GB (sum of `r2_bytes`),
 images and posters carry on.
+
+The queue yields with a MessageChannel rather than `setTimeout`, because a hidden browser pane clamps timers to about once a minute.
+First full run: 9 Nov 2026 (13,676 English ads, about 5.4 GB).

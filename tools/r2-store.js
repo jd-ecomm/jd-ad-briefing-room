@@ -19,6 +19,10 @@ const VIDEO_CAP_GB=9, MAX_VIDEO_MB=25, CONC=6;
 const ON_MOTION=location.hostname==='motionswipefile.blob.core.windows.net';
 const S=window.__r2=window.__r2||{};
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+/* yield without setTimeout: hidden tabs clamp timers to ~1 per minute, which stalls the queue */
+const mc=new MessageChannel(),yq=[];mc.port1.onmessage=()=>{const f=yq.shift();f&&f()};const tick=()=>new Promise(r=>{yq.push(r);mc.port2.postMessage(0)});
+/* skip rows another run finished, or that were re-tagged non-English, after the queue was loaded */
+const stillTodo=async id=>{try{const j=await rest('in_ads?select=r2_at,is_english&id=eq.'+encodeURIComponent(id));return j[0]&&!j[0].r2_at&&j[0].is_english!==false}catch(e){return true}};
 const rest=async(p,o={})=>{const r=await fetch(B+'rest/v1/'+p,{...o,headers:{...H,'Content-Type':'application/json',...(o.headers||{})}});if(!r.ok)throw new Error('rest '+p.split('?')[0]+' '+r.status);const t=await r.text();return t?JSON.parse(t):null};
 class Gone extends Error{}
 async function get(urls){let last;for(const u of urls.filter(Boolean)){try{const r=await fetch(u);if(r.ok)return await r.blob();last=r.status;if(r.status>=500)throw new Error('src '+r.status)}catch(e){if(e instanceof Gone)throw e;last=e.message}}
@@ -67,12 +71,12 @@ async function rows(limit){const sel='id,brand_id,format,video,poster,images,log
 async function used(){let t=0;for(let from=0;;from+=1000){const j=await rest('in_ads?select=r2_bytes&r2_bytes=gt.0&order=id&limit=1000&offset='+from);j.forEach(x=>t+=+x.r2_bytes);if(j.length<1000)break}return t}
 async function existingLogos(){const j=await rest('in_ads?select=brand_id,logo_r2&logo_r2=not.is.null&limit=1000');j.forEach(x=>S.logos[x.brand_id]=Promise.resolve(x.logo_r2))}
 window.__r2Start=async({limit=0}={})=>{if(S.running)return 'already running';
- Object.assign(S,{running:true,done:false,ok:0,videos:0,videoSkipped:0,posters:0,images:0,gone:[],fail:[],logos:{},logoBytes:{},logoCounted:{},started:Date.now(),source:ON_MOTION?'motion':'supabase'});
+ Object.assign(S,{running:true,done:false,ok:0,skipped:0,videos:0,videoSkipped:0,posters:0,images:0,gone:[],fail:[],logos:{},logoBytes:{},logoCounted:{},started:Date.now(),source:ON_MOTION?'motion':'supabase'});
  S.bytes=await used();S.bytesStart=S.bytes;await existingLogos();const q=await rows(limit);S.total=q.length;S.left=q.length;
- (async()=>{await Promise.all(Array.from({length:CONC},async()=>{while(q.length){const r=q.shift();S.left=q.length;
+ (async()=>{await Promise.all(Array.from({length:CONC},async()=>{while(q.length){const r=q.shift();S.left=q.length;if(!(await stillTodo(r.id))){S.skipped++;continue}
    for(let attempt=0;attempt<2;attempt++){try{await one(r);break}catch(e){if(e instanceof Gone){S.gone.push(r.id);break}if(attempt){S.fail.push(r.id+': '+e.message)}else await sleep(1500)}}
-   await sleep(150)}}));S.running=false;S.done=true;S.finished=Date.now()})();
+   await tick()}}));S.running=false;S.done=true;S.finished=Date.now()})();
  return 'started '+S.total+' rows from '+S.source};
-window.__r2Status=()=>({running:S.running,done:S.done,total:S.total,left:S.left,ok:S.ok,videos:S.videos,videoSkipped:S.videoSkipped,posters:S.posters,images:S.images,
+window.__r2Status=()=>({running:S.running,done:S.done,total:S.total,left:S.left,ok:S.ok,skipped:S.skipped,videos:S.videos,videoSkipped:S.videoSkipped,posters:S.posters,images:S.images,
  gone:(S.gone||[]).length,fail:(S.fail||[]).length,failSample:(S.fail||[]).slice(-3),gb:+((S.bytes||0)/1073741824).toFixed(3),mins:S.started?+(((S.finished||Date.now())-S.started)/60000).toFixed(1):0});
 })();
