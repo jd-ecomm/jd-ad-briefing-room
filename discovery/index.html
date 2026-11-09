@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Creative Discovery · JD Ad Briefing Room</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap">
+<link rel="preload" href="../fonts/ForeverForwardSans-Headline.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="discovery.css?v=09nov1">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="top-in">
+    <a class="brandmark" href="#directory" aria-label="Creative Discovery home">
+      <div><div class="display">Creative Discovery</div><small>JD Ad Briefing Room · Canada · Preview</small></div>
+    </a>
+    <nav class="topnav" id="topnav" aria-label="Sections"></nav>
+    <svg class="roundel" viewBox="0 0 144 144" role="img" aria-label="JD Sports"><path fill="currentColor" d="M 88.144531 52.375 L 81.914062 91.605469 C 81.914062 91.605469 105.574219 95.359375 109.203125 72.070312 C 112.828125 48.777344 88.144531 52.375 88.144531 52.375"/><path fill="currentColor" d="M 72 0 C 32.234375 0 0 32.234375 0 72 C 0 111.765625 32.234375 144 72 144 C 111.765625 144 144 111.765625 144 72 C 144 52.90625 136.414062 34.589844 122.910156 21.089844 C 109.410156 7.585938 91.097656 0 72 0 M 21.121094 108.078125 L 23.359375 91.359375 C 50.320312 91.359375 54.878906 36.238281 54.878906 36.238281 L 72 36.238281 C 59.839844 115.359375 21.121094 108.078125 21.121094 108.078125 M 87.121094 106.160156 L 63.121094 106.160156 L 74.878906 36.078125 L 98.878906 36.078125 C 121.28125 36.078125 129.601562 53.597656 126.71875 71.199219 C 124.1875 91.152344 107.230469 106.117188 87.121094 106.160156"/></svg>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+  <div class="wrap loading"><div class="note" role="status"><div id="loadnote">Loading ads…</div></div></div>
+  <section class="view" id="v-home" data-view="directory" hidden></section>
+  <section class="view" id="v-library" data-view="discover" hidden></section>
+  <section class="view" id="v-trending" data-view="trending" hidden></section>
+  <section class="view" id="v-brands" data-view="brands" hidden></section>
+  <section class="view" id="v-global" data-view="global" hidden></section>
+  <section class="view" id="v-boards" data-view="boards" hidden></section>
+</main>
+
+<nav class="tabbar" aria-label="Sections"><div class="tabbar-in" id="tabbar"></div></nav>
+
+<div class="layer" id="viewer" hidden role="dialog" aria-modal="true" aria-label="Ad viewer"></div>
+<div class="reels" id="reels" hidden role="dialog" aria-modal="true" aria-label="Reels mode"></div>
+<div id="overlays"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js" defer></script>
+<script src="discovery.js?v=09nov1" defer></script>
+</body>
+</html>
