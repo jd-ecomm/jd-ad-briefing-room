@@ -1,0 +1,1033 @@
+{
+  "base": "https://jd-ecomm.github.io/jd-ad-briefing-room/",
+  "when": "2026-11-09T12:31:08.542Z",
+  "passed": 205,
+  "failed": 0,
+  "results": [
+    {
+      "name": "d discover: cards render",
+      "pass": true,
+      "detail": "36 cards"
+    },
+    {
+      "name": "d discover: inside Briefing Room (hero + projects row + section)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d discover: no old Discover Ads / Trending section",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d discover: no bottom tab bar",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d discover: no video playing without hover",
+      "pass": true,
+      "detail": "0 playing"
+    },
+    {
+      "name": "d discover: no creative cropped (22 measured)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d discover: gutters equal within 2px, equal column widths",
+      "pass": true,
+      "detail": "{\"hg\":[\"16.0\"],\"vg\":[\"16.0\"],\"spread\":0,\"wspread\":0,\"n\":23}"
+    },
+    {
+      "name": "d discover: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d discover: responsive columns",
+      "pass": true,
+      "detail": "5 columns"
+    },
+    {
+      "name": "d hover: video plays muted on hover",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d hover: the video is visible above the poster",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d hover: moving the pointer never pauses or seeks (plays straight through)",
+      "pass": true,
+      "detail": "[0.16,0.25,0.33,0.42,0.5,0.58,0.66,0.75,0.83,0.92,1,1.08,1.17,1.25,1.33,1.42,1.5]"
+    },
+    {
+      "name": "d hover: mouse out pauses and returns to poster",
+      "pass": true,
+      "detail": "{\"p\":true,\"vis\":false}"
+    },
+    {
+      "name": "d hover: no scrub code path (no pointermove seeking)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d JD: JD Global section (stats, market chips, Show more)",
+      "pass": true,
+      "detail": "{\"n\":36,\"cols\":2,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":248,\"ch\":440,\"rows\":0,\"more\":true,\"filters\":true}"
+    },
+    {
+      "name": "d JD: larger cards, 2 per row, sorted by Proven, no list rows",
+      "pass": true,
+      "detail": "{\"n\":36,\"cols\":2,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":248,\"ch\":440,\"rows\":0,\"more\":true,\"filters\":true}"
+    },
+    {
+      "name": "d JD: card keeps Proven score, market pill, days · format · landing",
+      "pass": true,
+      "detail": "{\"n\":36,\"cols\":2,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":248,\"ch\":440,\"rows\":0,\"more\":true,\"filters\":true}"
+    },
+    {
+      "name": "d JD: no creative cropped (10 measured)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d JD: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d JD: no video playing without hover",
+      "pass": true,
+      "detail": "0 playing"
+    },
+    {
+      "name": "d JD: market chip filters to that market",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d Trending: native cards with rank badge, no iframe",
+      "pass": true,
+      "detail": "{\"n\":36,\"badge\":\"#1\",\"iframe\":0}"
+    },
+    {
+      "name": "d Trending: no creative cropped (20 measured)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d Trending: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d Trending: no video playing without hover",
+      "pass": true,
+      "detail": "0 playing"
+    },
+    {
+      "name": "d autoplay: toggle visible and off by default",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d autoplay on: videos in view play muted, max 8, none off screen",
+      "pass": true,
+      "detail": "{\"n\":7,\"muted\":true,\"stored\":\"true\",\"offscreen\":0}"
+    },
+    {
+      "name": "d autoplay: choice remembered in this browser",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "d autoplay off again: nothing plays",
+      "pass": true,
+      "detail": "0 playing"
+    },
+    {
+      "name": "d filters: \"Filters\" button visible with its label",
+      "pass": true,
+      "detail": "{\"vis\":true,\"txt\":\"FILTERS\"}"
+    },
+    {
+      "name": "d filters: opens as a right drawer",
+      "pass": true,
+      "detail": "{\"open\":true,\"right\":1440,\"bottom\":900,\"w\":440,\"h\":900,\"vw\":1440,\"vh\":900,\"counts\":275,\"brandSearch\":true,\"quick\":3,\"slider\":2,\"dates\":2,\"ai\":true}"
+    },
+    {
+      "name": "d filters: all groups with live counts, brand search, quick groups, slider, dates, AI toggle",
+      "pass": true,
+      "detail": "{\"open\":true,\"right\":1440,\"bottom\":900,\"w\":440,\"h\":900,\"vw\":1440,\"vh\":900,\"groups\":[\"Brand\",\"Market\",\"Media type\",\"Aspect\",\"Visual format\",\"Hook format\",\"Status\",\"Days live\",\"Launch date\",\"Proven, Rising, Most saved\",\"Landing page type\",\"CTA\"],\"counts\":275,\"brandSearch\":true,\"quick\":3,\"slider\":2,\"dates\":2,\"ai\":true}"
+    },
+    {
+      "name": "d filters: live result count updates in the drawer",
+      "pass": true,
+      "detail": "Show 8,014 results -> Show 1,402 results"
+    },
+    {
+      "name": "d filters: 3 filters applied, 3 removable chips, \"Filters · 3\", state in the URL",
+      "pass": true,
+      "detail": "{\"chips\":3,\"btn\":\"FILTERS · 3\",\"hash\":\"#discover?kind=video&asp=9%3A16&st=live\",\"ok\":true,\"n\":1402}"
+    },
+    {
+      "name": "d filters applied: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d filters: shared URL restores the same filters",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d filters: removing a chip removes that filter",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d filters: Clear all",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d search: \"knock knock\" finds the New Balance 204L ad (hook text)",
+      "pass": true,
+      "detail": "{\"n\":1,\"sub\":\"1 result for \\\"knock knock\\\"\",\"empty\":\"\",\"sugg\":0,\"ids\":1,\"brands\":[\"JD Sports Australia\"]}"
+    },
+    {
+      "name": "d search: case and accent insensitive, partial words",
+      "pass": true,
+      "detail": "{\"n\":1}"
+    },
+    {
+      "name": "d search: \"north face\" finds The North Face",
+      "pass": true,
+      "detail": "{\"n\":678,\"sub\":\"678 results for \\\"north face\\\"\",\"empty\":\"\",\"sugg\":0,\"ids\":987,\"brands\":[\"The North Face\",\"JD Sports\",\"Little Burgundy Shoes\",\"Sneakersnstuff\",\"Sport Chek\",\"DICK'S Sporting Goods\"]}"
+    },
+    {
+      "name": "d search: 0 results shows \"No results for\" with suggestions",
+      "pass": true,
+      "detail": "{\"n\":0,\"sub\":\"0 results for \\\"north zzqxq\\\"\",\"empty\":\"No results for \\\"north zzqxq\\\" Check the spelling or use fewer words.\\nTRY\\nThe North Face\\nThe North Face\\nThe North Face\\nThe North Face\\n\\\"north\\\" (687)\",\"sugg\":5,\"ids\":0,\"brands\":[]}"
+    },
+    {
+      "name": "d viewer: ad 6a7f47c4bd1fb9616677cdd4 Hook line starts \"KNOCK KNOCK\", Meta headline shown separately",
+      "pass": true,
+      "detail": "{\"hook\":\"KNOCK KNOCK...NEW BALANCE 204L AT JD 😍\",\"headline\":\"New Balance 204L at JD\"}"
+    },
+    {
+      "name": "d share: fresh deep link #discover/ad/<id> opens that ad's viewer",
+      "pass": true,
+      "detail": "{\"hash\":\"#discover/ad/6a7f47c4bd1fb9616677cdd4\",\"mid\":\"6a7f47c4bd1fb9616677cdd4\",\"hook\":\"KNOCK KNOCK...NEW BALANCE 204L AT JD 😍\",\"copyBtn\":true}"
+    },
+    {
+      "name": "d share: viewer has a Copy link button",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d share: viewer Copy link writes the full URL and shows \"Link copied\"",
+      "pass": true,
+      "detail": "https://jd-ecomm.github.io/jd-ad-briefing-room/preview/#discover/ad/6a7f47c4bd1fb9616677cdd4 | Link copied"
+    },
+    {
+      "name": "d share: Esc on a deep link closes to the grid",
+      "pass": true,
+      "detail": "#discover"
+    },
+    {
+      "name": "d share: old #ad/<id> links still open the ad",
+      "pass": true,
+      "detail": "{\"hash\":\"#discover/ad/6a7f47c4bd1fb9616677cdd4\",\"mid\":\"6a7f47c4bd1fb9616677cdd4\"}"
+    },
+    {
+      "name": "d share: opening an ad puts /ad/<id> in the URL",
+      "pass": true,
+      "detail": "#discover/ad/6ac5cc365c0724606cf898ef"
+    },
+    {
+      "name": "d share: Esc closes and keeps the scroll position",
+      "pass": true,
+      "detail": "{\"y0\":1400,\"y\":1400,\"hidden\":true,\"hash\":\"#discover\"}"
+    },
+    {
+      "name": "d share: browser Back closes the viewer and keeps the scroll position",
+      "pass": true,
+      "detail": "{\"y0\":1400,\"y\":1400,\"hidden\":true,\"hash\":\"#discover\"}"
+    },
+    {
+      "name": "d share: card Copy link copies #discover/ad/<id>",
+      "pass": true,
+      "detail": "https://jd-ecomm.github.io/jd-ad-briefing-room/preview/#discover/ad/6a7e8a49bd1fb961667195f7"
+    },
+    {
+      "name": "d Brands: search bar, category chips with counts, Focus and Canadian chips, 5 sorts",
+      "pass": true,
+      "detail": "{\"n\":127,\"chips\":13,\"focus\":true,\"ca\":true,\"sort\":5,\"search\":true,\"card\":{\"logo\":true,\"name\":\"SKIMS\",\"cat\":\"Athleisure and Yoga · Focus\",\"active\":\"597\",\"bar\":3,\"trend\":true,\"sum\":151}}"
+    },
+    {
+      "name": "d Brands: card has logo, name, category, active ads, mix bar, 30-day trend, summary",
+      "pass": true,
+      "detail": "{\"logo\":true,\"name\":\"SKIMS\",\"cat\":\"Athleisure and Yoga · Focus\",\"active\":\"597\",\"bar\":3,\"trend\":true,\"sum\":151}"
+    },
+    {
+      "name": "d Brands: video / image / carousel % sums to 100 on every card",
+      "pass": true,
+      "detail": "{\"n\":127,\"bad\":[]}"
+    },
+    {
+      "name": "d Brands list: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d Batch 3: Discover count went up (8014 cards) and Birkenstock (batch 3) is in Brands",
+      "pass": true,
+      "detail": "{\"dc\":8014,\"b3\":[\"Birkenstock\"]}"
+    },
+    {
+      "name": "d Brands: search \"gym\" finds Gymshark",
+      "pass": true,
+      "detail": "[\"Gymshark\"]"
+    },
+    {
+      "name": "d Brands: search \"north\" (case and accent insensitive) finds The North Face",
+      "pass": true,
+      "detail": "[\"The North Face\"]"
+    },
+    {
+      "name": "d Brands: category chip \"JD (our markets)\" filters the list",
+      "pass": true,
+      "detail": "[\"JD (our markets)\",\"JD (our markets)\",\"JD (our markets)\",\"JD (our markets)\",\"JD (our markets)\"]"
+    },
+    {
+      "name": "d Brands: Focus brands chip",
+      "pass": true,
+      "detail": "[\"SKIMS\",\"The North Face\",\"Alo Yoga\",\"New Balance\",\"JD Sports\",\"Nike\",\"Gymshark\",\"lululemon\",\"Foot Locker\",\"JD Sports Australia\",\"JD Sports New Zealand\",\"adidas\"]"
+    },
+    {
+      "name": "d Brand page Gymshark: header, summary, 5 stat tiles, 8-week chart, tags, hooks, top ads, grid of only this brand, Filters",
+      "pass": true,
+      "detail": "{\"h\":\"Gymshark\",\"sub\":\"Sportswear and Athletic · UK · 334 active / 482 total · median 33 days live\",\"sum\":254,\"tiles\":[\"Format mix\",\"Aspect mix\",\"UGC share\",\"Studio / product share\",\"Launches captured, last 30 days\"],\"panels\":[\"Launches captured per week by format · last 8 weeks\",\"Top visual formats\",\"Top hook formats\",\"Top ads · Proven score\"],\"weeks\":8,\"strip\":6,\"grid\":36,\"brands\":[\"Gymshark\"],\""
+    },
+    {
+      "name": "d Brand page Gymshark: format mix sums to 100",
+      "pass": true,
+      "detail": "{\"n\":1,\"bad\":[]}"
+    },
+    {
+      "name": "d Brand page Gymshark: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d Brands: back keeps the search",
+      "pass": true,
+      "detail": "{\"q\":\"gym\",\"n\":1}"
+    },
+    {
+      "name": "d Brand page The North Face: header, summary, 5 stat tiles, 8-week chart, tags, hooks, top ads, grid of only this brand, Filters",
+      "pass": true,
+      "detail": "{\"h\":\"The North Face\",\"sub\":\"Outdoor · USA · 605 active / 872 total · median 12 days live\",\"sum\":252,\"tiles\":[\"Format mix\",\"Aspect mix\",\"UGC share\",\"Studio / product share\",\"Launches captured, last 30 days\"],\"panels\":[\"Launches captured per week by format · last 8 weeks\",\"Top visual formats\",\"Top hook formats\",\"Top ads · Proven score\"],\"weeks\":8,\"strip\":6,\"grid\":36,\"brands\":[\"The North Face\"],\"fil"
+    },
+    {
+      "name": "d Brand page The North Face: format mix sums to 100",
+      "pass": true,
+      "detail": "{\"n\":1,\"bad\":[]}"
+    },
+    {
+      "name": "d Brand page The North Face: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d Brands: back keeps the search",
+      "pass": true,
+      "detail": "{\"q\":\"north\",\"n\":1}"
+    },
+    {
+      "name": "d JD: Ads | Hooks switch",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d Hooks: header strip, format bars, signals (not results), trend, templates with AI suggestions, library with thumbs and Copy link",
+      "pass": true,
+      "detail": "{\"hash\":\"#discover/jd/hooks\",\"strip\":[\"Hooks read\",\"With on-screen text\",\"Hook formats\",\"Most used\",\"Launch dates\"],\"bars\":19,\"sig\":19,\"trend\":5,\"tps\":12,\"ai\":36,\"rows\":60,\"thumb\":true,\"copy\":60,\"signalsLbl\":true,\"filters\":true,\"csv\":2,\"fb\":true}"
+    },
+    {
+      "name": "d Hooks: bar lengths match the counts (longest bar = most used)",
+      "pass": true,
+      "detail": "[[4,3],[86,73],[120,102],[13,11],[37,32],[21,18],[42,36],[47,40],[6,5],[29,25],[41,35],[147,125],[43,37],[77,66],[20,17],[84,72],[25,21],[618,526],[8,7]]"
+    },
+    {
+      "name": "d Hooks: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d Hooks: clicking a bar (\"Teaser / Knock knock\") filters the library",
+      "pass": true,
+      "detail": "{\"chips\":4,\"count\":\"4 hooks · Teaser / Knock knock\",\"want\":4,\"sel\":\"Teaser / Knock knock\"}"
+    },
+    {
+      "name": "d Hooks: \"Download hooks (CSV)\" has BOM, the right header and 4 rows",
+      "pass": true,
+      "detail": "{\"bom\":true,\"header\":[\"ad_id\",\"brand\",\"market\",\"launch_date\",\"days_live\",\"format\",\"aspect\",\"hook_text\",\"hook_format\",\"hook_template\",\"onscreen_text\",\"meta_headline\",\"primary_text\",\"landing_url\",\"proven_score\",\"ad_link\",\"ad_library_link\"],\"n\":4,\"name\":\"jd-hooks-jd-teaserknockknock-2026-11-09.csv\",\"widths\":[17]}"
+    },
+    {
+      "name": "d Hooks: \"Download all (CSV)\" has every hook read (6052 rows), same header",
+      "pass": true,
+      "detail": "{\"bom\":true,\"header\":[\"ad_id\",\"brand\",\"market\",\"launch_date\",\"days_live\",\"format\",\"aspect\",\"hook_text\",\"hook_format\",\"hook_template\",\"onscreen_text\",\"meta_headline\",\"primary_text\",\"landing_url\",\"proven_score\",\"ad_link\",\"ad_library_link\"],\"n\":6052,\"name\":\"jd-hooks-all-brands-2026-11-09.csv\",\"widths\":[17]}"
+    },
+    {
+      "name": "d Hooks: by-market toggle shows each market's share",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d Hooks: clicking a hook opens the viewer on that ad",
+      "pass": true,
+      "detail": "{\"mid\":\"6ab85612fce96c9e25ce70de\",\"hash\":\"#discover/jd/hooks/ad/6ab85612fce96c9e25ce70de\"}"
+    },
+    {
+      "name": "d Hooks: Esc returns to the Hooks view",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d filters: Hook format group with counts",
+      "pass": true,
+      "detail": "[[\"hf|Teaser / Knock knock\",20],[\"hf|Offer / Price first\",172],[\"hf|Countdown / Urgency\",14],[\"hf|Question\",106],[\"hf|List / How to\",60],[\"hf|Style tip / Outfit\",165],[\"hf|POV / Relatable\",97],[\"hf|Skit / Scenario\",78],[\"hf|Creator / Talking head\",291],[\"hf|Social proof / Trend\",50],[\"hf|Callout\",84],[\"hf|Drop / New in alert\",196],[\"hf|Store / Location\",124],[\"hf|Seasonal / Occasion\",261],[\"hf|Col"
+    },
+    {
+      "name": "d filters: Hook format \"Question\" applies in Discover (106 cards)",
+      "pass": true,
+      "detail": "{\"n\":106,\"ok\":true,\"chip\":1,\"hash\":\"#discover?hf=Question\"}"
+    },
+    {
+      "name": "d fix: Hooks chart uses only the new format list (19 formats)",
+      "pass": true,
+      "detail": "[\"Teaser / Knock knock\",\"Offer / Price first\",\"Question\",\"List / How to\",\"Style tip / Outfit\",\"POV / Relatable\",\"Skit / Scenario\",\"Creator / Talking head\",\"Social proof / Trend\",\"Callout\",\"Drop / New in alert\",\"Store / Location\",\"Seasonal / Occasion\",\"Collection / Campaign line\",\"Brand or collab callout\",\"Product name reveal\",\"Statement / Claim\",\"Visual only\",\"Other / Unreadable\"]"
+    },
+    {
+      "name": "d fix: every template shown has a placeholder and is used on 2+ ads",
+      "pass": true,
+      "detail": "[{\"t\":\"FIND YOUR FIT AT [STORE]\",\"n\":22},{\"t\":\"[PRODUCT] ONLY AT JD\",\"n\":17},{\"t\":\"THE [PRODUCT]\",\"n\":14},{\"t\":\"UP TO [N]% OFF\",\"n\":12},{\"t\":\"[STORE] BACK WITH A BRAND-NEW LOOK\",\"n\":9},{\"t\":\"JD EXCLUSIVE [PRODUCT]\",\"n\":8},{\"t\":\"THIS OR THAT? SHOP BOTH ON SALE AT [STORE]\",\"n\":7},{\"t\":\"[PRODUCT]\",\"n\":6},{\"t\":\"ONLY AT JD MEANS HUNDREDS OF EXCLUSIVE [PRODUCT]\",\"n\":6},{\"t\":\"TODAY'S FIT, FROM JD: [PRODU"
+    },
+    {
+      "name": "d fix: every loaded hook_format is in the new list, every template has a placeholder; Statement / Claim is not the catch-all (335 of 6052)",
+      "pass": true,
+      "detail": "{\"n\":6052,\"bad\":0,\"ex\":[],\"tbad\":0,\"st\":335}"
+    },
+    {
+      "name": "d fix: brand card trends say \"launches captured\"",
+      "pass": true,
+      "detail": "[\" launches captured, last 30 days vs prior 30\",\" launches captured, last 30 days vs prior 30\",\" launches captured, last 30 days vs prior 30\",\" launches captured, last 30 days vs prior 30\"]"
+    },
+    {
+      "name": "d fix: no brand summary says launches changed without \"captured\"",
+      "pass": true,
+      "detail": "[\"Leans on image ads (69% image, mostly Headline and Try-On), with launches captured up 27% in the last 30 days (video +74%) and Unboxing rising (+550%).\",\"Leans on video ads (68% video, mostly 9:16), with launches captured up 121% in the last 30 days (video +138%), based on limited tags.\",\"Leans on image ads (56% image, mostly Try-On and Split Screen), with fewer launches captured in the last 30 "
+    },
+    {
+      "name": "d fix: ALO Wellness Club (1 ad) says \"Not enough ads captured yet for a pattern (1 ad).\" and makes no claim",
+      "pass": true,
+      "detail": "{\"hash\":\"#discover/brands/66ea2c8daa0d5e909886fd0f\",\"sum\":\"Not enough ads captured yet for a pattern (1 ad).\"}"
+    },
+    {
+      "name": "d fix: Gymshark summary says \"launches captured\", names a hook format (machine read)",
+      "pass": true,
+      "detail": "{\"sum\":\"Leans on image ads (74% image, mostly Headline and Montage), with fewer launches captured in the last 30 days (-83% vs the prior 30). Ads run a median of 33 days and 59% stay live 30+ days; the most used hook format is Offer / Price first (machine read).\",\"tiles\":[\"Format mix\",\"Aspect mix\",\"UGC share\",\"Studio / product share\",\"Launches captured, last 30 days\"]}"
+    },
+    {
+      "name": "d loading: no \"Loading ads\" bar or diagonal placeholders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d Brands: tiles render",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d Brands: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d Boards: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d Boards: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d viewer: Reels frame matches Instagram (rail icons, no numbers)",
+      "pass": true,
+      "detail": "{\"reels\":true,\"digits\":[],\"w\":340,\"vw\":1440,\"rail\":5}"
+    },
+    {
+      "name": "d viewer: batch 1 panels and actions present",
+      "pass": true,
+      "detail": "{\"labels\":[],\"acts\":[],\"hookTxt\":\"Visual hook, no text\",\"hk\":null,\"hkind\":\"visual\",\"h\":\"New colours just dropped\",\"hookOk\":true}"
+    },
+    {
+      "name": "d viewer: Hook line = hook_text (never the Meta headline)",
+      "pass": true,
+      "detail": "{\"labels\":[],\"acts\":[],\"hookTxt\":\"Visual hook, no text\",\"hk\":null,\"hkind\":\"visual\",\"h\":\"New colours just dropped\",\"hookOk\":true}"
+    },
+    {
+      "name": "d viewer: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d Reels mode: opens full height, icons only",
+      "pass": true,
+      "detail": "{\"open\":true,\"digits\":[],\"w\":506,\"h\":900,\"vw\":1440,\"vh\":900,\"playing\":1}"
+    },
+    {
+      "name": "d viewer: Esc closes",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d Projects section still opens",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d no console errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d media load failures (info)",
+      "pass": true,
+      "detail": "6 failed resource loads"
+    },
+    {
+      "name": "m discover: cards render",
+      "pass": true,
+      "detail": "36 cards"
+    },
+    {
+      "name": "m discover: inside Briefing Room (hero + projects row + section)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m discover: no old Discover Ads / Trending section",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m discover: no bottom tab bar",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m discover: no video playing without hover",
+      "pass": true,
+      "detail": "0 playing"
+    },
+    {
+      "name": "m discover: no creative cropped (13 measured)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m discover: gutters equal within 2px, equal column widths",
+      "pass": true,
+      "detail": "{\"hg\":[\"12.0\"],\"vg\":[\"12.0\"],\"spread\":0,\"wspread\":0,\"n\":12}"
+    },
+    {
+      "name": "m discover: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m discover: responsive columns",
+      "pass": true,
+      "detail": "2 columns"
+    },
+    {
+      "name": "m touch grid: no video playing without hover",
+      "pass": true,
+      "detail": "0 playing"
+    },
+    {
+      "name": "m JD: JD Global section (stats, market chips, Show more)",
+      "pass": true,
+      "detail": "{\"n\":36,\"cols\":1,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":294,\"ch\":523,\"rows\":0,\"more\":true,\"filters\":true}"
+    },
+    {
+      "name": "m JD: larger cards, 1 per row, sorted by Proven, no list rows",
+      "pass": true,
+      "detail": "{\"n\":36,\"cols\":1,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":294,\"ch\":523,\"rows\":0,\"more\":true,\"filters\":true}"
+    },
+    {
+      "name": "m JD: card keeps Proven score, market pill, days · format · landing",
+      "pass": true,
+      "detail": "{\"n\":36,\"cols\":1,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":294,\"ch\":523,\"rows\":0,\"more\":true,\"filters\":true}"
+    },
+    {
+      "name": "m JD: no creative cropped (4 measured)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m JD: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m JD: no video playing without hover",
+      "pass": true,
+      "detail": "0 playing"
+    },
+    {
+      "name": "m JD: market chip filters to that market",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m Trending: native cards with rank badge, no iframe",
+      "pass": true,
+      "detail": "{\"n\":36,\"badge\":\"#1\",\"iframe\":0}"
+    },
+    {
+      "name": "m Trending: no creative cropped (11 measured)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m Trending: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m Trending: no video playing without hover",
+      "pass": true,
+      "detail": "0 playing"
+    },
+    {
+      "name": "m autoplay: toggle visible and off by default",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m autoplay on: videos in view play muted, max 8, none off screen",
+      "pass": true,
+      "detail": "{\"n\":3,\"muted\":true,\"stored\":\"true\",\"offscreen\":0}"
+    },
+    {
+      "name": "m autoplay: choice remembered in this browser",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "m autoplay off again: nothing plays",
+      "pass": true,
+      "detail": "0 playing"
+    },
+    {
+      "name": "m filters: \"Filters\" button visible with its label",
+      "pass": true,
+      "detail": "{\"vis\":true,\"txt\":\"FILTERS\"}"
+    },
+    {
+      "name": "m filters: opens as a bottom sheet",
+      "pass": true,
+      "detail": "{\"open\":true,\"right\":390,\"bottom\":844,\"w\":390,\"h\":743,\"vw\":390,\"vh\":844,\"counts\":275,\"brandSearch\":true,\"quick\":3,\"slider\":2,\"dates\":2,\"ai\":true}"
+    },
+    {
+      "name": "m filters: all groups with live counts, brand search, quick groups, slider, dates, AI toggle",
+      "pass": true,
+      "detail": "{\"open\":true,\"right\":390,\"bottom\":844,\"w\":390,\"h\":743,\"vw\":390,\"vh\":844,\"groups\":[\"Brand\",\"Market\",\"Media type\",\"Aspect\",\"Visual format\",\"Hook format\",\"Status\",\"Days live\",\"Launch date\",\"Proven, Rising, Most saved\",\"Landing page type\",\"CTA\"],\"counts\":275,\"brandSearch\":true,\"quick\":3,\"slider\":2,\"dates\":2,\"ai\":true}"
+    },
+    {
+      "name": "m filters: live result count updates in the drawer",
+      "pass": true,
+      "detail": "Show 8,014 results -> Show 1,402 results"
+    },
+    {
+      "name": "m filters: 3 filters applied, 3 removable chips, \"Filters · 3\", state in the URL",
+      "pass": true,
+      "detail": "{\"chips\":3,\"btn\":\"FILTERS · 3\",\"hash\":\"#discover?kind=video&asp=9%3A16&st=live\",\"ok\":true,\"n\":1402}"
+    },
+    {
+      "name": "m filters applied: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m filters: shared URL restores the same filters",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m filters: removing a chip removes that filter",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m filters: Clear all",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m search: \"knock knock\" finds the New Balance 204L ad (hook text)",
+      "pass": true,
+      "detail": "{\"n\":1,\"sub\":\"1 result for \\\"knock knock\\\"\",\"empty\":\"\",\"sugg\":0,\"ids\":1,\"brands\":[\"JD Sports Australia\"]}"
+    },
+    {
+      "name": "m search: case and accent insensitive, partial words",
+      "pass": true,
+      "detail": "{\"n\":1}"
+    },
+    {
+      "name": "m search: \"north face\" finds The North Face",
+      "pass": true,
+      "detail": "{\"n\":678,\"sub\":\"678 results for \\\"north face\\\"\",\"empty\":\"\",\"sugg\":0,\"ids\":987,\"brands\":[\"The North Face\",\"JD Sports\",\"Little Burgundy Shoes\",\"Sneakersnstuff\",\"Sport Chek\",\"DICK'S Sporting Goods\"]}"
+    },
+    {
+      "name": "m search: 0 results shows \"No results for\" with suggestions",
+      "pass": true,
+      "detail": "{\"n\":0,\"sub\":\"0 results for \\\"north zzqxq\\\"\",\"empty\":\"No results for \\\"north zzqxq\\\" Check the spelling or use fewer words.\\nTRY\\nThe North Face\\nThe North Face\\nThe North Face\\nThe North Face\\n\\\"north\\\" (687)\",\"sugg\":5,\"ids\":0,\"brands\":[]}"
+    },
+    {
+      "name": "m viewer: ad 6a7f47c4bd1fb9616677cdd4 Hook line starts \"KNOCK KNOCK\", Meta headline shown separately",
+      "pass": true,
+      "detail": "{\"hook\":\"KNOCK KNOCK...NEW BALANCE 204L AT JD 😍\",\"headline\":\"New Balance 204L at JD\"}"
+    },
+    {
+      "name": "m share: fresh deep link #discover/ad/<id> opens that ad's viewer",
+      "pass": true,
+      "detail": "{\"hash\":\"#discover/ad/6a7f47c4bd1fb9616677cdd4\",\"mid\":\"6a7f47c4bd1fb9616677cdd4\",\"hook\":\"KNOCK KNOCK...NEW BALANCE 204L AT JD 😍\",\"copyBtn\":true}"
+    },
+    {
+      "name": "m share: viewer has a Copy link button",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m share: viewer Copy link writes the full URL and shows \"Link copied\"",
+      "pass": true,
+      "detail": "https://jd-ecomm.github.io/jd-ad-briefing-room/preview/#discover/ad/6a7f47c4bd1fb9616677cdd4 | Link copied"
+    },
+    {
+      "name": "m share: Esc on a deep link closes to the grid",
+      "pass": true,
+      "detail": "#discover"
+    },
+    {
+      "name": "m share: old #ad/<id> links still open the ad",
+      "pass": true,
+      "detail": "{\"hash\":\"#discover/ad/6a7f47c4bd1fb9616677cdd4\",\"mid\":\"6a7f47c4bd1fb9616677cdd4\"}"
+    },
+    {
+      "name": "m share: opening an ad puts /ad/<id> in the URL",
+      "pass": true,
+      "detail": "#discover/ad/6a7fa4d6bd1fb961667a7bc5"
+    },
+    {
+      "name": "m share: Esc closes and keeps the scroll position",
+      "pass": true,
+      "detail": "{\"y0\":1400,\"y\":1400,\"hidden\":true,\"hash\":\"#discover\"}"
+    },
+    {
+      "name": "m share: browser Back closes the viewer and keeps the scroll position",
+      "pass": true,
+      "detail": "{\"y0\":1400,\"y\":1400,\"hidden\":true,\"hash\":\"#discover\"}"
+    },
+    {
+      "name": "m share: card Copy link copies #discover/ad/<id>",
+      "pass": true,
+      "detail": "https://jd-ecomm.github.io/jd-ad-briefing-room/preview/#discover/ad/6a8a5ca3bd1fb96166c01c21"
+    },
+    {
+      "name": "m Brands: search bar, category chips with counts, Focus and Canadian chips, 5 sorts",
+      "pass": true,
+      "detail": "{\"n\":127,\"chips\":13,\"focus\":true,\"ca\":true,\"sort\":5,\"search\":true,\"card\":{\"logo\":true,\"name\":\"SKIMS\",\"cat\":\"Athleisure and Yoga · Focus\",\"active\":\"597\",\"bar\":3,\"trend\":true,\"sum\":151}}"
+    },
+    {
+      "name": "m Brands: card has logo, name, category, active ads, mix bar, 30-day trend, summary",
+      "pass": true,
+      "detail": "{\"logo\":true,\"name\":\"SKIMS\",\"cat\":\"Athleisure and Yoga · Focus\",\"active\":\"597\",\"bar\":3,\"trend\":true,\"sum\":151}"
+    },
+    {
+      "name": "m Brands: video / image / carousel % sums to 100 on every card",
+      "pass": true,
+      "detail": "{\"n\":127,\"bad\":[]}"
+    },
+    {
+      "name": "m Brands list: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m Batch 3: Discover count went up (8014 cards) and Birkenstock (batch 3) is in Brands",
+      "pass": true,
+      "detail": "{\"dc\":8014,\"b3\":[\"Birkenstock\"]}"
+    },
+    {
+      "name": "m Brands: search \"gym\" finds Gymshark",
+      "pass": true,
+      "detail": "[\"Gymshark\"]"
+    },
+    {
+      "name": "m Brands: search \"north\" (case and accent insensitive) finds The North Face",
+      "pass": true,
+      "detail": "[\"The North Face\"]"
+    },
+    {
+      "name": "m Brands: category chip \"JD (our markets)\" filters the list",
+      "pass": true,
+      "detail": "[\"JD (our markets)\",\"JD (our markets)\",\"JD (our markets)\",\"JD (our markets)\",\"JD (our markets)\"]"
+    },
+    {
+      "name": "m Brands: Focus brands chip",
+      "pass": true,
+      "detail": "[\"SKIMS\",\"The North Face\",\"Alo Yoga\",\"New Balance\",\"JD Sports\",\"Nike\",\"Gymshark\",\"lululemon\",\"Foot Locker\",\"JD Sports Australia\",\"JD Sports New Zealand\",\"adidas\"]"
+    },
+    {
+      "name": "m Brand page Gymshark: header, summary, 5 stat tiles, 8-week chart, tags, hooks, top ads, grid of only this brand, Filters",
+      "pass": true,
+      "detail": "{\"h\":\"Gymshark\",\"sub\":\"Sportswear and Athletic · UK · 334 active / 482 total · median 33 days live\",\"sum\":254,\"tiles\":[\"Format mix\",\"Aspect mix\",\"UGC share\",\"Studio / product share\",\"Launches captured, last 30 days\"],\"panels\":[\"Launches captured per week by format · last 8 weeks\",\"Top visual formats\",\"Top hook formats\",\"Top ads · Proven score\"],\"weeks\":8,\"strip\":6,\"grid\":36,\"brands\":[\"Gymshark\"],\""
+    },
+    {
+      "name": "m Brand page Gymshark: format mix sums to 100",
+      "pass": true,
+      "detail": "{\"n\":1,\"bad\":[]}"
+    },
+    {
+      "name": "m Brand page Gymshark: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m Brands: back keeps the search",
+      "pass": true,
+      "detail": "{\"q\":\"gym\",\"n\":1}"
+    },
+    {
+      "name": "m Brand page The North Face: header, summary, 5 stat tiles, 8-week chart, tags, hooks, top ads, grid of only this brand, Filters",
+      "pass": true,
+      "detail": "{\"h\":\"The North Face\",\"sub\":\"Outdoor · USA · 605 active / 872 total · median 12 days live\",\"sum\":252,\"tiles\":[\"Format mix\",\"Aspect mix\",\"UGC share\",\"Studio / product share\",\"Launches captured, last 30 days\"],\"panels\":[\"Launches captured per week by format · last 8 weeks\",\"Top visual formats\",\"Top hook formats\",\"Top ads · Proven score\"],\"weeks\":8,\"strip\":6,\"grid\":36,\"brands\":[\"The North Face\"],\"fil"
+    },
+    {
+      "name": "m Brand page The North Face: format mix sums to 100",
+      "pass": true,
+      "detail": "{\"n\":1,\"bad\":[]}"
+    },
+    {
+      "name": "m Brand page The North Face: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m Brands: back keeps the search",
+      "pass": true,
+      "detail": "{\"q\":\"north\",\"n\":1}"
+    },
+    {
+      "name": "m JD: Ads | Hooks switch",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m Hooks: header strip, format bars, signals (not results), trend, templates with AI suggestions, library with thumbs and Copy link",
+      "pass": true,
+      "detail": "{\"hash\":\"#discover/jd/hooks\",\"strip\":[\"Hooks read\",\"With on-screen text\",\"Hook formats\",\"Most used\",\"Launch dates\"],\"bars\":19,\"sig\":19,\"trend\":5,\"tps\":12,\"ai\":36,\"rows\":60,\"thumb\":true,\"copy\":60,\"signalsLbl\":true,\"filters\":true,\"csv\":2,\"fb\":true}"
+    },
+    {
+      "name": "m Hooks: bar lengths match the counts (longest bar = most used)",
+      "pass": true,
+      "detail": "[[4,1],[86,18],[120,25],[13,3],[37,8],[21,4],[42,9],[47,10],[6,1],[29,6],[41,8],[147,30],[43,9],[77,16],[20,4],[84,17],[25,5],[618,126],[8,2]]"
+    },
+    {
+      "name": "m Hooks: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m Hooks: clicking a bar (\"Teaser / Knock knock\") filters the library",
+      "pass": true,
+      "detail": "{\"chips\":4,\"count\":\"4 hooks · Teaser / Knock knock\",\"want\":4,\"sel\":\"Teaser / Knock knock\"}"
+    },
+    {
+      "name": "m Hooks: by-market toggle shows each market's share",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m Hooks: clicking a hook opens the viewer on that ad",
+      "pass": true,
+      "detail": "{\"mid\":\"6ab85612fce96c9e25ce70de\",\"hash\":\"#discover/jd/hooks/ad/6ab85612fce96c9e25ce70de\"}"
+    },
+    {
+      "name": "m Hooks: Esc returns to the Hooks view",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m filters: Hook format group with counts",
+      "pass": true,
+      "detail": "[[\"hf|Teaser / Knock knock\",20],[\"hf|Offer / Price first\",172],[\"hf|Countdown / Urgency\",14],[\"hf|Question\",106],[\"hf|List / How to\",60],[\"hf|Style tip / Outfit\",165],[\"hf|POV / Relatable\",97],[\"hf|Skit / Scenario\",78],[\"hf|Creator / Talking head\",291],[\"hf|Social proof / Trend\",50],[\"hf|Callout\",84],[\"hf|Drop / New in alert\",196],[\"hf|Store / Location\",124],[\"hf|Seasonal / Occasion\",261],[\"hf|Col"
+    },
+    {
+      "name": "m filters: Hook format \"Question\" applies in Discover (106 cards)",
+      "pass": true,
+      "detail": "{\"n\":106,\"ok\":true,\"chip\":1,\"hash\":\"#discover?hf=Question\"}"
+    },
+    {
+      "name": "m fix: Hooks chart uses only the new format list (19 formats)",
+      "pass": true,
+      "detail": "[\"Teaser / Knock knock\",\"Offer / Price first\",\"Question\",\"List / How to\",\"Style tip / Outfit\",\"POV / Relatable\",\"Skit / Scenario\",\"Creator / Talking head\",\"Social proof / Trend\",\"Callout\",\"Drop / New in alert\",\"Store / Location\",\"Seasonal / Occasion\",\"Collection / Campaign line\",\"Brand or collab callout\",\"Product name reveal\",\"Statement / Claim\",\"Visual only\",\"Other / Unreadable\"]"
+    },
+    {
+      "name": "m fix: every template shown has a placeholder and is used on 2+ ads",
+      "pass": true,
+      "detail": "[{\"t\":\"FIND YOUR FIT AT [STORE]\",\"n\":22},{\"t\":\"[PRODUCT] ONLY AT JD\",\"n\":17},{\"t\":\"THE [PRODUCT]\",\"n\":14},{\"t\":\"UP TO [N]% OFF\",\"n\":12},{\"t\":\"[STORE] BACK WITH A BRAND-NEW LOOK\",\"n\":9},{\"t\":\"JD EXCLUSIVE [PRODUCT]\",\"n\":8},{\"t\":\"THIS OR THAT? SHOP BOTH ON SALE AT [STORE]\",\"n\":7},{\"t\":\"[PRODUCT]\",\"n\":6},{\"t\":\"ONLY AT JD MEANS HUNDREDS OF EXCLUSIVE [PRODUCT]\",\"n\":6},{\"t\":\"TODAY'S FIT, FROM JD: [PRODU"
+    },
+    {
+      "name": "m fix: every loaded hook_format is in the new list, every template has a placeholder; Statement / Claim is not the catch-all (335 of 6052)",
+      "pass": true,
+      "detail": "{\"n\":6052,\"bad\":0,\"ex\":[],\"tbad\":0,\"st\":335}"
+    },
+    {
+      "name": "m fix: brand card trends say \"launches captured\"",
+      "pass": true,
+      "detail": "[\" launches captured, last 30 days vs prior 30\",\" launches captured, last 30 days vs prior 30\",\" launches captured, last 30 days vs prior 30\",\" launches captured, last 30 days vs prior 30\"]"
+    },
+    {
+      "name": "m fix: no brand summary says launches changed without \"captured\"",
+      "pass": true,
+      "detail": "[\"Leans on image ads (69% image, mostly Headline and Try-On), with launches captured up 27% in the last 30 days (video +74%) and Unboxing rising (+550%).\",\"Leans on video ads (68% video, mostly 9:16), with launches captured up 121% in the last 30 days (video +138%), based on limited tags.\",\"Leans on image ads (56% image, mostly Try-On and Split Screen), with fewer launches captured in the last 30 "
+    },
+    {
+      "name": "m fix: ALO Wellness Club (1 ad) says \"Not enough ads captured yet for a pattern (1 ad).\" and makes no claim",
+      "pass": true,
+      "detail": "{\"hash\":\"#discover/brands/66ea2c8daa0d5e909886fd0f\",\"sum\":\"Not enough ads captured yet for a pattern (1 ad).\"}"
+    },
+    {
+      "name": "m fix: Gymshark summary says \"launches captured\", names a hook format (machine read)",
+      "pass": true,
+      "detail": "{\"sum\":\"Leans on image ads (74% image, mostly Headline and Montage), with fewer launches captured in the last 30 days (-83% vs the prior 30). Ads run a median of 33 days and 59% stay live 30+ days; the most used hook format is Offer / Price first (machine read).\",\"tiles\":[\"Format mix\",\"Aspect mix\",\"UGC share\",\"Studio / product share\",\"Launches captured, last 30 days\"]}"
+    },
+    {
+      "name": "m loading: no \"Loading ads\" bar or diagonal placeholders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m Brands: tiles render",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m Brands: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m Boards: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m Boards: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m viewer: Reels frame matches Instagram (rail icons, no numbers)",
+      "pass": true,
+      "detail": "{\"reels\":true,\"digits\":[],\"w\":358,\"vw\":390,\"rail\":5}"
+    },
+    {
+      "name": "m viewer: Reels frame fits a 390px screen",
+      "pass": true,
+      "detail": "{\"reels\":true,\"digits\":[],\"w\":358,\"vw\":390,\"rail\":5}"
+    },
+    {
+      "name": "m viewer: batch 1 panels and actions present",
+      "pass": true,
+      "detail": "{\"labels\":[],\"acts\":[],\"hookTxt\":\"Up to 70% Off!\",\"hk\":\"Up to 70% Off!\",\"hkind\":\"text\",\"h\":\"18% OFF* | Code EARLYACCESS\",\"hookOk\":true}"
+    },
+    {
+      "name": "m viewer: Hook line = hook_text (never the Meta headline)",
+      "pass": true,
+      "detail": "{\"labels\":[],\"acts\":[],\"hookTxt\":\"Up to 70% Off!\",\"hk\":\"Up to 70% Off!\",\"hkind\":\"text\",\"h\":\"18% OFF* | Code EARLYACCESS\",\"hookOk\":true}"
+    },
+    {
+      "name": "m viewer: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m Reels mode: opens full height, icons only",
+      "pass": true,
+      "detail": "{\"open\":true,\"digits\":[],\"w\":390,\"h\":844,\"vw\":390,\"vh\":844,\"playing\":1}"
+    },
+    {
+      "name": "m viewer: Esc closes",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m Projects section still opens",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m no console errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m media load failures (info)",
+      "pass": true,
+      "detail": "3 failed resource loads"
+    },
+    {
+      "name": "throttled: page loader \"Loading creative\"",
+      "pass": true,
+      "detail": "{\"txt\":\"LOADING CREATIVE\",\"top\":459,\"h\":558,\"main\":459}"
+    },
+    {
+      "name": "throttled: no layout jump when the loader goes (grid starts where the loader was)",
+      "pass": true,
+      "detail": "{\"before\":459,\"after\":459}"
+    },
+    {
+      "name": "throttled: card shimmer at the true aspect with \"Loading creative\"",
+      "pass": true,
+      "detail": "{\"shim\":40,\"label\":\"Loading creative\"}"
+    },
+    {
+      "name": "throttled: viewer shows spinner + \"Loading creative\" while the video buffers",
+      "pass": true,
+      "detail": "{\"on\":true,\"txt\":\"LOADING CREATIVE\"}"
+    },
+    {
+      "name": "naming: \"Directory\" in the Creative Discovery nav, no \"Home\"",
+      "pass": true,
+      "detail": "[\"Discover\",\"Directory\",\"Trending Ads Weekly\",\"Brands\",\"JD Global\",\"Boards\",\"Reels\",\"Projects\",\"Discover\",\"Directory\",\"Trending\",\"Brands\",\"More\"]"
+    },
+    {
+      "name": "naming: Creative Discovery opens on Discover by default",
+      "pass": true,
+      "detail": ""
+    }
+  ]
+}
