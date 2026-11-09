@@ -162,25 +162,36 @@ begin
     where c.live and c.vg in (select m.vg from cd_members m where m.id = any(ids) and m.live)), '[]'::jsonb);
 end $$;
 
--- one ad for the viewer: its card with full copy and on-screen text, concept variants, more from the brand, more like this
+-- one ad for the viewer: its card with every variant in full, concept variants, more from the brand, more like this
+-- (primary text and on-screen text are read by the page from in_ads directly, as before)
 create or replace function public.cd_viewer(p_id text) returns jsonb language plpgsql security definer set search_path = public as $$
-declare v text; c cd_cards; ct cd_ct; fullm jsonb; res jsonb;
+declare v text; c cd_cards; res jsonb;
 begin
   perform cd_ensure();
   select vg into v from cd_members where id = p_id and live;
   if v is null then return null; end if;
-  select * into c from cd_cards where vg = v; select * into ct from cd_ct where vg = v;
-  select jsonb_agg(e || jsonb_build_object('copy', a.copy, 'onscreen_text', a.onscreen_text, 'xt', null) order by e->>'id') into fullm
-    from jsonb_array_elements(c.m) e left join in_ads a on a.id = e->>'id';
-  res := jsonb_build_object('card', jsonb_build_object('vg', v, 'm', jsonb_strip_nulls(fullm)),
-    'concept', coalesce((select jsonb_agg(jsonb_build_object('vg', x.vg, 'm', cd_slim(x.vg)) order by t.ps desc, t.min_id) from (select x.* from cd_cards x join cd_ct t on t.vg = x.vg and t.live where x.live and x.ck = c.ck and x.vg <> v order by t.ps desc, t.min_id limit 12) x join cd_ct t on t.vg = x.vg), '[]'::jsonb),
-    'same', coalesce((select jsonb_agg(jsonb_build_object('vg', x.vg, 'm', cd_slim(x.vg)) order by t.ps desc, t.min_id) from (select x.* from cd_cards x join cd_ct t on t.vg = x.vg and t.live where x.live and x.bid = c.bid and x.vg <> v and x.ck <> c.ck order by t.ps desc, t.min_id limit 10) x join cd_ct t on t.vg = x.vg), '[]'::jsonb),
+  select * into c from cd_cards where vg = v;
+  res := jsonb_build_object('card', jsonb_build_object('vg', v, 'm', c.m),
+    'concept', coalesce((select jsonb_agg(jsonb_build_object('vg', x.vg, 'm', cd_slim(x.vg)) order by x.ps desc, x.min_id) from (select x.vg, t.ps, t.min_id from cd_cards x join cd_ct t on t.vg = x.vg and t.live where x.live and x.ck = c.ck and x.vg <> v order by t.ps desc, t.min_id limit 12) x), '[]'::jsonb),
+    'same', coalesce((select jsonb_agg(jsonb_build_object('vg', x.vg, 'm', cd_slim(x.vg)) order by x.ps desc, x.min_id) from (select x.vg, t.ps, t.min_id from cd_cards x join cd_ct t on t.vg = x.vg and t.live where x.live and x.bid = c.bid and x.vg <> v and x.ck <> c.ck order by t.ps desc, t.min_id limit 10) x), '[]'::jsonb),
     'like', coalesce((select jsonb_agg(jsonb_build_object('vg', z.vg, 'm', cd_slim(z.vg)) order by z.s desc, z.min_id) from (
-        select x.vg, x.m, t.min_id, cardinality(array(select unnest(x.vf) intersect select unnest(c.vf)))*3 + (case when x.kind = c.kind then 2 else 0 end) + (case when x.g = c.g then 1 else 0 end)
+        select x.vg, t.min_id, cardinality(array(select unnest(x.vf) intersect select unnest(c.vf)))*3 + (case when x.kind = c.kind then 2 else 0 end) + (case when x.g = c.g then 1 else 0 end)
           + (case when x.lp = c.lp then 1 else 0 end) + (case when x.market is not distinct from c.market then 1 else 0 end) + t.ps/400.0 s
-        from cd_cards x join cd_ct t on t.vg = x.vg and t.live where x.live and x.bid is distinct from c.bid order by 4 desc, t.min_id limit 10) z), '[]'::jsonb));
+        from cd_cards x join cd_ct t on t.vg = x.vg and t.live where x.live and x.bid is distinct from c.bid order by 3 desc, t.min_id limit 10) z), '[]'::jsonb));
   return res;
 end $$;
+
+-- a card for the grid: the lead ad and one ad per format in full (what the card can show), the other variants as small stubs
+create or replace function public.cd_slim(p_vg text) returns jsonb language sql stable security definer set search_path = public as $$
+  with o as (select m.id, m.asp, m.kind, m.j, t.var, t.par, row_number() over (order by t.ps desc, m.sd asc nulls first, m.id) rn
+             from cd_members m join cd_mt t on t.id = m.id where m.vg = p_vg and m.live),
+  f as (select asp, coalesce(min(rn) filter (where kind = 'video'), min(rn)) frn from o group by asp)
+  select jsonb_agg(case when o.rn = 1 or o.rn = f.frn then o.j || jsonb_build_object('var', o.var, 'par', o.par)
+    else jsonb_strip_nulls(jsonb_build_object('id', o.id, 'stub', 1, 'aspect', o.j->'aspect', 'start_date', o.j->'start_date', 'end_date', o.j->'end_date', 'status', o.j->'status',
+      'days_live', o.j->'days_live', 'format', o.kind, 'video_r2', case when o.kind = 'video' then 'stub' end, 'visual_formats', o.j->'visual_formats', 'vf_source', o.j->'vf_source',
+      'hook_format', o.j->'hook_format', 'focus', o.j->'focus', 'saves', o.j->'saves', 'brand', o.j->'brand', 'brand_id', o.j->'brand_id', 'var', o.var, 'par', o.par)) end order by o.id)
+  from o join f using (asp)
+$$;
 
 -- brand names (a brand can have several Meta pages) for the Brands tab
 create or replace function public.cd_brand_names() returns jsonb language plpgsql security definer set search_path = public as $$
@@ -194,11 +205,11 @@ end $$;
 
 -- JD Hooks: everything the Hooks view shows above the library, computed over the hook rows (one per ad, JD markets, hook read)
 create or replace function public.cd_hooks(p jsonb) returns jsonb language plpgsql security definer set search_path = public as $$
-declare scope text := coalesce(p->>'scope','jd'); res jsonb;
+declare v_scope text := coalesce(p->>'scope','jd'); res jsonb;
 begin
   perform cd_ensure();
   with r as (select m.id, m.vg, m.mk, m.hf, m.ht, m.hk, m.hsrc, m.sd, m.ost_or_hk, t.d, t.ps from cd_members m join cd_mt t on t.id = m.id
-             where m.live and t.live and m.hkind is not null and (scope = 'all' or m.mk is not null)),
+             where m.live and t.live and m.hkind is not null and (v_scope = 'all' or m.mk is not null)),
   mo as (select distinct to_char(sd, 'YYYY-MM') mo from r where sd is not null order by 1 desc limit 12),
   tp as (select ht, count(*) n, min(id) fid from r where ht is not null group by ht),
   tps as (select tp.*, (select hf from r where r.ht = tp.ht order by id limit 1) f,
@@ -247,4 +258,4 @@ begin
 end $$;
 
 grant execute on function public.cd_page(jsonb), public.cd_facets(jsonb), public.cd_summary(), public.cd_cards_by_ids(text[]), public.cd_viewer(text),
-  public.cd_brand_names(), public.cd_hooks(jsonb), public.cd_hook_rows(jsonb) to anon, authenticated;
+  public.cd_brand_names(), public.cd_hooks(jsonb), public.cd_hook_rows(jsonb), public.cd_slim(text) to anon, authenticated;
