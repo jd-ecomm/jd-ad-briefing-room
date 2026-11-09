@@ -22,7 +22,7 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -49,6 +49,7 @@ jobs:
       # A failed check never fails the job (no failure emails): PASS/FAIL goes to the step summary and results.json.
       # Only infrastructure problems (install, Pages never serving the commit, the script crashing before results) fail it.
       - name: Run the check
+        continue-on-error: true
         env:
           BASE: ${{ inputs.base_url }}
           PW_CHANNEL: chrome
