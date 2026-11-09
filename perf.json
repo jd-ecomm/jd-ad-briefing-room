@@ -1,0 +1,892 @@
+{
+  "base": "https://jd-ecomm.github.io/jd-ad-briefing-room/",
+  "page": "preview/",
+  "when": "2026-11-09T17:01:56.563Z",
+  "results": [
+    {
+      "name": "desktop",
+      "vp": "1440x900",
+      "cpu": 0,
+      "net": "none",
+      "hidden": false,
+      "firstCard": 1581,
+      "firstPoster": 2036,
+      "usable": 1581,
+      "longTasks": {
+        "n": 1,
+        "max": 60,
+        "total": 60
+      },
+      "lt": [
+        [
+          379,
+          60
+        ]
+      ],
+      "bytes": {
+        "all": 2958166,
+        "supabase": 184810,
+        "supabaseRequests": 22
+      },
+      "cards": 48,
+      "timeline": {
+        "html": 119,
+        "dcl": 291,
+        "res": [
+          [
+            "css2",
+            129,
+            228
+          ],
+          [
+            "jd-ad-briefing-room/brief.js",
+            130,
+            248
+          ],
+          [
+            "jd-ad-briefing-room/project.js",
+            130,
+            210
+          ],
+          [
+            "jd-ad-briefing-room/projnav.js",
+            131,
+            213
+          ],
+          [
+            "jd-ad-briefing-room/delivered.js",
+            131,
+            213
+          ],
+          [
+            "jd-ad-briefing-room/preview/cd.js",
+            131,
+            239
+          ],
+          [
+            "jd-ad-briefing-room/data.json",
+            251,
+            324
+          ],
+          [
+            "rest/v1/bb_users",
+            285,
+            1405
+          ],
+          [
+            "rest/v1/bb_projects",
+            291,
+            1402
+          ],
+          [
+            "rest/v1/bb_briefs",
+            460,
+            1409
+          ],
+          [
+            "rest/v1/rpc/cd_page",
+            479,
+            1533
+          ],
+          [
+            "rest/v1/in_favs",
+            480,
+            1403
+          ],
+          [
+            "rest/v1/in_boards",
+            480,
+            1404
+          ],
+          [
+            "rest/v1/in_board_items",
+            480,
+            1403
+          ],
+          [
+            "rest/v1/bb_assets",
+            1410,
+            1581
+          ],
+          [
+            "rest/v1/bb_queue",
+            1595,
+            1727
+          ]
+        ]
+      },
+      "nextBatch": [
+        22,
+        822,
+        53
+      ],
+      "longTasksAfterScroll": {
+        "n": 1,
+        "max": 60
+      },
+      "lt2": [
+        [
+          379,
+          60
+        ]
+      ],
+      "domCards": {
+        "cards": 144,
+        "withContent": 66,
+        "videos": 0
+      },
+      "hooks": 2756,
+      "brands": 375,
+      "brandPage": 241,
+      "errors": []
+    },
+    {
+      "name": "desktop",
+      "vp": "1440x900",
+      "cpu": 0,
+      "net": "none",
+      "hidden": false,
+      "firstCard": 640,
+      "firstPoster": 1023,
+      "usable": 640,
+      "longTasks": {
+        "n": 0,
+        "max": 0,
+        "total": 0
+      },
+      "lt": [],
+      "bytes": {
+        "all": 2952649,
+        "supabase": 184805,
+        "supabaseRequests": 22
+      },
+      "cards": 48,
+      "timeline": {
+        "html": 63,
+        "dcl": 195,
+        "res": [
+          [
+            "css2",
+            72,
+            156
+          ],
+          [
+            "jd-ad-briefing-room/brief.js",
+            73,
+            98
+          ],
+          [
+            "jd-ad-briefing-room/delivered.js",
+            73,
+            106
+          ],
+          [
+            "jd-ad-briefing-room/project.js",
+            73,
+            107
+          ],
+          [
+            "jd-ad-briefing-room/preview/cd.js",
+            73,
+            112
+          ],
+          [
+            "jd-ad-briefing-room/projnav.js",
+            73,
+            107
+          ],
+          [
+            "jd-ad-briefing-room/data.json",
+            159,
+            179
+          ],
+          [
+            "rest/v1/bb_users",
+            183,
+            357
+          ],
+          [
+            "rest/v1/bb_projects",
+            195,
+            421
+          ],
+          [
+            "rest/v1/bb_briefs",
+            373,
+            499
+          ],
+          [
+            "rest/v1/rpc/cd_page",
+            397,
+            583
+          ],
+          [
+            "rest/v1/in_favs",
+            398,
+            549
+          ],
+          [
+            "rest/v1/in_boards",
+            398,
+            601
+          ],
+          [
+            "rest/v1/in_board_items",
+            398,
+            511
+          ],
+          [
+            "rest/v1/bb_assets",
+            500,
+            621
+          ],
+          [
+            "rest/v1/bb_queue",
+            658,
+            767
+          ]
+        ]
+      },
+      "nextBatch": [
+        20,
+        56,
+        56
+      ],
+      "longTasksAfterScroll": {
+        "n": 0,
+        "max": 0
+      },
+      "lt2": [],
+      "domCards": {
+        "cards": 192,
+        "withContent": 65,
+        "videos": 0
+      },
+      "hooks": 185,
+      "brands": 350,
+      "brandPage": 189,
+      "errors": []
+    },
+    {
+      "name": "phone",
+      "vp": "390x844",
+      "cpu": 4,
+      "net": "none",
+      "hidden": false,
+      "firstCard": 1405,
+      "firstPoster": 1845,
+      "usable": 1405,
+      "longTasks": {
+        "n": 3,
+        "max": 170,
+        "total": 329
+      },
+      "lt": [
+        [
+          408,
+          170
+        ],
+        [
+          1228,
+          97
+        ],
+        [
+          1441,
+          62
+        ]
+      ],
+      "bytes": {
+        "all": 1052787,
+        "supabase": 184796,
+        "supabaseRequests": 22
+      },
+      "cards": 48,
+      "timeline": {
+        "html": 66,
+        "dcl": 397,
+        "res": [
+          [
+            "css2",
+            111,
+            202
+          ],
+          [
+            "jd-ad-briefing-room/brief.js",
+            118,
+            146
+          ],
+          [
+            "jd-ad-briefing-room/project.js",
+            118,
+            149
+          ],
+          [
+            "jd-ad-briefing-room/delivered.js",
+            119,
+            155
+          ],
+          [
+            "jd-ad-briefing-room/preview/cd.js",
+            120,
+            156
+          ],
+          [
+            "jd-ad-briefing-room/projnav.js",
+            121,
+            149
+          ],
+          [
+            "jd-ad-briefing-room/data.json",
+            279,
+            301
+          ],
+          [
+            "rest/v1/bb_users",
+            310,
+            483
+          ],
+          [
+            "rest/v1/bb_projects",
+            397,
+            570
+          ],
+          [
+            "rest/v1/bb_briefs",
+            897,
+            1065
+          ],
+          [
+            "rest/v1/rpc/cd_page",
+            975,
+            1175
+          ],
+          [
+            "rest/v1/in_favs",
+            977,
+            1126
+          ],
+          [
+            "rest/v1/in_boards",
+            977,
+            1091
+          ],
+          [
+            "rest/v1/in_board_items",
+            977,
+            1099
+          ],
+          [
+            "rest/v1/bb_assets",
+            1072,
+            1183
+          ]
+        ]
+      },
+      "nextBatch": [
+        127,
+        210,
+        159
+      ],
+      "longTasksAfterScroll": {
+        "n": 16,
+        "max": 170
+      },
+      "lt2": [
+        [
+          408,
+          170
+        ],
+        [
+          1228,
+          97
+        ],
+        [
+          1441,
+          62
+        ],
+        [
+          4387,
+          52
+        ],
+        [
+          4440,
+          61
+        ],
+        [
+          4716,
+          81
+        ],
+        [
+          4802,
+          53
+        ],
+        [
+          4897,
+          78
+        ],
+        [
+          5165,
+          100
+        ],
+        [
+          5273,
+          62
+        ],
+        [
+          5508,
+          67
+        ],
+        [
+          5660,
+          73
+        ],
+        [
+          5976,
+          78
+        ],
+        [
+          6059,
+          54
+        ],
+        [
+          6328,
+          58
+        ],
+        [
+          6475,
+          129
+        ]
+      ],
+      "domCards": {
+        "cards": 192,
+        "withContent": 37,
+        "videos": 0
+      },
+      "hooks": 233,
+      "brands": 459,
+      "brandPage": 284,
+      "errors": []
+    },
+    {
+      "name": "phone",
+      "vp": "390x844",
+      "cpu": 4,
+      "net": "none",
+      "hidden": false,
+      "firstCard": 1339,
+      "firstPoster": 1597,
+      "usable": 1339,
+      "longTasks": {
+        "n": 3,
+        "max": 140,
+        "total": 263
+      },
+      "lt": [
+        [
+          366,
+          140
+        ],
+        [
+          1187,
+          70
+        ],
+        [
+          1371,
+          53
+        ]
+      ],
+      "bytes": {
+        "all": 1052785,
+        "supabase": 184824,
+        "supabaseRequests": 22
+      },
+      "cards": 48,
+      "timeline": {
+        "html": 62,
+        "dcl": 341,
+        "res": [
+          [
+            "css2",
+            95,
+            185
+          ],
+          [
+            "jd-ad-briefing-room/brief.js",
+            99,
+            131
+          ],
+          [
+            "jd-ad-briefing-room/project.js",
+            100,
+            133
+          ],
+          [
+            "jd-ad-briefing-room/delivered.js",
+            101,
+            138
+          ],
+          [
+            "jd-ad-briefing-room/preview/cd.js",
+            101,
+            139
+          ],
+          [
+            "jd-ad-briefing-room/projnav.js",
+            101,
+            133
+          ],
+          [
+            "jd-ad-briefing-room/data.json",
+            268,
+            287
+          ],
+          [
+            "rest/v1/bb_users",
+            298,
+            548
+          ],
+          [
+            "rest/v1/bb_projects",
+            340,
+            576
+          ],
+          [
+            "rest/v1/bb_briefs",
+            815,
+            1020
+          ],
+          [
+            "rest/v1/rpc/cd_page",
+            880,
+            1140
+          ],
+          [
+            "rest/v1/in_favs",
+            882,
+            1092
+          ],
+          [
+            "rest/v1/in_boards",
+            883,
+            1134
+          ],
+          [
+            "rest/v1/in_board_items",
+            884,
+            990
+          ],
+          [
+            "rest/v1/bb_assets",
+            1027,
+            1133
+          ],
+          [
+            "rest/v1/bb_queue",
+            1149,
+            1296
+          ]
+        ]
+      },
+      "nextBatch": [
+        96,
+        142,
+        146
+      ],
+      "longTasksAfterScroll": {
+        "n": 11,
+        "max": 140
+      },
+      "lt2": [
+        [
+          366,
+          140
+        ],
+        [
+          1187,
+          70
+        ],
+        [
+          1371,
+          53
+        ],
+        [
+          4420,
+          58
+        ],
+        [
+          4565,
+          64
+        ],
+        [
+          4902,
+          77
+        ],
+        [
+          5140,
+          53
+        ],
+        [
+          5284,
+          68
+        ],
+        [
+          5654,
+          77
+        ],
+        [
+          5915,
+          56
+        ],
+        [
+          6052,
+          80
+        ]
+      ],
+      "domCards": {
+        "cards": 192,
+        "withContent": 37,
+        "videos": 0
+      },
+      "hooks": 467,
+      "brands": 483,
+      "brandPage": 387,
+      "errors": []
+    },
+    {
+      "name": "fast3g",
+      "vp": "1440x900",
+      "cpu": 0,
+      "net": "Fast 3G",
+      "hidden": false,
+      "firstCard": 9228,
+      "firstPoster": 15082,
+      "usable": 9228,
+      "longTasks": {
+        "n": 0,
+        "max": 0,
+        "total": 0
+      },
+      "lt": [],
+      "bytes": {
+        "all": 1011406,
+        "supabase": 53411,
+        "supabaseRequests": 21
+      },
+      "cards": 48,
+      "timeline": {
+        "html": 680,
+        "dcl": 1742,
+        "res": [
+          [
+            "css2",
+            611,
+            1261
+          ],
+          [
+            "jd-ad-briefing-room/brief.js",
+            681,
+            1586
+          ],
+          [
+            "jd-ad-briefing-room/project.js",
+            681,
+            1356
+          ],
+          [
+            "jd-ad-briefing-room/delivered.js",
+            681,
+            1365
+          ],
+          [
+            "jd-ad-briefing-room/preview/cd.js",
+            681,
+            1738
+          ],
+          [
+            "jd-ad-briefing-room/projnav.js",
+            682,
+            1372
+          ],
+          [
+            "jd-ad-briefing-room/data.json",
+            1398,
+            2858
+          ],
+          [
+            "rest/v1/bb_users",
+            1592,
+            2239
+          ],
+          [
+            "rest/v1/bb_projects",
+            1742,
+            2357
+          ],
+          [
+            "rest/v1/bb_briefs",
+            3014,
+            3836
+          ],
+          [
+            "rest/v1/rpc/cd_page",
+            3081,
+            9192
+          ],
+          [
+            "rest/v1/in_favs",
+            3082,
+            3947
+          ],
+          [
+            "rest/v1/in_boards",
+            3082,
+            3931
+          ],
+          [
+            "rest/v1/in_board_items",
+            3082,
+            3924
+          ],
+          [
+            "rest/v1/bb_assets",
+            3838,
+            6196
+          ],
+          [
+            "rest/v1/bb_queue",
+            6197,
+            7039
+          ]
+        ]
+      },
+      "errors": []
+    },
+    {
+      "name": "fast3g",
+      "vp": "1440x900",
+      "cpu": 0,
+      "net": "Fast 3G",
+      "hidden": false,
+      "firstCard": 9239,
+      "firstPoster": 15382,
+      "usable": 9239,
+      "longTasks": {
+        "n": 0,
+        "max": 0,
+        "total": 0
+      },
+      "lt": [],
+      "bytes": {
+        "all": 1019868,
+        "supabase": 53410,
+        "supabaseRequests": 21
+      },
+      "cards": 48,
+      "timeline": {
+        "html": 680,
+        "dcl": 1749,
+        "res": [
+          [
+            "css2",
+            610,
+            1261
+          ],
+          [
+            "jd-ad-briefing-room/brief.js",
+            680,
+            1586
+          ],
+          [
+            "jd-ad-briefing-room/project.js",
+            680,
+            1364
+          ],
+          [
+            "jd-ad-briefing-room/delivered.js",
+            681,
+            1404
+          ],
+          [
+            "jd-ad-briefing-room/preview/cd.js",
+            681,
+            1745
+          ],
+          [
+            "jd-ad-briefing-room/projnav.js",
+            681,
+            1348
+          ],
+          [
+            "jd-ad-briefing-room/data.json",
+            1398,
+            2857
+          ],
+          [
+            "rest/v1/bb_users",
+            1592,
+            2310
+          ],
+          [
+            "rest/v1/bb_projects",
+            1749,
+            2381
+          ],
+          [
+            "rest/v1/bb_briefs",
+            3010,
+            3852
+          ],
+          [
+            "rest/v1/rpc/cd_page",
+            3074,
+            9192
+          ],
+          [
+            "rest/v1/in_favs",
+            3074,
+            3938
+          ],
+          [
+            "rest/v1/in_boards",
+            3075,
+            3931
+          ],
+          [
+            "rest/v1/in_board_items",
+            3075,
+            3915
+          ],
+          [
+            "rest/v1/bb_assets",
+            3853,
+            6219
+          ],
+          [
+            "rest/v1/bb_queue",
+            6220,
+            7078
+          ]
+        ]
+      },
+      "errors": []
+    },
+    {
+      "name": "hidden",
+      "vp": "1440x900",
+      "cpu": 0,
+      "net": "none",
+      "hidden": true,
+      "firstCard": 2105,
+      "errors": []
+    },
+    {
+      "name": "hidden",
+      "vp": "1440x900",
+      "cpu": 0,
+      "net": "none",
+      "hidden": true,
+      "firstCard": 1121,
+      "errors": []
+    }
+  ]
+}
