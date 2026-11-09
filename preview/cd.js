@@ -1,6 +1,6 @@
 /* JD Ad Briefing Room · Creative Discovery (replaces Discover Ads). Preview build, served at /preview/.
    One section inside the Briefing Room with sub tabs: Discover (all brands), JD (our markets), Trending (Runneth weekly top ads), Brands, Boards.
-   Data: Supabase in_ads (batch 1, English), tr_ads (Runneth trending), in_favs, in_boards, in_board_items. Media: R2 first, then Supabase copies, then Motion.
+   Data: Supabase in_ads (every released batch, English), tr_ads (Runneth trending), in_favs, in_boards, in_board_items. Media: R2 first, then Supabase copies, then Motion.
    Cards are Motion style: true aspect ratio, object-fit contain, never cropped. Videos never autoplay in the grid:
    on a pointer device hover plays muted and moving across the card scrubs; on touch, tap opens the viewer. */
 (()=>{
@@ -80,7 +80,7 @@ async function apiRetry(path,opt,tries=4){let e;for(let i=0;i<tries;i++){try{ret
 async function loadAds(){const q=`in_ads?select=${COLS}&batch=not.is.null&is_english=is.true&order=id.asc`;
  const first=await apiRetry(q,{headers:{Range:`0-${PAGE-1}`,'Range-Unit':'items',Prefer:'count=exact'}});let rows=first.data||[];
  const total=+((first.range||'').split('/')[1])||rows.length;const pages=[];for(let f=PAGE;f<total;f+=PAGE)pages.push(f);
- for(let i=0;i<pages.length;i+=2){const res=await Promise.all(pages.slice(i,i+2).map(f=>apiRetry(q,{headers:{Range:`${f}-${f+PAGE-1}`,'Range-Unit':'items'}})));res.forEach(r=>rows=rows.concat(r.data||[]))}return rows}
+ for(let i=0;i<pages.length;i+=3){const res=await Promise.all(pages.slice(i,i+3).map(f=>apiRetry(q,{headers:{Range:`${f}-${f+PAGE-1}`,'Range-Unit':'items'}})));res.forEach(r=>rows=rows.concat(r.data||[]))}return rows}
 async function loadTrending(){let all=[],from=0;for(;;){const r=await apiRetry('tr_ads?select=week,category,rank,brand,age,kind,video,poster,images,logo,video_s,poster_s,images_s,logo_s&order=week.desc,category.asc,rank.asc',{headers:{Range:from+'-'+(from+999)}});const j=r.data||[];all=all.concat(j);if(j.length<1000)break;from+=1000}return all}
 async function loadSaves(){try{const f=(await api('in_favs?select=email,ad_id')).data||[];C.allFavs={};C.favs=new Set();
   f.forEach(x=>{C.allFavs[x.ad_id]=(C.allFavs[x.ad_id]||0)+1;if(x.email===me())C.favs.add(x.ad_id)});
