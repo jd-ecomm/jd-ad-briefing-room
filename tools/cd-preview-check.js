@@ -352,6 +352,10 @@ async function brandChecks(page, tag, shot) {
   await noHScrollP(page, tag, 'Brands list');
   await shot('brands');
   const q = async t => { await page.fill('#cd-bq', t); await page.waitForTimeout(250); return page.evaluate(() => [...document.querySelectorAll('.cd-bcard')].map(c => c.dataset.brand)); };
+  if (!FX) { // Part 4: batch 3 released (non-focus brands): Discover count above the 5,077 cards of batches 1 and 2, a batch 3 brand listed
+    const b3 = await q('birken'); const dc = await page.evaluate(() => +(document.querySelector('[data-cnt="discover"]')?.textContent || '0').replace(/,/g, ''));
+    ok(`${tag} Batch 3: Discover count went up (${dc} cards) and Birkenstock (batch 3) is in Brands`, dc > 5077 && b3.includes('Birkenstock'), JSON.stringify({ dc, b3 }));
+    await q(''); }
   const g = await q('gym'); ok(`${tag} Brands: search "gym" finds Gymshark`, g.length >= 1 && g.includes('Gymshark') && g.every(b => /gym/i.test(b)), JSON.stringify(g));
   const nf = await q('NÖRTH'); ok(`${tag} Brands: search "north" (case and accent insensitive) finds The North Face`, nf.includes('The North Face'), JSON.stringify(nf));
   await shot('brands-search');
