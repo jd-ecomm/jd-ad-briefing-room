@@ -1,0 +1,47 @@
+name: Creative Discovery aspect and posters
+
+# Measures aspect ratios of R2 media (ffprobe for video, PIL for images) and re-makes video posters
+# for the ids in scripts/cd_aspect/jobs.json (scripts/cd_aspect.py). Writes results.json to branch cd-aspect-results.
+# No database writes: the run that dispatched it reads the file and updates in_ads.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [scripts/cd_aspect/jobs.json]
+
+concurrency:
+  group: cd-aspect
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ffmpeg and Python deps
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          pip install -q requests pillow
+      - name: Probe and re-make posters
+        env:
+          SUPABASE_URL: https://cymkcvdsxoneojfisjgk.supabase.co
+          # Public anon key (already in the Briefing Room page code); only used to call the cd-r2-sign edge function.
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5bWtjdmRzeG9uZW9qZmlzamdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxMTg0ODQsImV4cCI6MjEwODY5NDQ4NH0.rgRRRXCab-s5xy4ICFa_l511Gol8EMqPEjBHThnAC9I' }}
+          OUT: /tmp/results.json
+        run: python3 -u scripts/cd_aspect.py
+      - name: Push results to cd-aspect-results
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          D=/tmp/res; mkdir -p "$D"; cp /tmp/results.json "$D/results.json"
+          cd "$D" && git init -q -b cd-aspect-results && git add -A \
+            && git commit -q -m "cd-aspect results (run ${{ github.run_id }})" \
+            && git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" cd-aspect-results:cd-aspect-results
