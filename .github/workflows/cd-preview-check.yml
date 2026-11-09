@@ -1,0 +1,73 @@
+name: Creative Discovery preview check
+
+# Runs Playwright (chromium) against the deployed /preview/ page with live Supabase and R2 data,
+# at 1440x900 and 390x844. Waits until GitHub Pages serves this commit's preview/cd.js first.
+# Screenshots + results.json are uploaded as an artifact and also pushed to a cd-preview-shots/run-<id> branch
+# so a Claude session without artifact download can read them with git.
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Site root"
+        required: false
+        default: "https://jd-ecomm.github.io/jd-ad-briefing-room/"
+
+concurrency:
+  group: cd-preview-check
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null
+          npm install --no-save playwright@1.48.2
+          npx playwright install --with-deps chromium
+      - name: Wait for Pages to serve this commit's preview
+        env:
+          BASE: ${{ inputs.base_url }}
+        run: |
+          want=$(md5sum preview/cd.js | cut -d' ' -f1)
+          for i in $(seq 1 60); do
+            got=$(curl -fsSL "${BASE}preview/cd.js?nocache=$RANDOM$i" | md5sum | cut -d' ' -f1 || true)
+            if [ "$got" = "$want" ]; then echo "Pages is serving this commit's preview (try $i)"; exit 0; fi
+            echo "waiting for Pages ($i): $got vs $want"; sleep 20
+          done
+          echo "Pages never served this commit's preview/cd.js"; exit 1
+      - name: Run the check
+        env:
+          BASE: ${{ inputs.base_url }}
+        run: node tools/cd-preview-check.js "$BASE" cd-shots
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cd-preview-shots
+          path: cd-shots
+          if-no-files-found: warn
+      - name: Push screenshots to a run branch
+        if: always()
+        run: |
+          [ -d cd-shots ] || exit 0
+          b="cd-preview-shots/run-${{ github.run_id }}"
+          mkdir -p /tmp/shots && cp -r cd-shots/. /tmp/shots/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan "$b"
+          git rm -rqf . >/dev/null 2>&1 || true
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -r /tmp/shots/. .
+          git add -A
+          git commit -qm "Creative Discovery preview check screenshots (run ${{ github.run_id }})"
+          git push -q origin "$b"
+          echo "Pushed $b"
