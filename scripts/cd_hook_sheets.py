@@ -43,6 +43,7 @@ MAX_FH = 960        # cap frame height
 COLS_V = 5
 CAP_H = 40
 COLS = "id,brand,format,video,poster,images,thumb_r2,images_r2,video_r2,is_english"
+DEBUG = SET == "debug"
 HOOK_TS = [0.0, 0.5, 1.0, 1.5, 2.0, 3.0]
 
 
@@ -76,8 +77,8 @@ def fetch(params):
 
 
 def load_rows():
-    if SET == "pilot":
-        ids = json.load(open("tools/cd-hooks/pilot.json"))
+    if SET in ("pilot", "debug"):
+        ids = json.load(open(f"tools/cd-hooks/{SET}.json"))
         rows = fetch({"id": "in.(" + ",".join(ids) + ")"})
         m = {r["id"]: r for r in rows}
         return [m[i] for i in ids if i in m]
@@ -120,7 +121,11 @@ def video_frames(url):
                 capture_output=True, text=True, timeout=60).stdout.strip() or 0)
         except Exception:
             dur = 0
-        ts = [t for t in HOOK_TS if dur == 0 or t < dur - 0.05]
+        if DEBUG:
+            print(url, len(data), subprocess.run(["ffprobe", "-v", "error", "-show_streams", "-show_format", p],
+                                                  capture_output=True, text=True).stdout, flush=True)
+        hook = [i / 4 for i in range(17)] if DEBUG else HOOK_TS
+        ts = [t for t in hook if dur == 0 or t < dur - 0.05]
         if dur > 0:
             ts += [round(dur * q, 1) for q in (0.25, 0.5, 0.75)]
         frames = []
@@ -147,6 +152,26 @@ def image_urls(row):
     if row.get("thumb_r2"):
         return [row["thumb_r2"]]
     return []
+
+
+def build_debug(row):
+    out = []
+    for key in ("video_r2", "video"):
+        if row.get(key):
+            try:
+                fr, sha, dur = video_frames(row[key])
+                out.append({"kind": "video", "frames": [(f"{key} {l}", im) for l, im in fr], "sha": key + sha})
+            except Exception as e:
+                print(row["id"], key, "failed", e, flush=True)
+    for key in ("poster", "thumb_r2"):
+        u = row.get(key) if key != "poster" else poster_of(row)
+        if u:
+            try:
+                data = get(u).content
+                out.append({"kind": "poster", "frames": [(key, fit(Image.open(io.BytesIO(data))))], "sha": key + u})
+            except Exception as e:
+                print(row["id"], key, "failed", e, flush=True)
+    return out
 
 
 def build(row):
@@ -215,8 +240,16 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     rows = load_rows()
     print(f"{SET}: {len(rows)} ads", flush=True)
-    with cf.ThreadPoolExecutor(8) as ex:
-        built = list(ex.map(build, rows))
+    if DEBUG:
+        built, rr = [], []
+        for row in rows:
+            for b in build_debug(row):
+                built.append(b)
+                rr.append(row)
+        rows = rr
+    else:
+        with cf.ThreadPoolExecutor(8) as ex:
+            built = list(ex.map(build, rows))
     groups, order, failed = {}, [], {}
     for row, b in zip(rows, built):
         if "error" in b:
