@@ -1,0 +1,635 @@
+{
+ "set": "pilot",
+ "sheets": {
+  "pilot_0001.jpg": [
+   {
+    "rep": "6acda18f5c0724606c2d0757",
+    "ids": [
+     "6acda18f5c0724606c2d0757"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "5.2s",
+     "10.4s",
+     "15.5s"
+    ]
+   }
+  ],
+  "pilot_0002.jpg": [
+   {
+    "rep": "6ab541b0fce96c9e25ba472c",
+    "ids": [
+     "6ab541b0fce96c9e25ba472c"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "1.9s",
+     "3.9s",
+     "5.8s"
+    ]
+   }
+  ],
+  "pilot_0003.jpg": [
+   {
+    "rep": "6af0d1f26c7ca7701767a811",
+    "ids": [
+     "6af0d1f26c7ca7701767a811"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "3.0s",
+     "6.0s",
+     "9.0s"
+    ]
+   }
+  ],
+  "pilot_0004.jpg": [
+   {
+    "rep": "6a84646bbd1fb96166972367",
+    "ids": [
+     "6a84646bbd1fb96166972367"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "8.9s",
+     "17.8s",
+     "26.6s"
+    ]
+   }
+  ],
+  "pilot_0005.jpg": [
+   {
+    "rep": "6af0d1f26c7ca7701767a81a",
+    "ids": [
+     "6af0d1f26c7ca7701767a81a"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "6.9s",
+     "13.8s",
+     "20.6s"
+    ]
+   }
+  ],
+  "pilot_0006.jpg": [
+   {
+    "rep": "6af0d1f331b38702a4138d76",
+    "ids": [
+     "6af0d1f331b38702a4138d76"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "2.8s",
+     "5.6s",
+     "8.4s"
+    ]
+   }
+  ],
+  "pilot_0007.jpg": [
+   {
+    "rep": "6acc4ed75c0724606c241586",
+    "ids": [
+     "6acc4ed75c0724606c241586"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "2.6s",
+     "5.2s",
+     "7.8s"
+    ]
+   }
+  ],
+  "pilot_0008.jpg": [
+   {
+    "rep": "6af0d1f16c7ca7701767a7d3",
+    "ids": [
+     "6af0d1f16c7ca7701767a7d3"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "2.5s",
+     "5.0s",
+     "7.5s"
+    ]
+   }
+  ],
+  "pilot_0009.jpg": [
+   {
+    "rep": "6aa2ce13fce96c9e25447d6b",
+    "ids": [
+     "6aa2ce13fce96c9e25447d6b"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "3.3s",
+     "6.5s",
+     "9.8s"
+    ]
+   }
+  ],
+  "pilot_0010.jpg": [
+   {
+    "rep": "6a882017bd1fb96166b1c7fe",
+    "ids": [
+     "6a882017bd1fb96166b1c7fe"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "3.8s",
+     "7.5s",
+     "11.3s"
+    ]
+   }
+  ],
+  "pilot_0011.jpg": [
+   {
+    "rep": "6ac5667f5c0724606cf65a30",
+    "ids": [
+     "6ac5667f5c0724606cf65a30"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "1.0s",
+     "1.9s",
+     "2.9s"
+    ]
+   }
+  ],
+  "pilot_0012.jpg": [
+   {
+    "rep": "6aecf3f33c0a2e186274061c",
+    "ids": [
+     "6aecf3f33c0a2e186274061c"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "10.8s",
+     "21.6s",
+     "32.3s"
+    ]
+   }
+  ],
+  "pilot_0013.jpg": [
+   {
+    "rep": "6ab85612fce96c9e25ce71c0",
+    "ids": [
+     "6ab85612fce96c9e25ce71c0"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "0.9s",
+     "1.8s",
+     "2.7s"
+    ]
+   }
+  ],
+  "pilot_0014.jpg": [
+   {
+    "rep": "6ae18fca5c56b3cd6fb03a18",
+    "ids": [
+     "6ae18fca5c56b3cd6fb03a18"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "3.9s",
+     "7.9s",
+     "11.8s"
+    ]
+   }
+  ],
+  "pilot_0015.jpg": [
+   {
+    "rep": "6ae18fca5c56b3cd6fb03a07",
+    "ids": [
+     "6ae18fca5c56b3cd6fb03a07"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "1.4s",
+     "2.8s",
+     "4.3s"
+    ]
+   }
+  ],
+  "pilot_0016.jpg": [
+   {
+    "rep": "6ab85613fce96c9e25ce71d5",
+    "ids": [
+     "6ab85613fce96c9e25ce71d5"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "1.9s",
+     "3.8s",
+     "5.7s"
+    ]
+   }
+  ],
+  "pilot_0017.jpg": [
+   {
+    "rep": "6abe943467369d32ccd6541d",
+    "ids": [
+     "6abe943467369d32ccd6541d"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "2.5s",
+     "5.0s",
+     "7.6s"
+    ]
+   }
+  ],
+  "pilot_0018.jpg": [
+   {
+    "rep": "6aef3aeb647d960140ce9223",
+    "ids": [
+     "6aef3aeb647d960140ce9223"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "1.4s",
+     "2.8s",
+     "4.3s"
+    ]
+   }
+  ],
+  "pilot_0019.jpg": [
+   {
+    "rep": "6aef3aeb647d960140ce91d7",
+    "ids": [
+     "6aef3aeb647d960140ce91d7"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "2.5s",
+     "4.9s",
+     "7.4s"
+    ]
+   }
+  ],
+  "pilot_0020.jpg": [
+   {
+    "rep": "6aef3aeb647d960140ce91e5",
+    "ids": [
+     "6aef3aeb647d960140ce91e5"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "1.6s",
+     "3.2s",
+     "4.8s"
+    ]
+   }
+  ],
+  "pilot_0021.jpg": [
+   {
+    "rep": "6abd6fb267369d32ccceb291",
+    "ids": [
+     "6abd6fb267369d32ccceb291"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "2.5s",
+     "5.1s",
+     "7.6s"
+    ]
+   }
+  ],
+  "pilot_0022.jpg": [
+   {
+    "rep": "6a9a87d60973d675995f2368",
+    "ids": [
+     "6a9a87d60973d675995f2368"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "2.5s",
+     "4.9s",
+     "7.4s"
+    ]
+   }
+  ],
+  "pilot_0023.jpg": [
+   {
+    "rep": "6abd6fb267369d32ccceb28d",
+    "ids": [
+     "6abd6fb267369d32ccceb28d"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "0.8s",
+     "1.5s",
+     "2.3s"
+    ]
+   }
+  ],
+  "pilot_0024.jpg": [
+   {
+    "rep": "6a7fa4d6bd1fb961667a7bce",
+    "ids": [
+     "6a7fa4d6bd1fb961667a7bce"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "1.9s",
+     "3.9s",
+     "5.8s"
+    ]
+   }
+  ],
+  "pilot_0025.jpg": [
+   {
+    "rep": "6aef3aeb647d960140ce91fd",
+    "ids": [
+     "6aef3aeb647d960140ce91fd"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "0.8s",
+     "1.6s",
+     "2.3s"
+    ]
+   }
+  ],
+  "pilot_0026.jpg": [
+   {
+    "rep": "6ac8e8055c0724606c0d504e",
+    "ids": [
+     "6ac8e8055c0724606c0d504e"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "3.1s",
+     "6.1s",
+     "9.2s"
+    ]
+   }
+  ],
+  "pilot_0027.jpg": [
+   {
+    "rep": "6aa0ee40a059f830c2736941",
+    "ids": [
+     "6aa0ee40a059f830c2736941"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "18.4s",
+     "36.8s",
+     "55.3s"
+    ]
+   }
+  ],
+  "pilot_0028.jpg": [
+   {
+    "rep": "6aaedd86fce96c9e2591dd32",
+    "ids": [
+     "6aaedd86fce96c9e2591dd32"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "3.8s",
+     "7.5s",
+     "11.3s"
+    ]
+   }
+  ],
+  "pilot_0029.jpg": [
+   {
+    "rep": "6aaedd86fce96c9e2591dd2d",
+    "ids": [
+     "6aaedd86fce96c9e2591dd2d"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "7.0s",
+     "14.0s",
+     "21.0s"
+    ]
+   }
+  ],
+  "pilot_0030.jpg": [
+   {
+    "rep": "6aee7a47326d6d369b4a388a",
+    "ids": [
+     "6aee7a47326d6d369b4a388a"
+    ],
+    "format": "video",
+    "kind": "video",
+    "frames": [
+     "0.0s",
+     "0.5s",
+     "1.0s",
+     "1.5s",
+     "2.0s",
+     "3.0s",
+     "6.2s",
+     "12.3s",
+     "18.5s"
+    ]
+   }
+  ]
+ },
+ "failed": {}
+}
