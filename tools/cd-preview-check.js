@@ -13,8 +13,10 @@ const SB_URL = 'https://cymkcvdsxoneojfisjgk.supabase.co/rest/v1/';
 const SB_KEY = (/SBK='([^']+)'/.exec(fs.readFileSync(path.join(__dirname, '..', 'preview', 'cd.js'), 'utf8')) || [, ''])[1];
 const JD_BIDS = ['66cf75a0e42d53dcea7879b5', '67aa28cb0a70ccc0c54281c6', '686f2d9374342e14cdc10979', '69925634d7b54bd21a2fcadb', '670ff958a61172249cb1b88d', '674e4a2a411da97a4980d2db'];
 /* counts and rows straight from in_ads (PostgREST), independent of the Creative Discovery RPCs */
-async function sqlCount(q) { const r = await fetch(SB_URL + 'in_ads?select=id&batch=not.is.null&is_english=is.true&' + q, { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, Prefer: 'count=exact', Range: '0-0' } }); return +((r.headers.get('content-range') || '').split('/')[1]); }
-async function sqlRows(select, q) { let out = [], from = 0; for (;;) { const r = await fetch(SB_URL + 'in_ads?select=' + select + '&batch=not.is.null&is_english=is.true&order=id.asc&' + q, { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, Range: `${from}-${from + 999}` } }); const j = await r.json(); out = out.concat(j); if (j.length < 1000) break; from += 1000; } return out; }
+async function sqlCount(q) { for (let i = 0; i < 4; i++) { const r = await fetch(SB_URL + 'in_ads?select=id&batch=not.is.null&is_english=is.true&' + q, { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, Prefer: 'count=exact', Range: '0-0', 'Range-Unit': 'items' } });
+  const n = +((r.headers.get('content-range') || '').split('/')[1]); if (isFinite(n) && (r.ok || r.status === 206)) return n; await new Promise(z => setTimeout(z, 1500)); } return NaN; }
+async function sqlRows(select, q) { let out = [], from = 0; for (;;) { let j = null; for (let i = 0; i < 4 && !Array.isArray(j); i++) { const r = await fetch(SB_URL + 'in_ads?select=' + select + '&batch=not.is.null&is_english=is.true&order=id.asc&' + q, { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, Range: `${from}-${from + 999}`, 'Range-Unit': 'items' } }); j = await r.json().catch(() => null); if (!Array.isArray(j)) await new Promise(z => setTimeout(z, 1500)); }
+  if (!Array.isArray(j)) throw new Error('in_ads rows did not load'); out = out.concat(j); if (j.length < 1000) break; from += 1000; } return out; }
 const results = []; const ok = (name, pass, detail = '') => { results.push({ name, pass: !!pass, detail: String(detail).slice(0, 400) }); console.log((pass ? 'PASS ' : 'FAIL ') + name + (detail ? '  ' + String(detail).slice(0, 300) : '')); };
 
 function fixtureRows() {
@@ -409,7 +411,7 @@ async function hookChecks(page, tag, shot) {
   const fmt = await page.evaluate(() => { const b = [...document.querySelectorAll('.cd-hbc [data-hkf]')].find(b => b.dataset.hkf !== 'Visual only'); return b ? b.dataset.hkf : null; });
   await page.click(`.cd-hbc [data-hkf="${fmt}"]`); await page.waitForTimeout(500);
   const fl = await page.evaluate(f => ({ chips: [...document.querySelectorAll('.cd-hr .cd-mk.y')].map(x => x.textContent), count: document.querySelector('#cd-hrows .cd-bcount')?.textContent, sel: document.querySelector('[data-hk="fmt"]').value }), fmt);
-  fl.want = FX ? await page.evaluate(f => window.CD.ROWS.filter(m => m.mk && m.hkind && m.hf === f).length, fmt) : await sqlCount(`hook_kind=not.is.null&hook_kind=neq.&brand_id=in.(${JD_BIDS.join(',')})&hook_format=eq.${encodeURIComponent(fmt)}`); // lazy loading: SQL truth
+  fl.want = FX ? await page.evaluate(f => window.CD.ROWS.filter(m => m.mk && m.hkind && m.hf === f).length, fmt) : await sqlCount(`hook_kind=not.is.null&brand_id=in.(${JD_BIDS.join(',')})&hook_format=eq.${encodeURIComponent(fmt)}`); // lazy loading: SQL truth
   ok(`${tag} Hooks: clicking a bar ("${fmt}") filters the library`, fl.chips.length > 0 && fl.chips.every(x => x === fmt) && fl.sel === fmt && new RegExp('^' + fl.want.toLocaleString('en-CA') + ' hook').test(fl.count || ''), JSON.stringify({ ...fl, chips: fl.chips.length }));
   await shot('hooks-filtered');
   if (tag === 'd') {
@@ -419,7 +421,7 @@ async function hookChecks(page, tag, shot) {
     const want = 'ad_id,brand,market,launch_date,days_live,format,aspect,hook_text,hook_format,hook_template,onscreen_text,meta_headline,primary_text,landing_url,proven_score,ad_link,ad_library_link';
     const c1 = await dl('filtered');
     ok(`${tag} Hooks: "Download hooks (CSV)" has BOM, the right header and ${fl.want} rows`, c1.bom && c1.header.join(',') === want && c1.n === fl.want && c1.widths.length === 1, JSON.stringify(c1));
-    const wantAll = FX ? await page.evaluate(() => window.CD.ROWS.filter(m => m.hkind).length) : await sqlCount('hook_kind=not.is.null&hook_kind=neq.'); // lazy loading: SQL truth
+    const wantAll = FX ? await page.evaluate(() => window.CD.ROWS.filter(m => m.hkind).length) : await sqlCount('hook_kind=not.is.null'); // lazy loading: SQL truth
     const c2 = await dl('all');
     ok(`${tag} Hooks: "Download all (CSV)" has every hook read (${wantAll} rows), same header`, c2.bom && c2.header.join(',') === want && c2.n === wantAll && c2.widths.length === 1, JSON.stringify(c2));
   }
@@ -454,7 +456,7 @@ async function fixRunChecks(page, tag, shot) {
   const known = h.bars.every(f => NEW_HF.includes(f));
   ok(`${tag} fix: Hooks chart uses only the new format list (${h.bars.length} formats)`, h.bars.length >= 3 && known && !h.bars.includes('Other'), JSON.stringify(h.bars));
   ok(`${tag} fix: every template shown has a placeholder and is used on 2+ ads`, h.tps.length >= 1 && h.tps.every(t => /\[(PRODUCT|BRAND|SEASON|STORE|COLLECTION|PRICE|N|DATE)\]/.test(t.t) && t.n >= 2), JSON.stringify(h.tps.slice(0, 12)));
-  const hfRows = FX ? null : (await sqlRows('id,hook_format,hook_template', 'hook_format=not.is.null&hook_format=neq.')).map(r => ({ hf: r.hook_format, ht: r.hook_template })); // lazy loading: SQL truth
+  const hfRows = FX ? null : (await sqlRows('id,hook_format,hook_template', 'hook_format=not.is.null')).map(r => ({ hf: r.hook_format, ht: r.hook_template })); // lazy loading: SQL truth
   const d = await page.evaluate(([nh, rows]) => { const all = rows || window.CD.ROWS.filter(m => m.hf); const bad = all.filter(m => !nh.includes(m.hf)); const tbad = all.filter(m => m.ht && !/\[(PRODUCT|BRAND|SEASON|STORE|COLLECTION|PRICE|N|DATE)\]/.test(m.ht)); const st = all.filter(m => m.hf === 'Statement / Claim').length; return { n: all.length, bad: bad.length, ex: bad.slice(0, 3).map(m => m.hf), tbad: tbad.length, st }; }, [NEW_HF, hfRows]);
   ok(`${tag} fix: every loaded hook_format is in the new list, every template has a placeholder; Statement / Claim is not the catch-all (${d.st} of ${d.n})`, d.n > 0 && d.bad === 0 && d.tbad === 0 && d.st < d.n * 0.25, JSON.stringify(d));
   await shot('fix-hooks');
@@ -570,7 +572,7 @@ async function lazyChecks() {
   if (liveReady) { const of = await live.evaluate(() => window.CD.ADS.length); const sum = await rpc('cd_summary', {}); ok(`lazy counts: total cards ${sum.cards} = old ${of}; brands ${sum.brands}`, sum.cards === of, JSON.stringify({ cards: sum.cards, old: of }));
     const jdOld = await live.evaluate(() => window.CD.ADS.filter(a => a.mk).length); ok(`lazy counts: JD cards ${sum.jd} = old ${jdOld}`, sum.jd === jdOld); }
   // SQL truth: hook rows and released ads
-  const hooksSql = await sqlCount(`hook_kind=not.is.null&hook_kind=neq.&brand_id=in.(${JD_BIDS.join(',')})`); const hk = await rpc('cd_hooks', { scope: 'jd' });
+  const hooksSql = await sqlCount(`hook_kind=not.is.null&brand_id=in.(${JD_BIDS.join(',')})`); const hk = await rpc('cd_hooks', { scope: 'jd' });
   ok(`lazy counts: JD hooks ${hk.n} = SQL ${hooksSql}`, hk.n === hooksSql);
   await live.close();
   // Filters drawer count matches the grid

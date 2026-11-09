@@ -258,7 +258,7 @@ function showFilters(){let o=$('#cd-fd');if(!o){o=document.createElement('div');
  o.hidden=false;document.documentElement.style.overflow='hidden';drawFD();$('#cd-fbtn').setAttribute('aria-expanded','true');setTimeout(()=>{const x=$('#cd-fd [data-fdx]');if(x)x.focus()},30)}
 function closeFilters(){const o=$('#cd-fd');if(!o||o.hidden)return;o.hidden=true;o.innerHTML='';if(!C.viewer)document.documentElement.style.overflow='';const b=$('#cd-fbtn');if(b){b.setAttribute('aria-expanded','false');b.focus()}}
 function drawFD(){const o=$('#cd-fd'),D=FD.D;if(!o||o.hidden)return;let FC=null;
- if(C.tab!=='trending'){const pr=getFacets(D);if(pr.res)FC=FD.last=pr.res;else{FD.wait=pr;pr.then(()=>{if(FD.wait===pr&&FD.D===D)drawFD()}).catch(()=>{});FC=FD.last;if(!FC)return}}
+ if(C.tab!=='trending'){const pr=getFacets(D);if(pr.res)FC=FD.last=pr.res;else{FD.wait=pr;pr.then(r=>{const o2=$('#cd-fd');if(!o2||o2.hidden)return;if(FD.wait===pr&&FD.D===D){drawFD();return}const cp=getFacets(FD.D);if(!cp.res){FD.last=r;drawFD()}}).catch(()=>{});FC=FD.last;if(!FC)return}}
  const sc=o.querySelector('.cd-fd-b')?o.querySelector('.cd-fd-b').scrollTop:0;const af=document.activeElement&&document.activeElement.id;
  const n=C.tab==='trending'?filtered(fBase(),'',D).length:+FC.n||0;const groups=fGroups(D,FC);
  const chip=(k,v,l,c)=>`<button type="button" class="cd-chip" data-fd="${k}|${esc(v)}" aria-pressed="${D[k].has(v)}" ${!c&&!D[k].has(v)?'data-zero':''}>${esc(l)}<small>${fmtN(c)}</small></button>`;
@@ -493,10 +493,12 @@ function draw(){const el=host();if(!el||el.hidden)return;shell();syncURL();
  if(vf!==vDiscover&&vf!==vJD&&!(vf===vBrands&&C.brand))body.dataset.v='';vf(body)}
 function counts(){const set=(k,n)=>{const s=$(`[data-cnt="${k}"]`);if(s)s.textContent=n==null?'':fmtN(n)};set('discover',SUM?SUM.cards:null);set('jd',SUM?SUM.jd:null);set('trending',C.tr?TR.filter(a=>a.week===C.week).length:null);set('brands',SUM?SUM.profiled:null);set('boards',C.boards.length||null)}
 /* a grid view over a feed: render when its first batch is in; while a new sort / filter / search loads, the previous grid of the same view stays */
-function withFeed(body,view,p,title,render){const fd=getFeed(p);C.cur=fd;
+function withFeed(body,view,p,title,render,prov){const fd=getFeed(p);C.cur=fd;
  if(fd.first){body.dataset.v=view;render(fd);return fd}
  if(fd.err&&!fd.loading){head(title,'');body.dataset.v='';body.innerHTML=`<div class="cd-note"><b>Can't load ads right now.</b> The team database didn't answer (${esc(fd.err.slice(0,90))}). <button type="button" class="cd-btn y" id="cd-retry">Try again</button></div>`;$('#cd-retry').onclick=()=>{fd.err=null;draw()};return null}
  if(!fd.loading)fd.more().then(()=>{if(C.cur===fd)draw()},()=>{if(C.cur===fd)draw()});
+ /* a provisional view from what is already loaded (JD market chips: the loaded JD ads of that market) until the server answers */
+ const pv=prov&&body.dataset.v===view?prov():null;if(pv){render(pv);C.cur=fd;return null}
  if(body.dataset.v!==view){head(title,'&nbsp;');body.innerHTML=LOADER}
  return null}
 function vDiscover(body){withFeed(body,'discover',feedP('discover'),'Discover',fd=>{
@@ -528,10 +530,12 @@ function vJD(body){const mkts=['all',...WORLD.map(w=>w[0]),'JD France'];
   <div class="cd-jd-grid" id="cd-jdg"></div>
   ${show<fd.total?`<div style="display:flex;justify-content:center;margin-top:16px"><button type="button" class="pill" data-gmore>Show more (${fmtN(fd.total-show)} left)</button></div>`:''}
   <div class="note"><div><b>JD Canada isn't in the Motion feed yet.</b> Once its Meta page is added, ads here can be matched to JD Canada's library to show what Canada hasn't run.</div></div></div>`;
- grid($('#cd-jdg',body),list.slice(0,show),'jd',{cols:jdCols,render:jdCard,est:jdEst,base:fd});C.lists.jd=list;C.src.jd=fd;C.totals.jd=fd.total;
+ grid($('#cd-jdg',body),list.slice(0,show),'jd',{cols:jdCols,render:jdCard,est:jdEst,base:fd});C.lists.jd=list;C.src.jd=fd;C.totals.jd=fd.total;if(!fd.prov)C.jdLast=fd;
  body.onclick=e=>{const m=e.target.closest('[data-gmk]');if(m){C.gmk=m.dataset.gmk;C.gshow=60;draw();return}
   if(e.target.closest('[data-gmore]')){const y=scrollY;C.gshow=show+60;const go=()=>{draw();scrollTo(0,y)};if(fd.items.length<C.gshow&&!fd.done)fd.more().then(go,go);else go();return}
-  const g=e.target.closest('[data-golib]');if(g){goTag(g.dataset.golib.slice(4))}}})}
+  const g=e.target.closest('[data-golib]');if(g){goTag(g.dataset.golib.slice(4))}}},
+ ()=>{const prev=C.jdLast,gm=C.gmk||'all';if(!prev||!C.jdStats)return null;const items=prev.items.filter(a=>gm==='all'||a.mk===gm);
+  return{items,total:gm==='all'?C.jdStats.all:(C.jdStats.mk||{})[gm]||items.length,jd:C.jdStats,first:true,done:true,prov:true,more:()=>getFeed(feedP('jd')).more()}})}
 function tipHTML(text,label='How the Proven score works'){return`<details class="tip"><summary aria-label="${esc(label)}">${sv(I.info,18)}</summary><div class="tipbox" role="note">${esc(text)}</div></details>`}
 function goTag(t){closeViewer('nav');fReset();C.f.tag.add(t);fSave();if(location.hash==='#discover')draw();else location.hash='discover'}
 function vTrending(body){if(C.trErr){head('Trending','');body.innerHTML=`<div class="cd-note"><b>Can't load trending ads.</b> ${esc(C.trErr)}</div>`;return}
@@ -751,9 +755,13 @@ function drawHookRows(){const el=$('#cd-hrows');if(!el)return;const f=hkFeed();
   ${rows.length>show.length?`<div class="cd-more"><button type="button" class="cd-btn" data-hkmore>Show more (${fmtN(rows.length-show.length)} left)</button></div>`:''}`:`<div class="cd-empty">No hooks match these filters.</div>`)}
 /* CSV: UTF-8 with BOM, every field quoted */
 const HK_COLS=['ad_id','brand','market','launch_date','days_live','format','aspect','hook_text','hook_format','hook_template','onscreen_text','meta_headline','primary_text','landing_url','proven_score','ad_link','ad_library_link'];
-async function hookCSV(which){const p={...hkP(which==='all'?'all':'jd'),full:true,limit:1000};if(which==='all'){p.fmt='';p.mkt='';p.kind='';p.min=0;p.q=''}
- toast('Preparing the CSV');let rows=[],cur=null;
- try{for(;;){const r=await rpc('cd_hook_rows',{...p,cursor:cur});rows=rows.concat(r.rows||[]);if(!r.next)break;cur=r.next}}catch(e){toast('Could not download: '+e.message);return}
+async function hookCSV(which){const p={...hkP(which==='all'?'all':'jd'),full:true,limit:8000};if(which==='all'){p.fmt='';p.mkt='';p.kind='';p.min=0;p.q=''}
+ toast('Preparing the CSV');let rows=[];
+ try{let cur=null;for(;;){const r=await rpc('cd_hook_rows',{...p,cursor:cur});rows=rows.concat(r.rows||[]);if(!r.next)break;cur=r.next}
+  /* headline, primary text, landing URL, on-screen text, Ad Library link and raw aspect, read from in_ads in parallel chunks */
+  const ids=rows.map(m=>m.id),tx={},ch=[];for(let i=0;i<ids.length;i+=120)ch.push(ids.slice(i,i+120));
+  for(let i=0;i<ch.length;i+=8)await Promise.all(ch.slice(i,i+8).map(c=>apiRetry(`in_ads?select=id,headline,copy,landing,onscreen_text,ad_library,aspect&id=in.(${c.map(encodeURIComponent).join(',')})`).then(r=>(r.data||[]).forEach(x=>tx[x.id]=x))));
+  rows.forEach(m=>{const x=tx[m.id]||{};m.h=x.headline||'';m.x=x.copy||'';m.l=x.landing||'';m.ost=x.onscreen_text||'';m.lib=x.ad_library||'';m.aspect=x.aspect||m.asp||''})}catch(e){toast('Could not download: '+e.message);return}
  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';const base=location.origin+location.pathname+'#discover/ad/';
  const lines=[HK_COLS.join(',')].concat(rows.map(m=>[m.id,m.b||'Unknown brand',m.mk||MKT_L[m.market]||m.market||'',m.sd||'',m.d,m.format,m.aspect||'',m.hk||'',m.hf||'',m.ht||'',m.ost||'',m.h||'',m.x||'',m.l||'',m.ps,base+m.id,m.lib||''].map(q).join(',')));
  const blob=new Blob(['﻿'+lines.join('\r\n')+'\r\n'],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);
