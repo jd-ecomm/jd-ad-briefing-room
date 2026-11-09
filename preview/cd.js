@@ -96,10 +96,10 @@ const BATCH=48;
 /* the anon role has a 3s statement timeout, and other jobs write to in_ads; retry a busy or failed page before giving up */
 async function apiRetry(path,opt,tries=4){let e;for(let i=0;i<tries;i++){try{return await api(path,opt)}catch(x){e=x;await new Promise(r=>setTimeout(r,800*Math.pow(2,i)))}}throw e}
 async function loadTrending(){let all=[],from=0;for(;;){const r=await apiRetry('tr_ads?select=week,category,rank,brand,age,kind,video,poster,images,logo,video_s,poster_s,images_s,logo_s&order=week.desc,category.asc,rank.asc',{headers:{Range:from+'-'+(from+999)}});const j=r.data||[];all=all.concat(j);if(j.length<1000)break;from+=1000}return all}
-async function loadSaves(){try{const f=(await api('in_favs?select=email,ad_id')).data||[];C.allFavs={};C.favs=new Set();
+async function loadSaves(){try{const[fv,bd,bi]=await Promise.all([api('in_favs?select=email,ad_id'),api('in_boards?select=id,name,note,created_by,created_at&order=created_at.asc'),api('in_board_items?select=board_id,ad_id,src,added_by,created_at&order=created_at.desc')]);
+  const f=fv.data||[];C.allFavs={};C.favs=new Set();
   f.forEach(x=>{C.allFavs[x.ad_id]=(C.allFavs[x.ad_id]||0)+1;if(x.email===me())C.favs.add(x.ad_id)});
-  C.boards=(await api('in_boards?select=id,name,note,created_by,created_at&order=created_at.asc')).data||[];
-  C.items=(await api('in_board_items?select=board_id,ad_id,src,added_by,created_at&order=created_at.desc')).data||[]}catch(e){C.saveErr=e.message}}
+  C.boards=bd.data||[];C.items=bi.data||[]}catch(e){C.saveErr=e.message}}
 
 function norm(r){
  const vid=r.format==='video'||r.video||r.video_s||r.video_r2?(r.video_r2||r.video_s||r.video||null):null;
@@ -118,7 +118,9 @@ function norm(r){
  a.valts=[r.video_s,r.video].filter(u=>u&&u!==vid);
  if(!a.asp){const f=(r.formats||[]).find(f=>f.ad_id===a.id);a.asp=(f&&f.aspect)||(kind==='carousel'?'1:1':'4:5');a.est=true}
  a.lp=lpType(a.l);const om=OFFER.exec(a.h+' '+a.x);a.of=om?om[0].replace(/^./,c=>c.toUpperCase()):null;a.handle=slug(a.b)||'brand';a.age=sd?Math.round((NOW-new Date(sd+'T12:00:00'))/DAY):999;return a}
-async function rpc(fn,body,tries=3){let e;for(let i=0;i<tries;i++){try{const r=await fetch(SBU+'rpc/'+fn,{method:'POST',headers:{apikey:SBK,Authorization:'Bearer '+SBK,'Content-Type':'application/json'},body:JSON.stringify(body||{})});
+/* RPCs that take one jsonb argument get it as {p: ...} (PostgREST matches body keys to argument names) */
+const RPC_P=new Set(['cd_page','cd_facets','cd_hooks','cd_hook_rows']);
+async function rpc(fn,body,tries=3){let e;const payload=JSON.stringify(RPC_P.has(fn)?{p:body||{}}:(body||{}));for(let i=0;i<tries;i++){try{const r=await fetch(SBU+'rpc/'+fn,{method:'POST',headers:{apikey:SBK,Authorization:'Bearer '+SBK,'Content-Type':'application/json'},body:payload});
    if(!r.ok)throw new Error(r.status+' '+(await r.text()).slice(0,140));return await r.json()}catch(x){e=x;if(i<tries-1)await new Promise(z=>setTimeout(z,600*Math.pow(2,i)))}}throw e}
 /* one ad (a member of a card): the same fields as before; var / par come from the server (concept group over every released ad) */
 function mkMember(r){const a=norm(r);a.var=+r.var||1;a.par=+r.par||0;a.ps=Math.min(a.d,CAP)+a.var+a.par;a.proven=a.d>=PROVEN_DAYS;if(r.stub)a.stub=1;return a}

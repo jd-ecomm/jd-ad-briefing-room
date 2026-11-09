@@ -551,7 +551,7 @@ async function lazyChecks() {
     await page.waitForFunction(n => window.CD.C.lists.discover.length > n, n0, { timeout: 15000 }).catch(() => { }); await page.waitForTimeout(700); }
   const sc = await page.evaluate(() => { const L = window.CD.C.lists.discover; const dom = [...document.querySelectorAll('#cd-body .cd-card[data-id]')].map(c => c.dataset.id);
     return { n: L.length, vgs: L.map(a => a.vg), ids: L.map(a => a.id), dom, total: window.CD.C.totals.discover }; });
-  const rpc = async (fn, b) => (await fetch(SB_URL + 'rpc/' + fn, { method: 'POST', headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(b) })).json();
+  const rpc = async (fn, b) => (await fetch(SB_URL + 'rpc/' + fn, { method: 'POST', headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(['cd_page', 'cd_facets', 'cd_hooks', 'cd_hook_rows'].includes(fn) ? { p: b } : b) })).json();
   let want = [], cur = null; for (let k = 0; k < Math.ceil(sc.n / 48); k++) { const r = await rpc('cd_page', { ctx: 'discover', sort: 'proven', f: { ai: true }, q: '', limit: 48, cursor: cur }); want = want.concat(r.rows.map(x => x.vg)); cur = r.next; if (!cur) break; }
   const dup = sc.vgs.length - new Set(sc.vgs).size; const domDup = sc.dom.length - new Set(sc.dom).size;
   ok('lazy scroll: 3 more batches load in order (192+ cards), no duplicates, no gaps', sc.n >= 192 && !dup && !domDup && sc.vgs.every((v, i) => v === want[i]) && sc.dom.length === sc.n, JSON.stringify({ n: sc.n, dup, domDup, mismatch: sc.vgs.findIndex((v, i) => v !== want[i]), dom: sc.dom.length, total: sc.total }));
