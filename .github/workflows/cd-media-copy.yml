@@ -1,0 +1,50 @@
+name: Creative Discovery media copy
+
+# Copies English Creative Discovery ad media from Motion's Azure blobs into R2 (scripts/cd_media_copy.py).
+# Resumable: rows already copied (r2_at set) are skipped, so just dispatch again to continue.
+on:
+  workflow_dispatch:
+    inputs:
+      max_ads:
+        description: "Max ads this run (0 = all)"
+        required: false
+        default: "0"
+      workers:
+        description: "Parallel workers"
+        required: false
+        default: "8"
+      only_batch:
+        description: "Only this batch number (blank = all)"
+        required: false
+        default: ""
+
+concurrency:
+  group: cd-media-copy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ffmpeg and Python deps
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          pip install -q requests pillow
+      - name: Copy media to R2
+        env:
+          SUPABASE_URL: https://cymkcvdsxoneojfisjgk.supabase.co
+          # Public anon key (already in the Briefing Room page code); RLS limits it to in_ads select/update.
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5bWtjdmRzeG9uZW9qZmlzamdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxMTg0ODQsImV4cCI6MjEwODY5NDQ4NH0.rgRRRXCab-s5xy4ICFa_l511Gol8EMqPEjBHThnAC9I' }}
+          MAX_ADS: ${{ inputs.max_ads }}
+          WORKERS: ${{ inputs.workers }}
+          ONLY_BATCH: ${{ inputs.only_batch }}
+        run: python3 -u scripts/cd_media_copy.py
