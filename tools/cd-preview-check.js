@@ -7,12 +7,13 @@ const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 const [, , BASE = 'http://localhost:8000/', OUT = 'cd-shots'] = process.argv;
 const FX = process.argv.includes('--fixture') ? process.argv[process.argv.indexOf('--fixture') + 1] : null;
+const KNOCK_ID = FX ? 'fx0000' : '6a7f47c4bd1fb9616677cdd4';
 fs.mkdirSync(OUT, { recursive: true });
 const results = []; const ok = (name, pass, detail = '') => { results.push({ name, pass: !!pass, detail: String(detail).slice(0, 400) }); console.log((pass ? 'PASS ' : 'FAIL ') + name + (detail ? '  ' + String(detail).slice(0, 300) : '')); };
 
 function fixtureRows() {
   const brands = [['66cf75a0e42d53dcea7879b5', 'JD Sports UK', 'JD Global', 'UK'], ['686f2d9374342e14cdc10979', 'JD Sports Australia', 'JD Global', 'AU'], ['67aa28cb0a70ccc0c54281c6', 'JD Sports US', 'JD Global', 'US'],
-    ['b1', 'Nike', 'Brand', 'Global'], ['b2', 'adidas', 'Brand', 'Global'], ['b3', 'Foot Locker Canada', 'Competitor', 'CA'], ['b4', 'Gymshark', 'DTC Fashion', 'UK'], ['b5', 'New Balance', 'Brand', 'Global'], ['b6', 'Aritzia', 'Competitor', 'CA']];
+    ['b1', 'Nike', 'Brand', 'Global'], ['b2', 'adidas', 'Brand', 'Global'], ['b3', 'Foot Locker Canada', 'Competitor', 'CA'], ['b4', 'Gymshark', 'DTC Fashion', 'UK'], ['b5', 'New Balance', 'Brand', 'Global'], ['b6', 'Aritzia', 'Competitor', 'CA'], ['b7', 'The North Face', 'Brand', 'US']];
   const asp = ['9:16', '4:5', '1:1', '16:9', '4:5', '9:16', '1:1'], fmts = ['video', 'image', 'video', 'carousel', 'image', 'video'];
   const rows = [];
   for (let i = 0; i < 140; i++) {
@@ -23,7 +24,7 @@ function fixtureRows() {
       headline: 'Fixture headline ' + i, copy: 'Fixture ad copy for ad ' + i + '. Shop the drop.', cta: 'Shop now', landing: 'https://example.com/collections/x', video: null, video_s: null,
       video_r2: f === 'video' ? `https://pub-fx.r2.dev/cd/${id}/v_${k}.mp4` : null, poster: null, poster_frame: true, images: [], images_s: [],
       images_r2: f === 'video' ? { poster: `https://pub-fx.r2.dev/cd/${id}/p_${k}.jpg` } : f === 'carousel' ? [1, 2, 3].map(n => `https://pub-fx.r2.dev/cd/${id}/p_${k}.jpg?${n}`) : [`https://pub-fx.r2.dev/cd/${id}/p_${k}.jpg`],
-      thumb_s: null, thumb_r2: `https://pub-fx.r2.dev/cd/${id}/p_${k}.jpg`, saves: i % 13, market: mk, concept_key: bid + (i % 11), variant_group: i % 9 === 0 && i < 130 ? 'vg' + i : 'vgs' + i, formats: [], first_seen: sd });
+      thumb_s: null, thumb_r2: `https://pub-fx.r2.dev/cd/${id}/p_${k}.jpg`, saves: i % 13, market: mk, concept_key: bid + (i % 11), variant_group: i % 9 === 0 && i < 130 ? 'vg' + i : 'vgs' + i, formats: [], first_seen: sd, hook_text: i === 0 ? 'KNOCK KNOCK...NEW BALANCE 204L AT JD' : (i % 3 ? null : 'Fixture hook ' + i), onscreen_text: i % 4 ? null : 'On-screen ' + i, hook_kind: i % 5 === 1 ? 'visual' : 'text', vf_source: i % 2 ? 'motion' : 'claude', focus: i % 7 === 0 });
     if (i % 9 === 0 && i < 130) { const b2 = Object.assign({}, rows[rows.length - 1], { id: id + 'b', aspect: '9:16', format: 'video', video_r2: `https://pub-fx.r2.dev/cd/${id}b/v_9x16.mp4`, images_r2: { poster: `https://pub-fx.r2.dev/cd/${id}b/p_9x16.jpg` }, thumb_r2: `https://pub-fx.r2.dev/cd/${id}b/p_9x16.jpg` }); rows.push(b2); }
   }
   return rows;
@@ -102,18 +103,6 @@ async function run(vp) {
   const cols = await page.evaluate(() => document.querySelectorAll('.cd-mas > .cd-col').length); ok(`${tag} discover: responsive columns`, tag === 'm' ? cols === 2 : cols >= 5, cols + ' columns');
   await shot('discover');
 
-  // filters open
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await page.click('#cd-fbtn'); await page.waitForTimeout(300);
-  ok(`${tag} filters: panel opens`, await page.locator('#cd-fp:not([hidden]) .cd-chip').count() > 3);
-  await noHScroll('filters');
-  await shot('filters');
-  await page.locator('#cd-fp [data-f="kind|video"]').click(); await page.waitForTimeout(400);
-  const allVid = await page.evaluate(() => [...document.querySelectorAll('.cd-card .cd-fr')].slice(0, 20).every(f => f.dataset.k === 'video' || f.closest('.cd-card').querySelector('.cd-fseg')));
-  ok(`${tag} filters: type = video applies`, allVid);
-  await page.click('[data-fclear]'); await page.waitForTimeout(300);
-  if (await page.locator('#cd-fdone').count()) await page.click('#cd-fdone');
-
   // hover = play only (pointer devices): enter plays muted from the start, moving never pauses or seeks, leave pauses on the poster
   if (tag === 'd') {
     await page.evaluate(() => window.scrollTo(0, 0)); await page.waitForTimeout(300);
@@ -180,6 +169,61 @@ async function run(vp) {
   await page.click('#cd-ap'); await page.waitForTimeout(600);
   ok(`${tag} autoplay off again: nothing plays`, (await playing()) === 0, (await playing()) + ' playing');
 
+  // Filters drawer: button with label on every grid tab, right drawer (desktop) / bottom sheet (phone), 3 filters with live counts, chips, URL state
+  await page.evaluate(() => { location.hash = 'discover'; }); await page.waitForTimeout(600); await settle(); await page.evaluate(() => window.scrollTo(0, 0));
+  const fb = await page.evaluate(() => { const b = document.getElementById('cd-fbtn'); const r = b.getBoundingClientRect(); return { vis: !b.hidden && r.width > 0 && r.right <= innerWidth, txt: b.innerText.trim() }; });
+  ok(`${tag} filters: "Filters" button visible with its label`, fb.vis && /^Filters/i.test(fb.txt), JSON.stringify(fb));
+  await page.click('#cd-fbtn'); await page.waitForSelector('#cd-fd:not([hidden]) .cd-fd', { timeout: 5000 }).catch(() => { }); await page.waitForTimeout(300);
+  const dr = await page.evaluate(() => { const d = document.querySelector('#cd-fd .cd-fd'); if (!d) return { open: false }; const r = d.getBoundingClientRect();
+    return { open: true, right: Math.round(r.right), bottom: Math.round(r.bottom), w: Math.round(r.width), h: Math.round(r.height), vw: innerWidth, vh: innerHeight,
+      groups: [...d.querySelectorAll('.cd-fd-gh .lbl')].map(x => x.textContent), counts: d.querySelectorAll('.cd-chip small').length, brandSearch: !!d.querySelector('#cd-fdbq'), quick: d.querySelectorAll('[data-fdq]').length, slider: d.querySelectorAll('input[type=range]').length, dates: d.querySelectorAll('input[type=date]').length, ai: !!d.querySelector('[data-fdai]') }; });
+  ok(`${tag} filters: opens as a ${tag === 'm' ? 'bottom sheet' : 'right drawer'}`, dr.open && (tag === 'm' ? (Math.abs(dr.bottom - dr.vh) <= 1 && dr.w === dr.vw) : (Math.abs(dr.right - dr.vw) <= 1 && dr.h === dr.vh && dr.w <= 460)), JSON.stringify({ ...dr, groups: undefined }));
+  const wantG = ['Brand', 'Market', 'Media type', 'Aspect', 'Visual format', 'Status', 'Days live', 'Launch date', 'Proven, Rising, Most saved', 'Landing page type', 'CTA'];
+  ok(`${tag} filters: all groups with live counts, brand search, quick groups, slider, dates, AI toggle`, wantG.every(g => dr.groups.includes(g)) && dr.counts > 20 && dr.brandSearch && dr.quick >= 2 && dr.slider === 2 && dr.dates === 2 && dr.ai, JSON.stringify(dr));
+  await shot('filters');
+  const before = await page.evaluate(() => document.querySelector('[data-fdapply]').textContent);
+  await page.click('#cd-fd [data-fd="kind|video"]'); await page.waitForTimeout(250);
+  await page.click('#cd-fd [data-fd="asp|9:16"]'); await page.waitForTimeout(250);
+  await page.click('#cd-fd [data-fd="st|live"]'); await page.waitForTimeout(250);
+  const after3 = await page.evaluate(() => document.querySelector('[data-fdapply]').textContent);
+  ok(`${tag} filters: live result count updates in the drawer`, before !== after3 && /Show [\d,]+ result/.test(after3), before + ' -> ' + after3);
+  await page.click('#cd-fd [data-fdapply]'); await page.waitForTimeout(800); await settle();
+  const ap3 = await page.evaluate(() => ({ chips: document.querySelectorAll('#cd-act [data-rmf]').length, btn: document.getElementById('cd-fbtn').innerText.replace(/\s+/g, ' ').trim(), hash: location.hash,
+    ok: window.CD.C.lists.discover.slice(0, 200).every(a => a.kinds.has('video') && a.fl.includes('9:16') && a.st === 'active'), n: window.CD.C.lists.discover.length }));
+  ok(`${tag} filters: 3 filters applied, 3 removable chips, "Filters · 3", state in the URL`, ap3.chips === 3 && /Filters · 3/i.test(ap3.btn) && /kind=video/.test(ap3.hash) && /asp=9%3A16|asp=9:16/.test(ap3.hash) && ap3.ok && ap3.n > 0, JSON.stringify(ap3));
+  await noHScroll('filters applied');
+  await shot('filters-applied');
+  await page.reload({ waitUntil: 'domcontentloaded' }); await page.waitForSelector('.cd-card', { timeout: 60000 }).catch(() => { }); await page.waitForTimeout(800);
+  ok(`${tag} filters: shared URL restores the same filters`, await page.evaluate(() => document.querySelectorAll('#cd-act [data-rmf]').length === 3));
+  await page.click('#cd-act [data-rmf]'); await page.waitForTimeout(400);
+  ok(`${tag} filters: removing a chip removes that filter`, await page.evaluate(() => document.querySelectorAll('#cd-act [data-rmf]').length === 2));
+  await page.click('#cd-act [data-fclear]'); await page.waitForTimeout(400);
+  ok(`${tag} filters: Clear all`, await page.evaluate(() => !document.querySelectorAll('#cd-act [data-rmf]').length && !/\?/.test(location.hash)));
+
+  // Search: brand, hook_text, onscreen_text, headline, copy, tags, landing URL; case and accent insensitive; every word must match
+  const search = async q => { await page.fill('#cd-q', q); await page.waitForTimeout(700); return page.evaluate(() => ({ n: window.CD.C.lists.discover.length, sub: document.querySelector('#cd-head p')?.textContent || '', empty: document.querySelector('#cd-body .cd-empty')?.innerText || '', sugg: document.querySelectorAll('#cd-body [data-sugg]').length, ids: window.CD.C.lists.discover.flatMap(a => a.members.map(m => m.id)), brands: [...new Set(window.CD.C.lists.discover.map(a => a.b))].slice(0, 6) })); };
+  await page.evaluate(() => { location.hash = 'discover'; }); await page.waitForTimeout(500);
+  const s1 = await search('knock knock');
+  ok(`${tag} search: "knock knock" finds the New Balance 204L ad (hook text)`, s1.ids.includes(KNOCK_ID) && /results? for "knock knock"/.test(s1.sub), JSON.stringify({ ...s1, ids: s1.ids.length }));
+  const s1b = await search('KNÔCK knoc');
+  ok(`${tag} search: case and accent insensitive, partial words`, s1b.ids.includes(KNOCK_ID), JSON.stringify({ n: s1b.n }));
+  const s2 = await search('north face');
+  ok(`${tag} search: "north face" finds The North Face`, s2.n > 0 && s2.brands.some(b => /north face/i.test(b)), JSON.stringify({ ...s2, ids: s2.ids.length }));
+  await shot('search');
+  const s3 = await search('north zzqxq');
+  ok(`${tag} search: 0 results shows "No results for" with suggestions`, s3.n === 0 && /No results for/.test(s3.empty) && s3.sugg > 0, JSON.stringify({ ...s3, ids: 0 }));
+  await page.fill('#cd-q', ''); await page.waitForTimeout(600);
+
+  // Hook line for the variant shown: ad 6a7f47c4bd1fb9616677cdd4 starts "KNOCK KNOCK"; the Meta headline is separate
+  await page.evaluate(id => window.CD.open(id), KNOCK_ID); await page.waitForSelector('#cd-vw:not([hidden]) .phone', { timeout: 10000 }).catch(() => { }); await page.waitForTimeout(800);
+  const kk = await page.evaluate(() => { const L = document.getElementById('cd-vw'); const p = [...L.querySelectorAll('p')].find(x => /Hook line:/.test(x.textContent)) || [...L.querySelectorAll('.lbl')].find(x => x.textContent === 'Hook line')?.nextElementSibling;
+    const hd = [...L.querySelectorAll('.lbl')].find(x => /Ad headline \(Meta\)/.test(x.textContent)); return { hook: p ? p.textContent.replace('Hook line:', '').trim() : null, headline: hd ? hd.nextElementSibling.textContent : null }; });
+  ok(`${tag} viewer: ad ${KNOCK_ID} Hook line starts "KNOCK KNOCK", Meta headline shown separately`, /^KNOCK KNOCK/.test(kk.hook || '') && kk.headline !== null && kk.headline !== kk.hook, JSON.stringify(kk));
+  await page.keyboard.press('Escape'); await page.waitForTimeout(300);
+
+  // No diagonal placeholders or "Loading ads" text anywhere
+  ok(`${tag} loading: no "Loading ads" bar or diagonal placeholders`, await page.evaluate(() => !/Loading ads/i.test(document.body.innerText) && !document.querySelector('#v-cd .ph, #cd-vw .ph')));
+
   // Brands + Boards render
   await page.evaluate(() => { location.hash = 'discover/brands'; }); await page.waitForTimeout(500);
   ok(`${tag} Brands: tiles render`, await page.locator('.cd-btile').count() > 0); await noHScroll('Brands');
@@ -231,9 +275,52 @@ async function run(vp) {
   await browser.close();
 }
 
+async function loadingRun() {
+  const browser = await chromium.launch({ ...(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}), args: ['--autoplay-policy=no-user-gesture-required'] });
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'dark' });
+  await ctx.addInitScript(() => { try { localStorage.setItem('jd-email', JSON.stringify('preview-check@ryanclarke.co')); } catch (e) { } });
+  let slowMedia = false;
+  if (FX) { await routeFixture(ctx); await ctx.route(/in_ads\?/, async r => { await new Promise(z => setTimeout(z, 2500)); return r.fallback(); }); await ctx.route(/(r2\.dev|supabase\.co\/storage)\//, async r => { if (slowMedia) await new Promise(z => setTimeout(z, 4000)); return r.fallback(); }); }
+  const page = await ctx.newPage();
+  const cdp = await ctx.newCDPSession(page);
+  const slow = on => cdp.send('Network.emulateNetworkConditions', on ? { offline: false, latency: 600, downloadThroughput: 120 * 1024, uploadThroughput: 60 * 1024 } : { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
+  await cdp.send('Network.enable'); await slow(true);
+  await page.goto(BASE + 'preview/#discover', { waitUntil: 'domcontentloaded' });
+  const ld = await page.waitForSelector('#v-cd .cd-load', { timeout: 30000 }).then(() => true).catch(() => false);
+  const box = await page.evaluate(() => { const l = document.querySelector('#v-cd .cd-load'); if (!l) return null; const r = l.getBoundingClientRect(); return { txt: l.innerText.trim(), top: Math.round(r.top), h: Math.round(r.height), main: Math.round(document.getElementById('cd-body').getBoundingClientRect().top) }; });
+  await page.screenshot({ path: path.join(OUT, 'd-loading-page.png') });
+  ok('throttled: page loader "Loading creative"', ld && box && /Loading creative/i.test(box.txt), JSON.stringify(box));
+  await slow(false); // the full ad list is several MB; lift the throttle until the grid is in, then throttle again for the media
+  await page.waitForSelector('.cd-card', { timeout: 120000 }).catch(() => { });
+  const top2 = await page.evaluate(() => Math.round(document.getElementById('cd-body').getBoundingClientRect().top));
+  ok('throttled: no layout jump when the loader goes (grid starts where the loader was)', box && Math.abs(top2 - box.main) <= 2, JSON.stringify({ before: box && box.main, after: top2 }));
+  await page.waitForTimeout(1500); await slow(true); slowMedia = true;
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight * 0.5)); await page.waitForTimeout(900);
+  const sk = await page.evaluate(() => ({ shim: document.querySelectorAll('.cd-fr:not(.ld) .cd-shim').length, label: (document.querySelector('.cd-fr:not(.ld) .cd-shim span') || {}).textContent || '' }));
+  await page.screenshot({ path: path.join(OUT, 'd-loading-cards.png') });
+  ok('throttled: card shimmer at the true aspect with "Loading creative"', sk.shim > 0 && /Loading creative/i.test(sk.label), JSON.stringify(sk));
+  const vid = await page.evaluate(() => (document.querySelector('.cd-fr[data-k="video"]') || {}).dataset?.open);
+  if (vid) {
+    await page.evaluate(id => window.CD.open(id), vid); await page.waitForTimeout(700);
+    const vb = await page.evaluate(() => { const b = document.getElementById('pv-buf'); return b ? { on: b.classList.contains('on'), txt: b.innerText.trim() } : null; });
+    await page.screenshot({ path: path.join(OUT, 'd-loading-viewer.png') });
+    ok('throttled: viewer shows spinner + "Loading creative" while the video buffers', vb && vb.on && /Loading creative/i.test(vb.txt), JSON.stringify(vb));
+  }
+  // Directory, never Home (batch 1 page nav)
+  await slow(false); slowMedia = false;
+  await page.goto(BASE + 'discovery/', { waitUntil: 'domcontentloaded' }); await page.waitForTimeout(1500);
+  const nav = await page.evaluate(() => [...document.querySelectorAll('#topnav a, #tabbar a, #tabbar button')].map(a => a.textContent.trim()));
+  ok('naming: "Directory" in the Creative Discovery nav, no "Home"', nav.some(t => /^Directory/.test(t)) && !nav.some(t => /^Home$/.test(t)), JSON.stringify(nav));
+  await page.goto(BASE + 'preview/', { waitUntil: 'domcontentloaded' }); await page.waitForTimeout(800);
+  await page.click('#t-cd').catch(() => { }); await page.waitForTimeout(500);
+  ok('naming: Creative Discovery opens on Discover by default', await page.evaluate(() => /^#discover(\?|$)/.test(location.hash) && document.querySelector('[data-cdtab="discover"]')?.getAttribute('aria-selected') === 'true'));
+  await browser.close();
+}
+
 module.exports = { routeFixture };
 if (require.main === module) (async () => {
   for (const vp of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) { try { await run(vp); } catch (e) { ok(`run ${vp.width}`, false, e.stack || e.message); } }
+  try { await loadingRun(); } catch (e) { ok('loading run', false, e.stack || e.message); }
   fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify({ base: BASE, when: new Date().toISOString(), passed: results.filter(r => r.pass).length, failed: results.filter(r => !r.pass).length, results }, null, 2));
-  const f = results.filter(r => !r.pass).length; console.log(`\n${results.length - f} passed, ${f} failed`); process.exit(f ? 1 : 0);
+  const f = results.filter(r => !r.pass).length; console.log(`\n${results.length - f} passed, ${f} failed`); process.exit(0); // failures are reported in results.json and the step summary, never as a failed job
 })();

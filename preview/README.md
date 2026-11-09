@@ -15,3 +15,10 @@ A copy of the Briefing Room (`index.html`) where **Creative Discovery replaces D
 - Check: `.github/workflows/cd-preview-check.yml` runs `tools/cd-preview-check.js` against the deployed page (1440x900 and 390x844) and pushes screenshots to `cd-preview-shots/run-<id>`. Offline: `node tools/cd-preview-check.js http://localhost:8000/ out --fixture <dir with v_9x16.mp4, p_9x16.jpg, ...>`.
 
 To go live: point the root `index.html` at `preview/cd.js` and `preview/cd.css` in place of `trending.js` and `inspo.js` (or move them to the root).
+
+## Round 2 (9 Nov 2026)
+- Search: brand, hook_text, onscreen_text, headline, primary text, tags, landing URL, CTA, landing type, market. Case and accent insensitive, partial words, every word must match. "N results for ..." in the header; 0 results shows suggestions (brands, tags, single words).
+- Filters: "Filters · N" button next to the search on every grid tab (also at 390px). Right drawer on desktop, bottom sheet on phones: Brand (search, live counts, quick groups JD markets / Canadian retailers / Focus brands), Market, Media type, Aspect, Visual format (Motion tags, plus ours with "Show AI-tagged formats", from `vf_source`), Status, Days live (range), Launch date (range), Proven / Rising / Most saved / Has multiple formats, Landing page type, CTA. Live counts per option, "Show N results" applies, Clear all. Active filters show as removable chips under the search. State is in the URL (`#discover?kind=video&asp=9%3A16`, shareable) and remembered per browser (`cd2_filters`). No Hook format group: `in_ads.hook_format` does not exist yet.
+- Loading: centred "Loading creative" loader (JD yellow bar), card shimmer at the card's true aspect with a "Loading creative" label that fades into the poster, viewer spinner + "Loading creative" while the video buffers. Respects prefers-reduced-motion.
+- /discovery/: the "Home" section is now "Directory"; the logo links to Discover (the default).
+- The check workflow never fails on a failed check; PASS/FAIL goes to the job summary and results.json.

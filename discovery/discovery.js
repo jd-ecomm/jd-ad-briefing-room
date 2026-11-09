@@ -377,7 +377,7 @@ function growGrid(host, list, ctx, cls = "", opt = {}) {
 /* ---------- navigation ---------- */
 const NAV = [
   { k: "discover", label: "Discover", icon: "compass" },
-  { k: "directory", label: "Home", icon: "grid", long: "Home" },
+  { k: "directory", label: "Directory", icon: "grid", long: "Directory" },
   { k: "trending", label: "Trending", icon: "fire", long: "Trending Ads Weekly" },
   { k: "brands", label: "Brands", icon: "store" },
   { k: "global", label: "JD Global", icon: "globe" },

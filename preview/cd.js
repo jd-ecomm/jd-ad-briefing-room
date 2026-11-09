@@ -68,7 +68,7 @@ const I={
 const sv=(s,n=16)=>s.replace('<svg',`<svg width="${n}" height="${n}" aria-hidden="true"`);
 
 /* ---------- state ---------- */
-const C={tab:'discover',q:'',f:{kind:new Set(),asp:new Set(),brand:new Set(),tag:new Set(),mk:new Set(),cat:new Set(),status:new Set()},
+const C={tab:'discover',q:'',f:null,
  sort:{discover:'proven',jd:'proven',trending:'rank',brand:'proven',boards:'added'},brand:null,board:null,week:null,
  fmt:{},filtersOpen:false,started:false,ready:false,err:null,tr:null,trErr:null,favs:new Set(),allFavs:{},boards:[],items:[],saveErr:null,lists:{},viewer:null};
 let ROWS=[],ADS=[],BYID={},BRANDS=[],BRAND_BY={},TR=[];
@@ -90,7 +90,7 @@ function lpType(u) {
 function bucket(a){const m=/^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/.exec(a||'');if(!m||!+m[2])return null;const r=Math.log(m[1]/m[2]);let best=null,bd=9;
  [['9:16',9/16],['4:5',.8],['1:1',1],['16:9',16/9]].forEach(([k,v])=>{const d=Math.abs(r-Math.log(v));if(d<bd){bd=d;best=k}});return best}
 const ratioOf=s=>{const m=/^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/.exec(s||'');return m&&+m[2]?m[1]/m[2]:null};
-const COLS='id,brand,brand_id,brand_group,logo,logo_s,logo_r2,status,start_date,end_date,days_live,format,visual_formats,aspect,platforms,cards,headline,copy,cta,landing,video,video_s,video_r2,poster,poster_frame,images,images_s,images_r2,thumb_s,thumb_r2,saves,market,concept_key,variant_group,formats,first_seen,hook_text,onscreen_text,hook_kind';
+const COLS='id,brand,brand_id,brand_group,logo,logo_s,logo_r2,status,start_date,end_date,days_live,format,visual_formats,aspect,platforms,cards,headline,copy,cta,landing,video,video_s,video_r2,poster,poster_frame,images,images_s,images_r2,thumb_s,thumb_r2,saves,market,concept_key,variant_group,formats,first_seen,hook_text,onscreen_text,hook_kind,vf_source,focus';
 /* the anon role has a 3s statement timeout, and other jobs write to in_ads; retry a busy or failed page before giving up */
 async function apiRetry(path,opt,tries=4){let e;for(let i=0;i<tries;i++){try{return await api(path,opt)}catch(x){e=x;await new Promise(r=>setTimeout(r,800*Math.pow(2,i)))}}throw e}
 async function loadAds(){const q=`in_ads?select=${COLS}&batch=not.is.null&is_english=is.true&order=id.asc`;
@@ -115,7 +115,7 @@ function norm(r){
   logo:r.logo_r2||r.logo_s||r.logo||'',vf:r.visual_formats||[],ar:r.aspect||'',asp:bucket(r.aspect),ratio:ratioOf(r.aspect),
   pl:(r.platforms||[]).filter(p=>p&&p!=='unknown'),h:r.headline||'',x:r.copy||'',cta:r.cta||'Learn more',l:r.landing||'',sd,ed:r.end_date,d,st:r.status,
   mk:MK[r.brand_id]||null,market:r.market||null,ck:r.concept_key||('c_'+r.id),vg:r.variant_group||('vg_'+r.id),fs:r.first_seen,motion:r.saves||0,
-  poster:cleanPoster,c:r.cards||imgs.length||1,hk:r.hook_text||null,ost:r.onscreen_text||null,hkind:r.hook_kind||null};
+  poster:cleanPoster,c:r.cards||imgs.length||1,hk:r.hook_text||null,ost:r.onscreen_text||null,hkind:r.hook_kind||null,vfs:r.vf_source||null,focus:!!r.focus};
  a.alts=[r.thumb_r2,r.thumb_s,(r.images_s||[])[0],r.poster,(r.images||[])[0]].filter(u=>u&&u!==thumb);
  a.valts=[r.video_s,r.video].filter(u=>u&&u!==vid);
  if(!a.asp){const f=(r.formats||[]).find(f=>f.ad_id===a.id);a.asp=(f&&f.aspect)||(kind==='carousel'?'1:1':'4:5');a.est=true}
@@ -130,33 +130,138 @@ function buildData(rows){
    st:ms.some(m=>m.st==='active')?'active':rep.st,vf:[...new Set(ms.flatMap(m=>m.vf))],age:Math.min(...ms.map(m=>m.age)),
    sv:ms.reduce((s,m)=>s+(C.allFavs[m.id]||0),0),motion:Math.max(...ms.map(m=>m.motion))});
   it.def=fm['4:5']?'4:5':fl[0]||rep.asp;it.kinds=new Set(ms.map(m=>m.kind));
-  it.hay=[it.b,...ms.map(m=>m.h+' '+m.x),it.vf.join(' '),[...it.kinds].join(' '),it.lp,it.cta,it.g,it.mk||'',it.market||''].join(' ').toLowerCase();
+  it.vfm=[...new Set(ms.filter(m=>m.vfs==='motion').flatMap(m=>m.vf))];it.focus=ms.some(m=>m.focus);
+  it.hay=' '+nz([it.b,...ms.map(m=>[m.h,m.x,m.hk,m.ost,m.l].join(' ')),it.vf.join(' '),[...it.kinds].join(' '),it.lp,it.cta,it.g,it.mk||'',it.market||'',MKT_L[it.market]||''].join(' '))+' ';
   return it});
  BYID={};ADS.forEach(it=>{BYID[it.id]=it;it.members.forEach(m=>{if(!BYID[m.id])BYID[m.id]=it})});
  const bb={};ADS.forEach(a=>{const b=bb[a.bid]=bb[a.bid]||{b:a.b,bid:a.bid,g:a.g,logo:'',n:0,live:0,nw:0,dsum:0,proven:0,mk:a.mk,market:a.market,top:[]};
-  b.n++;if(a.st==='active')b.live++;if(a.age<=14)b.nw++;b.dsum+=a.d;if(a.proven)b.proven++;if(!b.logo&&a.logo)b.logo=a.logo;b.top.push(a)});
+  b.n++;if(a.focus)b.focus=true;if(a.st==='active')b.live++;if(a.age<=14)b.nw++;b.dsum+=a.d;if(a.proven)b.proven++;if(!b.logo&&a.logo)b.logo=a.logo;b.top.push(a)});
  BRANDS=Object.values(bb).map(b=>{b.avgd=Math.round(b.dsum/b.n);b.top.sort((x,y)=>y.ps-x.ps);b.top=b.top.slice(0,3);return b}).sort((p,q)=>q.n-p.n);
  BRAND_BY=Object.fromEntries(BRANDS.map(b=>[b.bid,b]))}
 function normTr(r,i){const imgs=(r.images_s&&r.images_s.length?r.images_s:r.images)||[];const video=r.video_s||r.video||null;
  const kind=r.kind==='video'&&video?'video':(r.kind==='carousel'||imgs.length>1?'carousel':'image');
  return{id:'tr'+i,src:'tr',b:r.brand||'Unknown brand',logo:r.logo_s||r.logo||'',kind,video,thumb:(r.poster_s||r.poster||imgs[0]||''),imgs,
   alts:[r.poster,(r.images||[])[0]].filter(Boolean),valts:[r.video].filter(u=>u&&u!==video),asp:null,ratio:null,rank:r.rank,cat:r.category,
-  age:r.age||'',week:r.week,hay:[r.brand,TRN[r.category]||r.category,kind].join(' ').toLowerCase(),fl:[],nf:0,members:[]}}
+  age:r.age||'',week:r.week,hay:' '+nz([r.brand,TRN[r.category]||r.category,kind].join(' '))+' ',fl:[],nf:0,members:[]}}
 const cur=it=>it.src==='ad'?(it.fm[C.fmt[it.id]||it.def]||it):it;
 const isSaved=it=>it.src==='ad'&&it.members.some(m=>C.favs.has(m.id));
 
 /* ---------- filtering ---------- */
 const RISING=a=>a.st==='active'&&a.age<=30;
-function filtered(base,ctx){const q=C.q.trim().toLowerCase(),F=C.f;const terms=q?q.split(/\s+/):[];
- return base.filter(a=>{if(terms.length&&!terms.every(t=>a.hay.includes(t)))return false;
-  if(F.kind.size&&!(a.kinds?[...a.kinds].some(k=>F.kind.has(k)):F.kind.has(a.kind)))return false;
-  if(a.src==='ad'){if(F.asp.size&&!a.fl.some(k=>F.asp.has(k)))return false;
-   if(ctx!=='brand'&&F.brand.size&&!F.brand.has(a.bid))return false;
-   if(F.tag.size&&!a.vf.some(v=>F.tag.has(v)))return false;
-   if(ctx==='jd'&&F.mk.size&&!F.mk.has(a.mk))return false;
-   if(F.status.has('proven')&&!a.proven)return false;if(F.status.has('rising')&&!RISING(a))return false;if(F.status.has('live')&&a.st!=='active')return false;if(F.status.has('multi')&&a.nf<2)return false}
-  else{if(F.cat.size&&!F.cat.has(a.cat))return false}
-  return true})}
+/* ---------- search (case and accent insensitive, partial words, every word must match) ---------- */
+const nz=s=>String(s??'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9%$]+/g,' ').trim();
+const qTerms=()=>nz(C.q).split(' ').filter(Boolean);
+const qMatch=(a,terms)=>!terms.length||terms.every(t=>a.hay.includes(t));
+
+/* ---------- filters: state, matching, URL and per-browser memory ---------- */
+const F0=()=>({brand:new Set(),mkt:new Set(),kind:new Set(),asp:new Set(),tag:new Set(),st:new Set(),sig:new Set(),lp:new Set(),cta:new Set(),cat:new Set(),days:null,launch:null,ai:true});
+const SETS=['brand','mkt','kind','asp','tag','st','sig','lp','cta','cat'];
+const fClone=F=>{const o=F0();SETS.forEach(k=>o[k]=new Set(F[k]));o.days=F.days?F.days.slice():null;o.launch=F.launch?F.launch.slice():null;o.ai=F.ai;return o};
+const fCount=F=>SETS.reduce((s,k)=>s+F[k].size,0)+(F.days?1:0)+(F.launch?1:0)+(F.ai?0:1);
+const MKT_L={CA:'Canada',US:'USA',UK:'UK',AU:'Australia',NZ:'New Zealand',EU:'Europe',MX:'Mexico',CL:'Chile',FR:'France',Global:'Global','n/a':'Not set'};
+const SIG_L={proven:'Proven 60+ days',rising:'Rising',saved:'Most saved (team saves)',multi:'Has multiple formats'};
+const ST_L={live:'Active',ended:'Ended'};
+const KIND_L={video:'Video',image:'Image',carousel:'Carousel'};
+function fMatch(a,F,skip){
+ if(a.src==='tr'){if(skip!=='kind'&&F.kind.size&&!F.kind.has(a.kind))return false;if(skip!=='cat'&&F.cat.size&&!F.cat.has(a.cat))return false;return true}
+ if(skip!=='brand'&&F.brand.size&&!F.brand.has(a.bid))return false;
+ if(skip!=='mkt'&&F.mkt.size&&!F.mkt.has(a.market||'n/a'))return false;
+ if(skip!=='kind'&&F.kind.size&&![...a.kinds].some(k=>F.kind.has(k)))return false;
+ if(skip!=='asp'&&F.asp.size&&!a.fl.some(k=>F.asp.has(k)))return false;
+ if(skip!=='tag'&&F.tag.size&&!(F.ai?a.vf:a.vfm).some(v=>F.tag.has(v)))return false;
+ if(skip!=='st'&&F.st.size&&!F.st.has(a.st==='active'?'live':'ended'))return false;
+ if(skip!=='sig'&&F.sig.size){for(const s of F.sig){if(s==='proven'&&!a.proven)return false;if(s==='rising'&&!RISING(a))return false;if(s==='saved'&&!(a.sv>0))return false;if(s==='multi'&&a.nf<2)return false}}
+ if(skip!=='lp'&&F.lp.size&&!F.lp.has(a.lp))return false;
+ if(skip!=='cta'&&F.cta.size&&!F.cta.has(a.cta))return false;
+ if(skip!=='days'&&F.days&&(a.d<F.days[0]||a.d>F.days[1]))return false;
+ if(skip!=='launch'&&F.launch&&(!a.sd||(F.launch[0]&&a.sd<F.launch[0])||(F.launch[1]&&a.sd>F.launch[1])))return false;
+ return true}
+function filtered(base,ctx,F=C.f){const terms=qTerms();const skip=ctx==='brand'?'brand':null;return base.filter(a=>qMatch(a,terms)&&fMatch(a,F,skip))}
+function fToQS(F){const p=new URLSearchParams();SETS.forEach(k=>{if(F[k].size)p.set(k,[...F[k]].join('~'))});if(F.days)p.set('days',F.days.join('-'));if(F.launch)p.set('launch',F.launch.map(x=>x||'').join('_'));if(!F.ai)p.set('ai','0');if(C.q.trim())p.set('q',C.q.trim());return p.toString()}
+function fFromQS(qs){const F=F0();const p=new URLSearchParams(qs);SETS.forEach(k=>{const v=p.get(k);if(v)v.split('~').filter(Boolean).forEach(x=>F[k].add(x))});
+ const d=p.get('days');if(d){const[x,y]=d.split('-').map(Number);if(isFinite(x)&&isFinite(y))F.days=[x,y]}const l=p.get('launch');if(l){const[x,y]=l.split('_');F.launch=[x||'',y||'']}
+ if(p.get('ai')==='0')F.ai=false;return{F,q:p.get('q')||''}}
+function fSave(){store.set('filters',fToQS(C.f))}
+let CD_PATH='discover';
+function syncURL(){const qs=fToQS(C.f);const want='#'+CD_PATH+(qs?'?'+qs:'');if(location.hash!==want)history.replaceState(null,'',want)}
+function fCommit(F){C.f=F;fSave();draw()}
+
+/* ---------- filters drawer (right drawer on desktop, bottom sheet on phones) ---------- */
+function fBase(){if(C.tab==='trending')return TR.filter(r=>r.week===C.week);if(C.tab==='jd')return ADS.filter(a=>a.mk&&((C.gmk||'all')==='all'||a.mk===C.gmk));if(C.tab==='brands'&&C.brand)return ADS.filter(a=>a.bid===C.brand);return ADS}
+const FD={D:null,bq:''};
+function quickGroups(){const jd=BRANDS.filter(b=>b.mk).map(b=>b.bid);const ca=BRANDS.filter(b=>b.market==='CA'&&b.g!=='JD Global'&&b.g!=='Category finds').map(b=>b.bid);const fo=BRANDS.filter(b=>b.focus).map(b=>b.bid);
+ return[['jd','JD markets',jd],['ca','Canadian retailers',ca],['focus','Focus brands',fo]].filter(g=>g[2].length)}
+function fGroups(D){const base=fBase();const terms=qTerms();const pool=g=>base.filter(a=>qMatch(a,terms)&&fMatch(a,D,g==='brand'&&C.tab==='brands'&&C.brand?'brand':g));
+ const cnt=(g,fn)=>{const p=pool(g);return v=>p.filter(a=>fn(a,v)).length};
+ if(C.tab==='trending'){const ck=cnt('kind',(a,v)=>a.kind===v),cc=cnt('cat',(a,v)=>a.cat===v);
+  return[{k:'kind',l:'Media type',opts:Object.keys(KIND_L).map(v=>[v,KIND_L[v],ck(v)])},{k:'cat',l:'Category',opts:TRC.map(([v,l])=>[v,l,cc(v)])}]}
+ const g=[];
+ if(!(C.tab==='brands'&&C.brand)){const p=pool('brand');const bc={};p.forEach(a=>bc[a.bid]=(bc[a.bid]||0)+1);
+  const opts=BRANDS.filter(b=>bc[b.bid]||D.brand.has(b.bid)).sort((x,y)=>(bc[y.bid]||0)-(bc[x.bid]||0)).map(b=>[b.bid,b.b,bc[b.bid]||0]);g.push({k:'brand',l:'Brand',opts,search:true,quick:quickGroups()})}
+ {const p=pool('mkt');const mc={};p.forEach(a=>{const m=a.market||'n/a';mc[m]=(mc[m]||0)+1});g.push({k:'mkt',l:'Market',opts:Object.keys(mc).sort((x,y)=>mc[y]-mc[x]).map(m=>[m,MKT_L[m]||m,mc[m]])})}
+ {const c=cnt('kind',(a,v)=>a.kinds.has(v));g.push({k:'kind',l:'Media type',opts:Object.keys(KIND_L).map(v=>[v,KIND_L[v],c(v)])})}
+ {const c=cnt('asp',(a,v)=>a.fl.includes(v));g.push({k:'asp',l:'Aspect',opts:ASPECTS.map(v=>[v,v,c(v)])})}
+ {const p=pool('tag');const tc={};p.forEach(a=>(D.ai?a.vf:a.vfm).forEach(v=>tc[v]=(tc[v]||0)+1));D.tag.forEach(v=>{if(!tc[v])tc[v]=0});
+  g.push({k:'tag',l:'Visual format',opts:Object.keys(tc).sort((x,y)=>tc[y]-tc[x]).slice(0,48).map(v=>[v,v,tc[v]]),ai:true})}
+ {const c=cnt('st',(a,v)=>(a.st==='active'?'live':'ended')===v);g.push({k:'st',l:'Status',opts:Object.keys(ST_L).map(v=>[v,ST_L[v],c(v)])})}
+ {const p=pool('days');const mx=Math.max(1,...p.map(a=>a.d),...ADS.map(a=>a.d));g.push({k:'days',l:'Days live',range:[0,mx]})}
+ {g.push({k:'launch',l:'Launch date',dates:true})}
+ {const c=cnt('sig',(a,v)=>v==='proven'?a.proven:v==='rising'?RISING(a):v==='saved'?a.sv>0:a.nf>=2);g.push({k:'sig',l:'Proven, Rising, Most saved',opts:Object.keys(SIG_L).map(v=>[v,SIG_L[v],c(v)])})}
+ {const p=pool('lp');const lc={};p.forEach(a=>lc[a.lp]=(lc[a.lp]||0)+1);g.push({k:'lp',l:'Landing page type',opts:Object.keys(lc).sort((x,y)=>lc[y]-lc[x]).map(v=>[v,v,lc[v]])})}
+ {const p=pool('cta');const cc={};p.forEach(a=>cc[a.cta]=(cc[a.cta]||0)+1);g.push({k:'cta',l:'CTA',opts:Object.keys(cc).sort((x,y)=>cc[y]-cc[x]).slice(0,20).map(v=>[v,v,cc[v]])})}
+ return g}
+function openFilters(){FD.D=fClone(C.f);FD.bq='';let o=$('#cd-fd');if(!o){o=document.createElement('div');o.id='cd-fd';document.body.appendChild(o);o.addEventListener('click',onFDClick);o.addEventListener('input',onFDInput);o.addEventListener('change',onFDInput)}
+ o.hidden=false;document.documentElement.style.overflow='hidden';drawFD();$('#cd-fbtn').setAttribute('aria-expanded','true');setTimeout(()=>{const x=$('#cd-fd [data-fdx]');if(x)x.focus()},30)}
+function closeFilters(){const o=$('#cd-fd');if(!o||o.hidden)return;o.hidden=true;o.innerHTML='';if(!C.viewer)document.documentElement.style.overflow='';const b=$('#cd-fbtn');if(b){b.setAttribute('aria-expanded','false');b.focus()}}
+function drawFD(){const o=$('#cd-fd'),D=FD.D;const sc=o.querySelector('.cd-fd-b')?o.querySelector('.cd-fd-b').scrollTop:0;const af=document.activeElement&&document.activeElement.id;
+ const n=filtered(fBase(),C.tab==='brands'&&C.brand?'brand':'',D).length;const groups=fGroups(D);
+ const chip=(k,v,l,c)=>`<button type="button" class="cd-chip" data-fd="${k}|${esc(v)}" aria-pressed="${D[k].has(v)}" ${!c&&!D[k].has(v)?'data-zero':''}>${esc(l)}<small>${fmtN(c)}</small></button>`;
+ o.innerHTML=`<div class="cd-fd-bg" data-fdx-bg></div><aside class="cd-fd" role="dialog" aria-modal="true" aria-label="Filters">
+  <header class="cd-fd-h"><h3 class="disp">Filters</h3><span class="cd-fd-n">${fCount(D)?fCount(D)+' active':''}</span><button type="button" class="cd-ib2" data-fdx aria-label="Close filters">${sv(I.x,20)}</button></header>
+  <div class="cd-fd-b">${groups.map(G=>{let inner='';
+   if(G.range){const v=D.days||G.range;inner=`<div class="cd-rng" data-max="${G.range[1]}"><div class="cd-rng-v"><span id="cd-dmin">${v[0]}</span> to <span id="cd-dmax">${v[1]}</span> days</div>
+     <input type="range" min="0" max="${G.range[1]}" value="${v[0]}" data-days="0" aria-label="Minimum days live"><input type="range" min="0" max="${G.range[1]}" value="${v[1]}" data-days="1" aria-label="Maximum days live"></div>`}
+   else if(G.dates){const v=D.launch||['',''];inner=`<div class="cd-dates"><label><span>From</span><input type="date" data-launch="0" value="${v[0]}"></label><label><span>To</span><input type="date" data-launch="1" value="${v[1]}"></label></div>`}
+   else{let opts=G.opts;if(G.search&&FD.bq){const q=nz(FD.bq);opts=opts.filter(o=>nz(o[1]).includes(q))}
+    inner=(G.search?`<label class="cd-q cd-fd-q">${sv(I.search,14)}<input id="cd-fdbq" type="search" placeholder="Search brands" value="${esc(FD.bq)}" aria-label="Search brands" autocomplete="off"></label>
+      <div class="cd-chips cd-fd-quick">${G.quick.map(([k,l,ids])=>{const on=ids.length&&ids.every(i=>D.brand.has(i));return`<button type="button" class="cd-chip q" data-fdq="${k}" aria-pressed="${on}">${esc(l)}<small>${ids.length}</small></button>`}).join('')}</div>`:'')
+     +(G.ai?`<label class="cd-tog"><input type="checkbox" data-fdai ${D.ai?'checked':''}><span>Show AI-tagged formats</span><small>Motion tags plus ours</small></label>`:'')
+     +`<div class="cd-chips ${opts.length>14?'cd-fd-scroll':''}">${opts.map(([v,l,c])=>chip(G.k,v,l,c)).join('')||'<span class="cd-fd-none">No matches</span>'}</div>`}
+   const act=G.range?(D.days?1:0):G.dates?(D.launch?1:0):D[G.k].size;
+   return`<section class="cd-fd-g"><div class="cd-fd-gh"><span class="lbl">${G.l}</span>${act?`<button type="button" class="cd-link" data-fdclr="${G.k}">Clear</button>`:''}</div>${inner}</section>`}).join('')}</div>
+  <footer class="cd-fd-f"><button type="button" class="cd-btn" data-fdclear>Clear all</button><button type="button" class="cd-btn y" data-fdapply>Show ${fmtN(n)} result${n===1?'':'s'}</button></footer></aside>`;
+ o.querySelector('.cd-fd-b').scrollTop=sc;if(af==='cd-fdbq'){const i=$('#cd-fdbq');i.focus();i.setSelectionRange(i.value.length,i.value.length)}}
+function onFDClick(e){const t=e.target,D=FD.D;
+ if(t.closest('[data-fdx]')||t.matches('[data-fdx-bg]')){closeFilters();return}
+ const c=t.closest('[data-fd]');if(c){const[k,v]=c.dataset.fd.split(/\|(.*)/s);D[k].has(v)?D[k].delete(v):D[k].add(v);drawFD();return}
+ const q=t.closest('[data-fdq]');if(q){const g=quickGroups().find(x=>x[0]===q.dataset.fdq);if(g){const on=g[2].every(i=>D.brand.has(i));g[2].forEach(i=>on?D.brand.delete(i):D.brand.add(i))}drawFD();return}
+ const cl=t.closest('[data-fdclr]');if(cl){const k=cl.dataset.fdclr;if(k==='days')D.days=null;else if(k==='launch')D.launch=null;else D[k].clear();drawFD();return}
+ if(t.closest('[data-fdclear]')){FD.D=F0();FD.bq='';drawFD();return}
+ if(t.closest('[data-fdapply]')){const F=FD.D;closeFilters();fCommit(F);return}}
+let fdT;
+function onFDInput(e){const t=e.target,D=FD.D;
+ if(t.id==='cd-fdbq'){FD.bq=t.value;clearTimeout(fdT);fdT=setTimeout(drawFD,120);return}
+ if(t.matches('[data-fdai]')){D.ai=t.checked;drawFD();return}
+ if(t.matches('[data-days]')){const r=t.closest('.cd-rng');const mx=+r.dataset.max;const a=$$('[data-days]',r).map(x=>+x.value);let lo=Math.min(a[0],a[1]),hi=Math.max(a[0],a[1]);
+  $('#cd-dmin').textContent=lo;$('#cd-dmax').textContent=hi;D.days=(lo===0&&hi===mx)?null:[lo,hi];if(e.type==='change')drawFD();return}
+ if(t.matches('[data-launch]')){const v=$$('[data-launch]',$('#cd-fd')).map(x=>x.value);D.launch=v[0]||v[1]?v:null;drawFD();return}}
+document.addEventListener('keydown',e=>{const o=$('#cd-fd');if(o&&!o.hidden&&e.key==='Escape'){e.stopPropagation();closeFilters()}},true);
+/* chips under the search bar: every active filter, removable */
+function activeChips(){const F=C.f,on=[];
+ SETS.forEach(k=>F[k].forEach(v=>on.push([k,v,k==='brand'?(BRAND_BY[v]||{}).b||v:k==='cat'?TRN[v]||v:k==='mkt'?MKT_L[v]||v:k==='sig'?SIG_L[v]:k==='st'?ST_L[v]:k==='kind'?KIND_L[v]:v])));
+ if(F.days)on.push(['days','',`${F.days[0]} to ${F.days[1]} days`]);if(F.launch)on.push(['launch','',`Launched ${F.launch[0]?fmtDate(F.launch[0]):'any time'} to ${F.launch[1]?fmtDate(F.launch[1]):'now'}`]);if(!F.ai)on.push(['ai','','Motion tags only']);
+ return on}
+function rmFilter(k,v){const F=fClone(C.f);if(k==='days')F.days=null;else if(k==='launch')F.launch=null;else if(k==='ai')F.ai=true;else F[k].delete(v);fCommit(F)}
+function fReset(){C.f=F0();C.q='';const q=$('#cd-q');if(q)q.value=''}
+/* zero results: suggestions from brand names, tags and single words that do match */
+function suggestHTML(base){const terms=qTerms();if(!terms.length)return'';const out=[];
+ BRANDS.filter(b=>terms.some(t=>nz(b.b).includes(t))).slice(0,4).forEach(b=>out.push(['brand',b.bid,b.b]));
+ const tags=new Set();ADS.forEach(a=>a.vf.forEach(v=>{if(terms.some(t=>nz(v).includes(t)))tags.add(v)}));[...tags].slice(0,3).forEach(v=>out.push(['tag',v,v]));
+ if(terms.length>1)terms.forEach(t=>{const n=base.filter(a=>a.hay.includes(t)).length;if(n)out.push(['q',t,`"${t}" (${fmtN(n)})`])});
+ return out.length?`<div class="cd-sugg"><span class="lbl">Try</span>${out.slice(0,8).map(([k,v,l])=>`<button type="button" class="cd-chip" data-sugg="${k}|${esc(v)}">${esc(l)}</button>`).join('')}</div>`:''}
+function emptyHTML(base){const q=C.q.trim();return`<div class="cd-empty"><b>${q?`No results for "${esc(q)}"`:'No ads match.'}</b> ${fCount(C.f)?'Try clearing a filter. ':''}${q?'Check the spelling or use fewer words.':''}${suggestHTML(base)}</div>`}
+function resultLine(n,total,extra){const q=C.q.trim();return q?`${fmtN(n)} result${n===1?'':'s'} for "${esc(q)}"${extra?' · '+extra:''}`:''}
+C.f=F0();{const r=fFromQS(store.get('filters','')||'');C.f=r.F;C.q=r.q}
 function sorted(arr,mode){const sc={proven:a=>a.ps,rising:a=>a.var*4+a.par*3+Math.max(0,30-a.age)*2+(a.st==='active'?5:0),newest:a=>-a.age*1000+(a.ps||0),
   saved:a=>a.sv*1000+a.motion+a.ps/1000,longest:a=>a.d*1000+a.ps,rank:a=>-a.rank,added:a=>0}[mode]||(a=>a.ps);
  if(mode==='newest'&&arr[0]&&arr[0].src==='tr')return arr.slice().sort((a,b)=>(b.week||'').localeCompare(a.week||'')||a.rank-b.rank);
@@ -173,11 +278,11 @@ function badgeHTML(it,ctx){if(it.src==='tr')return`<span class="cd-badge">#${it.
 function frameHTML(it,ctx){const m=cur(it);const r=m.ratio||ratioOf(m.asp)||(it.src==='tr'?null:.8);
  const ar=r?`style="aspect-ratio:${r.toFixed(4)}"`:'style="aspect-ratio:.8"';
  const alts=esc(JSON.stringify(m.alts||[]));
- const media=m.thumb?`<img class="cd-po" alt="${esc(it.b)} ${kindLbl(m.kind).toLowerCase()} ad" loading="lazy" decoding="async" src="${esc(m.thumb)}" data-alts="${alts}">`
+ const media=m.thumb?`<span class="cd-shim" aria-hidden="true"><span>Loading creative</span></span><img class="cd-po" alt="${esc(it.b)} ${kindLbl(m.kind).toLowerCase()} ad" loading="lazy" decoding="async" src="${esc(m.thumb)}" data-alts="${alts}">`
   :(m.kind==='video'?`<span class="cd-nopo">${sv(I.play,22)}</span>`:`<span class="cd-nopo">${sv(I.img,22)}</span>`);
  const vsrc=m.kind==='video'&&m.video?` data-v="${esc(m.video)}" data-valts="${esc(JSON.stringify(m.valts||[]))}"`:'';
  const car=m.kind==='carousel'&&m.imgs.length>1?`<span class="cd-cnav"><button type="button" data-cs="-1" aria-label="Previous card">${sv(I.chevL,14)}</button><span>1/${m.imgs.length}</span><button type="button" data-cs="1" aria-label="Next card">${sv(I.chevR,14)}</button></span>`:'';
- return`<div class="cd-fr${r?'':' unk'}" ${ar} data-open="${esc(it.id)}" data-ctx="${ctx}" role="button" tabindex="0" aria-label="Open ${esc(it.b)} ad"${vsrc} data-k="${m.kind}">${media}
+ return`<div class="cd-fr${r?'':' unk'}${m.thumb?'':' ld'}" ${ar} data-open="${esc(it.id)}" data-ctx="${ctx}" role="button" tabindex="0" aria-label="Open ${esc(it.b)} ad"${vsrc} data-k="${m.kind}">${media}
   ${badgeHTML(it,ctx)}${m.kind==='video'?`<span class="cd-kind"><span class="cd-dur"></span></span><i class="cd-prog"><b></b></i>`:''}${car}</div>`}
 function card(it,ctx){const m=cur(it);const saved=isSaved(it);
  const fseg=it.nf>=2?`<div class="cd-fseg" role="group" aria-label="Format">${it.fl.map(k=>`<button type="button" data-fmt="${esc(it.id)}|${k}" aria-pressed="${k===m.asp}">${k}</button>`).join('')}</div>`:'';
@@ -193,7 +298,7 @@ const fmtWeek=w=>w?'Week of '+new Date(w+'T12:00').toLocaleDateString('en-CA',{d
 /* ---------- masonry grid (shortest column first, true aspect heights, grows on scroll) ---------- */
 const colsFor=w=>w<600?2:w<900?3:w<1200?4:w<1600?5:6;
 function grid(host,list,ctx,opt={}){C.lists[ctx]=list;const CF=opt.cols||colsFor,RN=opt.render||card,EST=opt.est||((it,r)=>1/r+.42+(it.nf>=2?.12:0));
- host.innerHTML=list.length?`<div class="cd-mas"></div><div class="cd-sent" aria-hidden="true"></div>`:`<div class="cd-empty">No ads match. Try clearing a filter or the search.</div>`;
+ host.innerHTML=list.length?`<div class="cd-mas"></div><div class="cd-sent" aria-hidden="true"></div>`:emptyHTML(opt.base||ADS);
  if(!list.length)return;const mas=$('.cd-mas',host),sent=$('.cd-sent',host);let n=0,cols=[],hs=[];
  const build=()=>{const c=CF(host.clientWidth||window.innerWidth);mas.style.setProperty('--cols',c);mas.innerHTML='';cols=[];hs=[];
   apReset();for(let i=0;i<c;i++){const d=document.createElement('div');d.className='cd-col';mas.appendChild(d);cols.push(d);hs.push(0)}const k=n;n=0;add(Math.max(k,CHUNK))};
@@ -206,9 +311,9 @@ function grid(host,list,ctx,opt={}){C.lists[ctx]=list;const CF=opt.cols||colsFor
  if(host._ro)host._ro.disconnect();host._ro=new ResizeObserver(()=>{const c=CF(host.clientWidth);if(c!==host._cols){host._cols=c;build()}});host._ro.observe(host)}
 
 /* fit every frame to the media's real shape once it loads, so nothing is cropped or letterboxed */
-document.addEventListener('load',e=>{const el=e.target;if(!(el instanceof HTMLImageElement)||!el.classList.contains('cd-po'))return;fitFrame(el.closest('.cd-fr'),el.naturalWidth,el.naturalHeight)},true);
+document.addEventListener('load',e=>{const el=e.target;if(!(el instanceof HTMLImageElement)||!el.classList.contains('cd-po'))return;const fr=el.closest('.cd-fr');fitFrame(fr,el.naturalWidth,el.naturalHeight);if(fr)fr.classList.add('ld')},true);
 document.addEventListener('error',e=>{const el=e.target;
- if(el instanceof HTMLImageElement&&el.dataset.alts){let a=[];try{a=JSON.parse(el.dataset.alts)}catch(x){}const nx=a.shift();el.dataset.alts=JSON.stringify(a);if(nx)el.src=nx;else{el.replaceWith(Object.assign(document.createElement('span'),{className:'cd-nopo',innerHTML:sv(I.img,22)}))}}
+ if(el instanceof HTMLImageElement&&el.dataset.alts){let a=[];try{a=JSON.parse(el.dataset.alts)}catch(x){}const nx=a.shift();el.dataset.alts=JSON.stringify(a);if(nx)el.src=nx;else{const fr=el.closest('.cd-fr');if(fr)fr.classList.add('ld');el.replaceWith(Object.assign(document.createElement('span'),{className:'cd-nopo',innerHTML:sv(I.img,22)}))}}
  if(el instanceof HTMLVideoElement&&el.dataset.valts){let a=[];try{a=JSON.parse(el.dataset.valts)}catch(x){}const nx=a.shift();el.dataset.valts=JSON.stringify(a);if(nx){el.src=nx}}},true);
 function fitFrame(fr,w,h){if(!fr||!w||!h)return;const r=w/h;const cur=parseFloat(fr.style.aspectRatio)||0;if(Math.abs(cur-r)/r>.005)fr.style.aspectRatio=r.toFixed(4);fr.classList.remove('unk');fr.dataset.nat=r.toFixed(4);const jm=fr.closest('.cd-jc-m');if(jm)jm.style.setProperty('--r',r.toFixed(4))}
 
@@ -260,16 +365,15 @@ function shell(){const el=host();if(el.dataset.built)return;el.dataset.built=1;
   <div class="cd-tabs" role="tablist" aria-label="Creative Discovery">${TABS.map(([k,l])=>`<a role="tab" href="#discover${k==='discover'?'':'/'+k}" data-cdtab="${k}" aria-selected="false">${l}<small data-cnt="${k}"></small></a>`).join('')}</div>
   <div class="cd-tools">
    <label class="cd-q">${sv(I.search,15)}<input id="cd-q" type="search" placeholder="Search brands, copy, tags" aria-label="Search Creative Discovery" autocomplete="off"></label>
-   <button type="button" class="cd-btn" id="cd-fbtn" aria-expanded="false" aria-controls="cd-fp">${sv(I.filter,15)}<span>Filters</span><b id="cd-fcount" hidden></b></button>
+   <button type="button" class="cd-btn cd-fb" id="cd-fbtn" aria-expanded="false" aria-haspopup="dialog">${sv(I.filter,15)}<span class="cd-fl">Filters<em id="cd-fcount" hidden></em></span></button>
    <label class="cd-sort"><span class="lbl">Sort</span><select id="cd-sort" aria-label="Sort"></select></label>
    <button type="button" class="cd-btn cd-ap" id="cd-ap" aria-pressed="${AP}">${sv(I.play,13)}<span>Autoplay</span><i class="cd-sw" aria-hidden="true"></i></button>
   </div></div>
-  <div class="cd-fp wrap" id="cd-fp" hidden></div>
   <div class="cd-act wrap" id="cd-act" hidden></div>
  </div>
  <div class="wrap cd-main"><div class="cd-head" id="cd-head"></div><div id="cd-body"></div></div></div>`;
- const q=$('#cd-q',el);let qt;q.oninput=()=>{clearTimeout(qt);qt=setTimeout(()=>{C.q=q.value;draw()},180)};
- $('#cd-fbtn',el).onclick=()=>{C.filtersOpen=!C.filtersOpen;drawFilters()};
+ const q=$('#cd-q',el);let qt;q.value=C.q;q.oninput=()=>{clearTimeout(qt);qt=setTimeout(()=>{C.q=q.value;fSave();draw()},180)};
+ $('#cd-fbtn',el).onclick=openFilters;
  $('#cd-sort',el).onchange=e=>{C.sort[sortKey()]=e.target.value;draw()};
  const apb=$('#cd-ap',el);apb.onclick=()=>apToggle(!AP);apToggle(AP);
  el.addEventListener('click',onClick);
@@ -280,49 +384,39 @@ function onClick(e){const t=e.target;
  const sb=t.closest('[data-save]');if(sb){toggleSave(sb.dataset.save);return}
  const fb=t.closest('[data-fmt]');if(fb){const[id,k]=fb.dataset.fmt.split('|');C.fmt[id]=k;const art=fb.closest('.cd-card');const it=BYID[id];if(art&&it){const ctx=art.querySelector('.cd-fr').dataset.ctx;const t2=document.createElement('template');t2.innerHTML=ctx==='jd'?jdCard(it,ctx):card(it,ctx);const nw=t2.content.firstElementChild;art.replaceWith(nw);apWatch(nw);apSync()}return}
  const fr=t.closest('.cd-fr');if(fr){openViewer(fr.dataset.open,fr.dataset.ctx);return}
- const fc=t.closest('[data-f]');if(fc){const[g,v]=fc.dataset.f.split('|');const s=C.f[g];s.has(v)?s.delete(v):s.add(v);draw();return}
- if(t.closest('[data-fclear]')){Object.values(C.f).forEach(s=>s.clear());C.q='';$('#cd-q').value='';draw();return}
+ const rf=t.closest('[data-rmf]');if(rf){const[g,v]=rf.dataset.rmf.split(/\|(.*)/s);rmFilter(g,v||'');return}
+ if(t.closest('[data-fclear]')){fReset();fSave();draw();return}
+ const sg=t.closest('[data-sugg]');if(sg){const[k,v]=sg.dataset.sugg.split(/\|(.*)/s);if(k==='q'){C.q=v;$('#cd-q').value=v;draw()}else{const F=fClone(C.f);F[k].add(v);C.q='';$('#cd-q').value='';fCommit(F)}return}
  const bd=t.closest('[data-bd]');if(bd){location.hash='discover/boards/'+bd.dataset.bd;return}
  if(t.closest('[data-newboard]')){newBoard();return}
  const rm=t.closest('[data-rmb]');if(rm){e.preventDefault();removeFromBoard(rm.dataset.rmb);return}}
 function stepCarousel(b){const fr=b.closest('.cd-fr'),it=BYID[fr.dataset.open]||C.trBy[fr.dataset.open];const m=cur(it);const n=m.imgs.length;
  const i=((+fr.dataset.ci||0)+(+b.dataset.cs)+n)%n;fr.dataset.ci=i;const img=$('img.cd-po',fr);if(img)img.src=m.imgs[i];$('.cd-cnav span',fr).textContent=`${i+1}/${n}`}
 
-/* ---------- filters ---------- */
-function fGroups(){const tab=C.tab;const base=tab==='trending'?TR:tab==='jd'?ADS.filter(a=>a.mk):ADS;const g=[];
- const cnt=(fn)=>base.filter(fn).length;
- g.push(['kind','Type',[['video','Video'],['image','Image'],['carousel','Carousel']].map(([k,l])=>[k,l,cnt(a=>a.kinds?a.kinds.has(k):a.kind===k)])]);
- if(tab==='trending'){g.push(['cat','Category',TRC.map(([k,l])=>[k,l,cnt(a=>a.cat===k)])]);return g}
- g.push(['asp','Aspect',ASPECTS.map(k=>[k,k,cnt(a=>a.fl.includes(k))])]);
- g.push(['status','Status',[['proven','Proven 60+ days'],['rising','Rising'],['live','Active now'],['multi','2+ formats']].map(([k,l])=>[k,l,cnt(a=>k==='proven'?a.proven:k==='rising'?RISING(a):k==='live'?a.st==='active':a.nf>=2)])]);
- if(tab==='jd'){const mk={};base.forEach(a=>mk[a.mk]=(mk[a.mk]||0)+1);g.push(['mk','Market',Object.entries(mk).sort((p,q)=>q[1]-p[1]).map(([k,n])=>[k,k,n])])}
- else if(!(tab==='brands'&&C.brand)){g.push(['brand','Brand',BRANDS.slice(0,40).map(b=>[b.bid,b.b,b.n])])}
- const tg={};base.forEach(a=>a.vf.forEach(v=>tg[v]=(tg[v]||0)+1));g.push(['tag','Tags',Object.entries(tg).sort((p,q)=>q[1]-p[1]).slice(0,36).map(([k,n])=>[k,k,n])]);
- return g}
-function drawFilters(){const fp=$('#cd-fp'),btn=$('#cd-fbtn'),act=$('#cd-act');const usable=C.ready&&C.tab!=='boards'&&C.tab!=='jd'&&!(C.tab==='brands'&&!C.brand);
+/* ---------- filter button, active chips and sort ---------- */
+function drawFilters(){const btn=$('#cd-fbtn'),act=$('#cd-act');const usable=C.ready&&C.tab!=='boards'&&!(C.tab==='brands'&&!C.brand);
  btn.hidden=!usable;$('.cd-q').hidden=C.tab==='boards';$('#cd-ap').hidden=!C.ready||(C.tab==='brands'&&!C.brand);
- const n=Object.values(C.f).reduce((s,x)=>s+x.size,0);const fc=$('#cd-fcount');fc.hidden=!n;fc.textContent=n;
- fp.hidden=!(usable&&C.filtersOpen);btn.setAttribute('aria-expanded',!fp.hidden);
- if(!fp.hidden)fp.innerHTML=fGroups().map(([g,l,opts])=>`<div class="cd-fg ${opts.length>8?'wide':''}"><span class="lbl">${l}</span><div class="cd-chips">${opts.map(([v,lab,c])=>`<button type="button" class="cd-chip" data-f="${g}|${esc(v)}" aria-pressed="${C.f[g].has(v)}">${esc(lab)}<small>${fmtN(c)}</small></button>`).join('')}</div></div>`).join('')+`<div class="cd-fg end"><button type="button" class="cd-btn" data-fclear>Clear all</button><button type="button" class="cd-btn y" id="cd-fdone">Done</button></div>`;
- const d=$('#cd-fdone');if(d)d.onclick=()=>{C.filtersOpen=false;drawFilters()};
- const on=[];Object.entries(C.f).forEach(([g,s])=>s.forEach(v=>on.push([g,v,g==='brand'?(BRAND_BY[v]||{}).b||v:g==='cat'?TRN[v]||v:g==='status'?{proven:'Proven',rising:'Rising',live:'Active',multi:'2+ formats'}[v]:v])));
- act.hidden=!usable||!on.length;act.innerHTML=on.map(([g,v,l])=>`<button type="button" class="cd-chip on" data-f="${g}|${esc(v)}" aria-label="Remove filter ${esc(l)}">${esc(l)} ${sv(I.x,12)}</button>`).join('')+(on.length?`<button type="button" class="cd-link" data-fclear>Clear all</button>`:'');
+ const n=fCount(C.f);const fc=$('#cd-fcount');fc.hidden=!n;fc.textContent=n?' · '+n:'';btn.setAttribute('aria-label',n?`Filters, ${n} active`:'Filters');
+ const on=usable?activeChips():[];
+ act.hidden=!on.length;act.innerHTML=on.map(([g,v,l])=>`<button type="button" class="cd-chip on" data-rmf="${g}|${esc(v)}" aria-label="Remove filter ${esc(l)}">${esc(l)} ${sv(I.x,12)}</button>`).join('')+(on.length?`<button type="button" class="cd-link" data-fclear>Clear all</button>`:'');
  const s=$('#cd-sort'),k=sortKey();s.closest('.cd-sort').hidden=!k||!C.ready;if(k){s.innerHTML=SORTS[k].map(([v,l])=>`<option value="${v}" ${C.sort[k]===v?'selected':''}>${l}</option>`).join('')}}
 
 /* ---------- views ---------- */
+const LOADER=`<div class="cd-load" role="status" aria-live="polite"><i class="cd-load-mk" aria-hidden="true"><b></b></i><span>Loading creative</span></div>`;
+
 function head(title,sub,extra=''){$('#cd-head').innerHTML=`<div class="cd-h1"><div><h2 class="disp">${title}</h2><p>${sub}</p></div>${extra}</div>`}
-function draw(){const el=host();if(!el||el.hidden)return;shell();
+function draw(){const el=host();if(!el||el.hidden)return;shell();syncURL();
  $$('[data-cdtab]',el).forEach(a=>{const on=a.dataset.cdtab===C.tab;a.setAttribute('aria-selected',on);a.classList.toggle('on',on)});
  drawFilters();const body=$('#cd-body');
  if(C.err){head('Creative Discovery','');body.innerHTML=`<div class="cd-note"><b>Can't load ads right now.</b> The team database didn't answer (${esc(C.err.slice(0,90))}). <button type="button" class="cd-btn y" id="cd-retry">Try again</button></div>`;$('#cd-retry').onclick=()=>{C.err=null;C.started=false;start()};return}
- if(!C.ready){head('Creative Discovery','Loading ads…');body.innerHTML=`<div class="cd-skel">${Array.from({length:10},(_,i)=>`<i style="aspect-ratio:${[.5625,.8,1,.8,.5625][i%5]}"></i>`).join('')}</div>`;return}
+ if(!C.ready){const T={discover:'Discover',jd:'JD Global',trending:'Trending',brands:'Brands',boards:'Boards'};head(T[C.tab]||'Discover','&nbsp;');body.innerHTML=LOADER;return}
  ({discover:vDiscover,jd:vJD,trending:vTrending,brands:vBrands,boards:vBoards}[C.tab]||vDiscover)(body)}
 function counts(){const set=(k,n)=>{const s=$(`[data-cnt="${k}"]`);if(s)s.textContent=n==null?'':fmtN(n)};set('discover',ADS.length);set('jd',ADS.filter(a=>a.mk).length);set('trending',C.tr?TR.filter(a=>a.week===C.week).length:null);set('brands',BRANDS.filter(b=>b.n>=3).length);set('boards',C.boards.length||null)}
 /* Discover mixes brands: each brand's best ad first, then round-robin, so no single brand fills the screen */
 function mixBrands(arr){const by=new Map();arr.forEach(a=>{const k=a.bid||a.b;if(!by.has(k))by.set(k,[]);by.get(k).push(a)});const qs=[...by.values()],out=[];
  while(out.length<arr.length)for(const q of qs)if(q.length)out.push(q.shift());return out}
 function vDiscover(body){let list=sorted(filtered(ADS,'discover'),C.sort.discover);if(C.sort.discover==='proven'&&!C.f.brand.size)list=mixBrands(list);
- head('Discover',`${fmtN(list.length)} of ${fmtN(ADS.length)} ads from ${fmtN(BRANDS.length)} brands. ${FINE.matches?'Hover a video to preview it. Click to open.':'Tap any ad to open it.'}`);
+ head('Discover',resultLine(list.length)||`${fmtN(list.length)} of ${fmtN(ADS.length)} ads from ${fmtN(BRANDS.length)} brands. ${FINE.matches?'Hover a video to preview it. Click to open.':'Tap any ad to open it.'}`);
  grid(body,list,'discover')}
 /* JD tab = the JD Global section from /discovery/ (same stats, market chips, Proven sort, Show more and note).
    The only change: each ad is a larger card (2 per row on desktop, 1 on phones) with the creative uncropped. */
@@ -336,11 +430,11 @@ function jdCard(a,ctx){const m=cur(a);const saved=isSaved(a);const r=m.ratio||ra
 const jdCols=w=>w<760?1:2;
 const jdEst=(it,r)=>{const one=(host()&&host().clientWidth||1200)<760;return one?Math.min(1/r,1.25)+.45:Math.max(.62,Math.min(440,400/r)/620)+.04};
 function vJD(body){const mkts=['all',...WORLD.map(w=>w[0]),'JD France'];
- const terms=C.q.trim().toLowerCase().split(/\s+/).filter(Boolean);const all=ADS.filter(a=>a.mk&&terms.every(t=>a.hay.includes(t)));const gm=C.gmk||'all';
+ const all=filtered(ADS.filter(a=>a.mk),'jd');const gm=C.gmk||'all';
  const list=all.filter(a=>gm==='all'||a.mk===gm).sort((a,b)=>b.ps-a.ps);
  const fmt={};all.forEach(a=>a.vf.forEach(v=>fmt[v]=(fmt[v]||0)+1));const live=all.filter(a=>a.st==='active').length;
  const show=Math.min(list.length,C.gshow||60);
- head(`JD Global <span class="cd-dv">${tipHTML(PROVEN_TIP)}</span>`,`What JD UK, US, Australia, New Zealand and Finish Line run, sorted by Proven score. Ideas to bring to JD Canada.`);
+ head(`JD Global <span class="cd-dv">${tipHTML(PROVEN_TIP)}</span>`,resultLine(list.length)||`What JD UK, US, Australia, New Zealand and Finish Line run, sorted by Proven score. Ideas to bring to JD Canada.`);
  body.innerHTML=`<div class="cd-dv cd-jd">
   <div class="two three cd-jd-stats">
    <div class="panel"><div class="lbl">Ads from sister banners</div><div class="display num" style="font-size:52px;margin-top:6px">${fmtN(all.length)}</div><div style="color:var(--t3);font-size:12.5px">${fmtN(live)} live now · ${all.filter(a=>a.proven).length} Proven</div></div>
@@ -351,20 +445,20 @@ function vJD(body){const mkts=['all',...WORLD.map(w=>w[0]),'JD France'];
   <div class="cd-jd-grid" id="cd-jdg"></div>
   ${show<list.length?`<div style="display:flex;justify-content:center;margin-top:16px"><button type="button" class="pill" data-gmore>Show more (${fmtN(list.length-show)} left)</button></div>`:''}
   <div class="note"><div><b>JD Canada isn't in the Motion feed yet.</b> Once its Meta page is added, ads here can be matched to JD Canada's library to show what Canada hasn't run.</div></div></div>`;
- grid($('#cd-jdg',body),list.slice(0,show),'jd',{cols:jdCols,render:jdCard,est:jdEst});C.lists.jd=list;
+ grid($('#cd-jdg',body),list.slice(0,show),'jd',{cols:jdCols,render:jdCard,est:jdEst,base:ADS.filter(a=>a.mk)});C.lists.jd=list;
  body.onclick=e=>{const m=e.target.closest('[data-gmk]');if(m){C.gmk=m.dataset.gmk;C.gshow=60;draw();return}
   if(e.target.closest('[data-gmore]')){const y=scrollY;C.gshow=show+60;draw();scrollTo(0,y);return}
   const g=e.target.closest('[data-golib]');if(g){goTag(g.dataset.golib.slice(4))}}}
 function tipHTML(text,label='How the Proven score works'){return`<details class="tip"><summary aria-label="${esc(label)}">${sv(I.info,18)}</summary><div class="tipbox" role="note">${esc(text)}</div></details>`}
-function goTag(t){closeViewer();Object.values(C.f).forEach(x=>x.clear());C.q='';const q=$('#cd-q');if(q)q.value='';C.f.tag.add(t);if(location.hash==='#discover')draw();else location.hash='discover'}
+function goTag(t){closeViewer();fReset();C.f.tag.add(t);fSave();if(location.hash==='#discover')draw();else location.hash='discover'}
 function vTrending(body){if(C.trErr){head('Trending','');body.innerHTML=`<div class="cd-note"><b>Can't load trending ads.</b> ${esc(C.trErr)}</div>`;return}
- if(!C.tr){head('Trending','Loading trending ads…');body.innerHTML='';return}
+ if(!C.tr){head('Trending','&nbsp;');body.innerHTML=LOADER;return}
  const weeks=[...new Set(TR.map(r=>r.week))];if(!C.week)C.week=weeks[0];
  const list=sorted(filtered(TR.filter(r=>r.week===C.week),'trending'),C.sort.trending);
- head('Trending',`The top ads each week in the categories closest to JD, ranked by Runneth community saves. Badge = rank in its category.`,
+ head('Trending',resultLine(list.length)||`The top ads each week in the categories closest to JD, ranked by Runneth community saves. Badge = rank in its category.`,
   `<label class="cd-sel"><span class="lbl">Week</span><select id="cd-week" aria-label="Week">${weeks.map(w=>`<option value="${w}" ${w===C.week?'selected':''}>${esc(fmtWeek(w))}</option>`).join('')}</select></label>`);
  const ws=$('#cd-week');if(ws)ws.onchange=()=>{C.week=ws.value;draw()};
- grid(body,list,'trending')}
+ grid(body,list,'trending',{base:TR})}
 function vBrands(body){if(C.brand){const b=BRAND_BY[C.brand];if(!b){location.hash='discover/brands';return}
   const list=sorted(filtered(ADS.filter(a=>a.bid===b.bid),'brand'),C.sort.brand);
   $('#cd-head').innerHTML=`<a class="cd-link back" href="#discover/brands">${sv(I.back,14)} All brands</a><div class="cd-bh">${logoHTML(b.b,b.logo,'cd-logo lg')}<div><h2 class="disp">${esc(b.b)}</h2><p>${esc(b.g==='JD Global'?'JD Group':b.g)}${b.market?' · '+esc(b.market):''} · ${b.n} ads · ${b.live} active · ${b.proven} proven · ${b.avgd} day average run</p></div></div>`;
@@ -421,7 +515,8 @@ const arCss=b=>({'9:16':'9/16','4:5':'4/5','1:1':'1/1','16:9':'16/9'})[b]||'4/5'
 const plFor=(k,pl)=>k==='9:16'?(pl==='stories'?'stories':'reels'):'feed';
 const LIKES=new Set();
 const vAv=m=>`<span class="av">${esc(initials(m.b))}${m.logo?`<img alt="" src="${esc(m.logo)}" onerror="this.remove()">`:''}</span>`;
-function vPh(a,small){return`<div class="ph" aria-hidden="true"><div class="pht">${esc(a.h||(a.x||'').slice(0,60)||a.b)}</div><div class="phb"><i>${esc(initials(a.b))}</i><span>${small?'':esc(a.b)+' · '}${a.kind} ${esc(a.asp||'')}</span></div></div>`}
+function vPh(a,small){return`<div class="cd-shim" aria-hidden="true">${small?'':'<span>Loading creative</span>'}</div>`}
+const BUF=`<div class="cd-buf on" id="pv-buf" role="status"><i aria-hidden="true"></i><span>Loading creative</span></div>`;
 function vVid(m,{id='',autoplay=false,t=1,still=false}={}){const src=esc(m.video)+'#t='+t;
  return`<video ${id?`id="${id}"`:''} muted playsinline loop preload="metadata" ${(m.poster||m.thumb)?`poster="${esc(m.poster||m.thumb)}"`:''} ${still?'data-still':''} data-valts="${esc(JSON.stringify(m.valts||[]))}" ${autoplay?'autoplay':''} src="${src}"></video>`}
 function vMedia(m,opt={}){if(m.kind==='video'&&m.video)return vVid(m,opt);
@@ -432,16 +527,16 @@ function igPreview(m,pl){const media=vMedia(m,{id:'pv-video',autoplay:true,t:.1}
  if(pl==='feed')return`<div class="phone" data-pl="feed">${SBAR}<div class="f-app">
    <div class="f-nav"><span class="wm">Feed</span><span class="r">${I.heart}${I.send}</span></div>
    <div class="f-post"><div class="f-head">${av}<div class="h"><b>${handle}</b><span>Sponsored</span></div>${I.more}</div>
-    <div class="f-media ig-media" style="aspect-ratio:${arCss(m.asp==='9:16'?'4:5':m.asp)}">${vPh(m)}${media}${m.kind==='video'?`<div class="igprog"><i id="pv-prog"></i></div>`:''}</div>
+    <div class="f-media ig-media" style="aspect-ratio:${arCss(m.asp==='9:16'?'4:5':m.asp)}">${vPh(m)}${media}${m.kind==='video'?BUF:''}${m.kind==='video'?`<div class="igprog"><i id="pv-prog"></i></div>`:''}</div>
     <div class="f-cta">${cta}${I.chevR}</div>
     <div class="f-acts">${I.heart}${I.comment}${I.send}<span class="sv">${I.bm}</span></div>
     <div class="f-txt">${capHTML(m)}</div></div>
    <div class="f-tabs">${I.homeig}${I.search}${I.reels}${I.shop}${I.user}</div></div></div>`;
- if(pl==='stories')return`<div class="phone" data-pl="stories">${SBAR}<div class="ig-wrap"><div class="ig-media">${vPh(m)}${media}</div><div class="ig-shade t"></div><div class="ig-shade"></div>
+ if(pl==='stories')return`<div class="phone" data-pl="stories">${SBAR}<div class="ig-wrap"><div class="ig-media">${vPh(m)}${media}${m.kind==='video'?BUF:''}</div><div class="ig-shade t"></div><div class="ig-shade"></div>
    <div class="s-bars"><i class="done"><b></b></i><i><b id="pv-prog"></b></i><i><b></b></i></div>
    <div class="s-head">${av}<div class="h">${handle}<span>Sponsored</span></div>${I.more}${I.x}</div>
    <div class="s-cta"><span class="up">${I.chevU}</span><span class="lnk">${I.link}${cta}</span></div></div></div>`;
- return`<div class="phone" data-pl="reels">${SBAR}<div class="ig-wrap"><div class="ig-media">${vPh(m)}${media}</div><div class="ig-shade t"></div><div class="ig-shade"></div>
+ return`<div class="phone" data-pl="reels">${SBAR}<div class="ig-wrap"><div class="ig-media">${vPh(m)}${media}${m.kind==='video'?BUF:''}</div><div class="ig-shade t"></div><div class="ig-shade"></div>
    ${reelOverlay(m,true)}<div class="igprog"><i id="pv-prog"></i></div></div></div>`}
 /* Instagram Reels chrome, icons only (no like, comment or share counts: we have no real engagement data) */
 function reelOverlay(a,inPhone){const liked=LIKES.has(a.id),it=BYID[a.id]||a,svd=isSaved(it);const handle=esc(a.handle||slug(a.b));
@@ -473,7 +568,8 @@ function onLayerClick(e){const t=e.target;
  const bl=t.closest('[data-brandlink]');if(bl){e.preventDefault();closeViewer();location.hash='discover/brands/'+bl.dataset.brandlink;return}
  const op=t.closest('.cd-fr[data-open]');if(op&&C.viewer&&!t.closest('[data-cs]')){openViewer(op.dataset.open,op.dataset.ctx);return}}
 function openViewer(id,ctx){const it=BYID[id]||(C.trBy&&C.trBy[id]);if(!it)return;hoverOut();[...AP_ON].forEach(apStop);
- const lst=(C.lists[ctx]||[]).includes(it)?C.lists[ctx]:[it];const f=it.src==='ad'?(C.fmt[it.id]||it.def):null;
+ const lst=(C.lists[ctx]||[]).includes(it)?C.lists[ctx]:[it];let f=it.src==='ad'?(C.fmt[it.id]||it.def):null;
+ if(it.src==='ad'&&id!==it.id){const mem=it.members.find(m=>m.id===id);if(mem&&it.fm[mem.asp]===mem){f=mem.asp;C.fmt[it.id]=f}}
  const keepFocus=C.viewer?C.viewer.focus:document.activeElement;
  C.viewer={it,list:lst,fmt:f,pl:plFor(f||'',null),ctx,focus:keepFocus};
  const L=vLayer('cd-vw','layer','Ad viewer');L.hidden=false;document.documentElement.style.overflow='hidden';drawViewer();$('[data-x]',L).focus()}
@@ -552,6 +648,7 @@ function drawViewer(keepScroll){const V=C.viewer,it=V.it,L=$('#cd-vw');
 function onPreviewMeta(v){const d=v.duration;if(!isFinite(d))return;const h=$('#tl-hook');if(h)h.style.width=Math.min(100,3/d*100)+'%';const t=$('#tl-ticks');if(t)t.innerHTML=`<span>0:00</span><span>${fmtDur(d/2)}</span><span>${fmtDur(d)}</span>`}
 function togglePreviewMute(){const v=$('#pv-video');if(!v)return;v.muted=!v.muted;if(!v.muted)v.play().catch(()=>{});const pm=$('#pv-mute');if(pm)pm.innerHTML=sv(v.muted?I.volOff:I.volOn)+(v.muted?' Sound off (M)':' Sound on (M)')}
 document.addEventListener('loadedmetadata',e=>{const v=e.target;if(v instanceof HTMLVideoElement&&v.id==='pv-video')onPreviewMeta(v)},true);
+['playing','canplay','waiting','stalled'].forEach(t=>document.addEventListener(t,e=>{const v=e.target;if(!(v instanceof HTMLVideoElement)||v.id!=='pv-video')return;const b=$('#pv-buf');if(b)b.classList.toggle('on',t==='waiting'||t==='stalled')},true));
 document.addEventListener('timeupdate',e=>{const v=e.target;if(!(v instanceof HTMLVideoElement)||!v.duration)return;const pct=(v.currentTime/v.duration*100)+'%';
  if(v.id==='pv-video'){const h=$('#tl-head');if(h)h.style.left=pct;const ip=$('#pv-prog');if(ip)ip.style.width=pct}
  const fr=v.closest('.cd-dv .frame');if(fr){const f=fr.querySelector('.igprog i');if(f)f.style.width=pct}},true);
@@ -603,13 +700,12 @@ async function start(){if(C.started)return;C.started=true;draw();
  const tr=loadTrending().then(rows=>{TR=rows.map(normTr);C.week=C.week||(TR[0]&&TR[0].week)||null;C.trBy=Object.fromEntries(TR.map(t=>[t.id,t]));C.tr=true;if(C.ready){counts();if(C.tab==='trending')draw()}}).catch(e=>{C.trErr=e.message;if(C.tab==='trending')draw()});
  try{const[rows]=await Promise.all([loadAds(),loadSaves()]);buildData(rows);C.ready=true}catch(e){C.err=e.message}
  draw();if(C.ready)counts();await tr.catch(()=>{})}
-function routeCD(h){const p=h.split('/');C.tab=TABS.some(t=>t[0]===p[1])?p[1]:'discover';C.brand=C.tab==='brands'&&p[2]?p[2]:null;if(C.tab==='boards'&&p[2])C.board=p[2];
- if(C.tab!=='jd')C.f.mk.clear();if(C.tab!=='trending')C.f.cat.clear();if(C.tab==='trending'){C.f.asp.clear();C.f.brand.clear();C.f.tag.clear();C.f.status.clear()}
- C.filtersOpen=false;window.scrollTo({top:0});start();draw()}
+function routeCD(h){const raw=location.hash.slice(1),rq=raw.indexOf('?');const qi=h.indexOf('?');const path=qi<0?h:h.slice(0,qi);if(rq>=0){const r=fFromQS(raw.slice(rq+1));C.f=r.F;C.q=r.q;const qe=$('#cd-q');if(qe)qe.value=C.q;fSave()}CD_PATH=path;const p=path.split('/');C.tab=TABS.some(t=>t[0]===p[1])?p[1]:'discover';C.brand=C.tab==='brands'&&p[2]?p[2]:null;if(C.tab==='boards'&&p[2])C.board=p[2];
+ closeFilters();window.scrollTo({top:0});start();draw()}
 function inject(){const row=document.querySelector('.proj .wrap');
  if(!document.getElementById('t-cd')){const g=document.createElement('span');g.className='tr-top';g.innerHTML='<span class="lbl">Always on</span><button type="button" class="pj tr-pj" id="t-cd"><i class="cd-dot"></i>Creative Discovery <i>Discover · JD · Trending</i></button>';row.appendChild(g);g.querySelector('button').onclick=()=>location.hash='discover'}
  if(!document.getElementById('v-cd')){const s=document.createElement('section');s.id='v-cd';s.hidden=true;document.querySelector('main').appendChild(s)}}
-const isCD=h=>h==='discover'||h.startsWith('discover/')||h==='trending'||h==='inspo'||h.startsWith('inspo/');
+const isCD=h0=>{const h=h0.split('?')[0];return h==='discover'||h.startsWith('discover/')||h==='trending'||h==='inspo'||h.startsWith('inspo/')};
 function hook(){const _show=window.show;window.show=function(tab){const v=document.getElementById('v-cd'),t=document.getElementById('t-cd');const bar=document.querySelector('nav.bar'),pj=document.querySelector('.proj .pj.on:not(#t-cd), .proj .pj.was');
   if(tab==='cd'){document.querySelectorAll('main > section').forEach(x=>x.hidden=true);document.querySelectorAll('nav.bar [data-tab]').forEach(x=>x.setAttribute('aria-pressed',false));v.hidden=false;t.classList.add('on');t.setAttribute('aria-current','true');if(pj){pj.classList.remove('on');pj.classList.add('was')}if(bar)bar.hidden=true;return}
   hoverOut();closeViewer();apReset();v.hidden=true;t.classList.remove('on');t.removeAttribute('aria-current');if(pj){pj.classList.add('on');pj.classList.remove('was')}if(bar)bar.hidden=false;return _show(tab)};
@@ -620,5 +716,5 @@ function hook(){const _show=window.show;window.show=function(tab){const v=docume
   return _route()};
  window.removeEventListener('hashchange',_route);window.addEventListener('hashchange',window.route)}
 const wait=setInterval(()=>{if(typeof D==='undefined'||!D||!window.show||!document.getElementById('t-project')||!document.getElementById('t-delivered'))return;clearInterval(wait);inject();hook();if(isCD(decodeURIComponent(location.hash.slice(1))))window.route()},60);
-window.CD={C,get AP(){return AP},get ADS(){return ADS},get TR(){return TR}};
+window.CD={C,open:(id)=>openViewer(id,'discover'),get AP(){return AP},get ADS(){return ADS},get TR(){return TR}};
 })();

@@ -187,3 +187,67 @@
 /* dialogs and toasts sit above the viewer and Reels layers */
 .cd-dlg-bg{z-index:1100}
 .toast{z-index:1200}
+
+/* ---------- loading state: page loader, card shimmer (viewer styles in cd-dv.css) ---------- */
+.cd-load{min-height:62vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--fg2);font:600 11.5px var(--body);letter-spacing:.12em;text-transform:uppercase}
+.cd-load-mk{position:relative;display:block;width:120px;height:4px;border-radius:999px;background:var(--s2);overflow:hidden}
+.cd-load-mk b{position:absolute;top:0;bottom:0;width:40%;border-radius:999px;background:var(--y);animation:cdload 1.1s cubic-bezier(.4,0,.2,1) infinite}
+@keyframes cdload{0%{left:-40%}100%{left:100%}}
+.cd-shim{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:flex-start;padding:10px;background:linear-gradient(100deg,var(--s1) 20%,var(--s2) 40%,var(--s1) 60%);background-size:220% 100%;animation:cdshim 1.3s linear infinite;transition:opacity .3s ease;z-index:0;pointer-events:none}
+.cd-shim span{font:700 9.5px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+@keyframes cdshim{0%{background-position:120% 0}100%{background-position:-120% 0}}
+.cd-fr img.cd-po{opacity:0;transition:opacity .3s ease}
+.cd-fr.ld img.cd-po{opacity:1}
+.cd-fr.ld>.cd-shim{opacity:0}
+.cd-sugg{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:12px}
+.cd-sugg .lbl{margin-right:4px}
+/* ---------- Filters button + drawer (right drawer on desktop, bottom sheet on phones) ---------- */
+.cd-fb .cd-fl{display:inline}
+.cd-fb em{font-style:normal;color:var(--y)}
+.cd-fb[aria-expanded="true"] em{color:#000}
+#cd-fd[hidden]{display:none}
+.cd-fd-bg{position:fixed;inset:0;z-index:1050;background:rgba(0,0,0,.55)}
+.cd-fd{position:fixed;z-index:1060;top:0;right:0;bottom:0;width:min(440px,100vw);background:var(--bg);border-left:1px solid var(--line);display:flex;flex-direction:column;color:var(--fg);box-shadow:-20px 0 50px rgba(0,0,0,.45)}
+.cd-fd-h{display:flex;align-items:center;gap:10px;padding:16px 16px 12px;border-bottom:1px solid var(--line)}
+.cd-fd-h h3{font-size:32px;margin:0;flex:none}
+.cd-fd-n{flex:1;color:var(--y);font:700 11.5px var(--body);letter-spacing:.06em;text-transform:uppercase}
+.cd-ib2{width:44px;height:44px;border-radius:999px;display:grid;place-items:center;background:none;border:0;color:var(--fg);cursor:pointer}
+.cd-ib2:hover{background:var(--s2)}
+.cd-fd-b{flex:1;overflow:auto;overscroll-behavior:contain;padding:4px 16px 16px}
+.cd-fd-g{padding:14px 0;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.cd-fd-g:last-child{border-bottom:0}
+.cd-fd-gh{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:20px}
+.cd-fd .cd-chip{height:34px}
+.cd-fd .cd-chip[data-zero]{opacity:.45}
+.cd-fd .cd-chip.q{border-style:dashed}
+.cd-fd .cd-chip.q[aria-pressed="true"]{border-style:solid}
+.cd-fd-scroll{max-height:196px;overflow:auto;padding-right:4px}
+.cd-fd-q{width:100%}
+.cd-fd-none{color:var(--mut);font-size:12.5px}
+.cd-tog{display:flex;align-items:center;gap:8px;font:600 12.5px var(--body);color:var(--fg2);cursor:pointer}
+.cd-tog input{width:18px;height:18px;accent-color:var(--y)}
+.cd-tog small{color:var(--mut);font-weight:500}
+.cd-rng{position:relative;display:flex;flex-direction:column;gap:6px}
+.cd-rng-v{font:600 13px var(--body);font-variant-numeric:tabular-nums}
+.cd-rng input[type=range]{width:100%;accent-color:var(--y)}
+.cd-dates{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cd-dates label{display:flex;flex-direction:column;gap:4px;font:600 11px var(--body);color:var(--mut);text-transform:uppercase;letter-spacing:.08em}
+.cd-dates input{height:40px;border-radius:10px;border:1px solid var(--line);background:var(--s2);color:var(--fg);padding:0 10px;font:500 13px var(--body);color-scheme:dark}
+.cd-fd-f{display:flex;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+.cd-fd-f .cd-btn{flex:1;height:44px}
+.cd-fd-f .cd-btn.y{flex:2}
+@media (max-width:700px){
+ .cd-fd{top:auto;left:0;width:100%;max-height:88dvh;border-left:0;border-top:1px solid var(--line2);border-radius:18px 18px 0 0}
+ .cd-fd::before{content:"";display:block;width:40px;height:4px;border-radius:4px;background:var(--line2);margin:8px auto 0}
+}
+/* phones: search on its own row, then Filters · Sort · Autoplay; Filters keeps its label */
+@media (max-width:600px){
+ .cd-tools{flex-wrap:wrap}
+ .cd-q{flex:1 1 100%}
+ .cd-fb .cd-fl{display:inline}
+ .cd-fb{padding:0 12px}
+ .cd-sort{flex:1;min-width:0}
+ .cd-sort select{max-width:none;width:100%}
+ .cd-fb span.cd-fl{display:inline!important}
+}
+@media (prefers-reduced-motion:reduce){.cd-load-mk b{animation:none;left:30%}.cd-shim{animation:none}.cd-fr img.cd-po{transition:none}}

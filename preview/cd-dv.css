@@ -412,3 +412,13 @@
 .cd-dv .meta{text-align:left;text-transform:none;letter-spacing:normal;font-weight:400;font-size:inherit;line-height:1.45}
 .cd-dv .ph{border-bottom:0;flex-wrap:nowrap;align-items:stretch}
 .cd-dv .note{max-width:none;line-height:1.45}
+/* loading state in the viewer: shimmer instead of the diagonal placeholder, spinner + label while the video buffers */
+.cd-dv .cd-shim{position:absolute;inset:0;display:flex;align-items:flex-end;padding:12px;background:linear-gradient(100deg,#121212 20%,#1d1d1d 40%,#121212 60%);background-size:220% 100%;animation:cdshim 1.3s linear infinite;transition:opacity .3s;pointer-events:none;z-index:0}
+.cd-dv .cd-shim span{font:700 10px var(--body);letter-spacing:.1em;text-transform:uppercase;color:#8A8B8C}
+.cd-dv .loaded>.cd-shim{opacity:0}
+.cd-dv .cd-buf{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:4;pointer-events:none;opacity:0;transition:opacity .2s;background:rgba(0,0,0,.25)}
+.cd-dv .cd-buf.on{opacity:1}
+.cd-dv .cd-buf i{width:34px;height:34px;border-radius:50%;border:3px solid rgba(255,255,255,.18);border-top-color:var(--jd);animation:cdspin .8s linear infinite}
+.cd-dv .cd-buf span{font:700 10.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+@keyframes cdspin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.cd-dv .cd-shim{animation:none}.cd-dv .cd-buf i{animation:none;border-top-color:var(--jd)}}
