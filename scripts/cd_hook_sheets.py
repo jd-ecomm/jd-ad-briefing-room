@@ -292,29 +292,29 @@ def _engine():
     return _TL.e
 
 
+def ocr_raw(engine, im):
+    """Raw OCR lines: [text, score, height/H, top/H, left/W] (loose filter; final rules in cd_hook_ocr_post.py)."""
+    import numpy as np
+    res, _ = engine(np.array(im))
+    W, H = im.size
+    out = []
+    for box, text, score in res or []:
+        ys = [pt[1] for pt in box]
+        xs = [pt[0] for pt in box]
+        h = (max(ys) - min(ys)) / H
+        if float(score) < 0.6 or h < 0.012 or not text.strip():
+            continue
+        out.append([text.strip(), round(float(score), 3), round(h, 4), round(min(ys) / H, 4), round(min(xs) / W, 4)])
+    return out
+
+
 def ocr_one(row):
     b = build(row)
     if "error" in b:
         return {"id": row["id"], "error": b["error"]}
     engine = _engine()
-    hook, allt, seen_h, seen_a = [], [], set(), set()
-    for lab, im in b["frames"]:
-        try:
-            t = float(lab.rstrip("s"))
-        except ValueError:
-            t = 99.0
-        txt = " ".join(ocr_texts(engine, im))
-        k = norm(txt)
-        if not k:
-            continue
-        if k not in seen_a:
-            seen_a.add(k)
-            allt.append(txt)
-        if t <= 3.0 and k not in seen_h:
-            seen_h.add(k)
-            hook.append(txt)
-    return {"id": row["id"], "sha": b["sha"], "hook_text": " ".join(hook) or None,
-            "onscreen_text": " | ".join(allt) or None, "hook_kind": "text" if hook else "visual"}
+    frames = [{"t": lab, "lines": ocr_raw(engine, im)} for lab, im in b["frames"]]
+    return {"id": row["id"], "brand": row.get("brand"), "sha": b["sha"], "frames": frames}
 
 
 def ocr_run(rows):
@@ -327,7 +327,7 @@ def ocr_run(rows):
                 out.append(r)
             if i % 50 == 0:
                 print(f"ocr {i}/{len(rows)}", flush=True)
-    name = f"ocr_p{PART}of{PARTS}.json"
+    name = f"ocr_raw_p{PART}of{PARTS}.json"
     json.dump({"results": out, "failed": failed}, open(os.path.join(OUT, name), "w"), ensure_ascii=False, indent=0)
     print(f"ocr: {len(out)} results, {len(failed)} failed")
 
