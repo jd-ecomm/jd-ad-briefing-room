@@ -30,3 +30,6 @@ Ryan: the page took 15 to 20 s (every English ad fetched in 1,000-row pages, eve
 - Page: first slice of 12 cards straight away, the rest of the batch in slices with the main thread given back in between; the next batch loads 1,400 px before the bottom with skeleton cards; cards 2,500 px off screen keep their box but lose their content and video (windowing); posters load through an IntersectionObserver (400 px); videos only on hover or Autoplay, removed when windowed.
 - Share links fetch that one ad and open the viewer without waiting for the grid.
 - Checks: tools/cd-perf.js (timings, also run on its own by .github/workflows/cd-perf.yml) and the lazy checks at the end of tools/cd-preview-check.js (timings, 3 batches in order, counts against the old in-browser code and SQL, deep link, hidden tab).
+
+## Live changes ported (9 Nov 2026, task cd-lazy-fixes)
+From the live copy (a508b9d, 919bc80), on top of lazy loading: Discover sorts Newest first by default (menu Newest, Proven, Rising, Most saved; server keyset on `cd_ct.s_newest`); the viewer's "In this card · N ads" chips are buttons that open that version (details fetched the lazy way) and replace the share-link hash; a format tag clicked from the JD tab opens Discover with the JD markets brand group plus that format (Montage = 223). Checks: `fixesChecks()` in tools/cd-preview-check.js.

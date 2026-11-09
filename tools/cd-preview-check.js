@@ -521,6 +521,54 @@ async function loadingRun() {
   await browser.close();
 }
 
+// cd-lazy-fixes (9 Nov 2026): the three live changes ported to /preview/ (a508b9d Newest default, 919bc80 version chips + JD format chips)
+async function fixesChecks() {
+  const browser = await chromium.launch({ ...(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}) });
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'dark' });
+  await ctx.addInitScript(() => { try { localStorage.setItem('jd-email', JSON.stringify('preview-check@ryanclarke.co')); localStorage.removeItem('cd2_filters'); } catch (e) { } });
+  const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+  const rpc = async (fn, b) => (await fetch(SB_URL + 'rpc/' + fn, { method: 'POST', headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ p: b }) })).json();
+  const settled = () => page.waitForFunction(() => { const fd = window.CD && window.CD.C.cur; return fd && fd.first && !fd.loading; }, null, { timeout: 20000 }).catch(() => { });
+  await page.goto(BASE + 'preview/#discover', { waitUntil: 'domcontentloaded' }); await page.waitForSelector('.cd-card', { timeout: 60000 }).catch(() => { }); await settled();
+  // (1) Discover sorts Newest first by default; menu order Newest, Proven, Rising, Most saved; server keyset order
+  const s1 = await page.evaluate(() => { const s = document.querySelector('#cd-sort'); return { val: s && s.value, opts: s ? [...s.options].map(o => o.textContent) : [], sort: window.CD.C.sort.discover, vgs: window.CD.C.lists.discover.slice(0, 48).map(a => a.vg) }; });
+  const r1 = await rpc('cd_page', { ctx: 'discover', sort: 'newest', f: { ai: true }, q: '', limit: 48 }); const w1 = (r1.rows || []).map(x => x.vg);
+  ok('fixes: Discover default sort is Newest, menu Newest / Proven / Rising / Most saved', s1.val === 'newest' && s1.sort === 'newest' && s1.opts.join('|') === 'Newest|Proven|Rising|Most saved', JSON.stringify({ val: s1.val, opts: s1.opts }));
+  ok('fixes: first batch in the server Newest keyset order', w1.length === 48 && s1.vgs.length === 48 && s1.vgs.every((v, i) => v === w1[i]), JSON.stringify({ n: s1.vgs.length, mismatch: s1.vgs.findIndex((v, i) => v !== w1[i]) }));
+  // (2) viewer "In this card · N ads" chips are buttons that open that version and update the share link
+  const multi = await page.evaluate(() => { const a = window.CD.C.lists.discover.find(x => x.members && x.members.length > 1); return a ? a.id : null; });
+  if (!multi) ok('fixes: a card with 2+ ads to test the version chips', false); else {
+    await page.evaluate(id => { location.hash = 'discover/ad/' + id; }, multi); await page.waitForSelector('#cd-vw:not([hidden]) [data-mem]', { timeout: 15000 }).catch(() => { });
+    const c0 = await page.evaluate(() => [...document.querySelectorAll('#cd-vw [data-mem]')].map(b => ({ tag: b.tagName, type: b.type, id: b.dataset.mem, pressed: b.getAttribute('aria-pressed'), title: b.title })));
+    ok('fixes: version chips are buttons (type=button, data-mem, aria-pressed, title "Show this version"), one pressed', c0.length > 1 && c0.every(b => b.tag === 'BUTTON' && b.type === 'button' && b.id && b.title === 'Show this version' && /^(true|false)$/.test(b.pressed)) && c0.filter(b => b.pressed === 'true').length === 1, JSON.stringify(c0.slice(0, 4)));
+    const tgt = c0.find(b => b.pressed === 'false');
+    if (tgt) { const hl = await page.evaluate(() => history.length); await page.click(`#cd-vw [data-mem="${tgt.id}"]`);
+      await page.waitForFunction(id => window.CD.C.viewer && window.CD.C.viewer.mid === id && document.querySelector(`#cd-vw [data-mem="${id}"]`)?.getAttribute('aria-pressed') === 'true', tgt.id, { timeout: 10000 }).catch(() => { });
+      const c1 = await page.evaluate(() => ({ mid: window.CD.C.viewer && window.CD.C.viewer.mid, hash: location.hash, hl: history.length, copy: document.querySelector('#vw-copy')?.dataset.copy }));
+      ok('fixes: clicking a version chip opens that version and replaces the share-link hash', c1.mid === tgt.id && c1.hash.includes('/ad/' + tgt.id) && c1.hl === hl && c1.copy === tgt.id, JSON.stringify({ ...c1, want: tgt.id, hl0: hl }));
+      await page.screenshot({ path: path.join(OUT, 'd-fix-versions.png') }); }
+    // (3b) from another tab (viewer opened from Discover): a format tag only sets the tag, no brand group
+    const tg = await page.$('#cd-vw [data-golib]');
+    if (tg) { await tg.click(); await page.waitForTimeout(400); await settled();
+      const o = await page.evaluate(() => ({ tags: [...window.CD.C.f.tag], brands: window.CD.C.f.brand.size, hash: location.hash }));
+      ok('fixes: format tag from Discover keeps the old behaviour (tag only, no brands)', o.tags.length === 1 && o.brands === 0 && /^#discover/.test(o.hash), JSON.stringify(o)); }
+    await page.keyboard.press('Escape').catch(() => { });
+  }
+  // (3) format tag from the JD tab opens Discover with the JD markets brand group + that format
+  await page.evaluate(() => { location.hash = 'discover/jd'; }); await page.waitForSelector('.cd-jd [data-golib]', { timeout: 20000 }).catch(() => { }); await settled();
+  const fm = await page.evaluate(() => { const b = [...document.querySelectorAll('.cd-jd [data-golib]')].find(x => /^tag:Montage$/.test(x.dataset.golib)) || document.querySelector('.cd-jd [data-golib]'); return b ? b.dataset.golib.slice(4) : null; });
+  if (!fm) ok('fixes: JD tab has format chips', false); else {
+    await page.click(`.cd-jd [data-golib="tag:${fm}"]`); await page.waitForFunction(() => /^#discover(\?|$)/.test(location.hash), null, { timeout: 8000 }).catch(() => { }); await page.waitForTimeout(400); await settled();
+    const o = await page.evaluate(() => { const g = (window.CD.SUM && window.CD.SUM.blist || []).filter(b => b[4]).map(b => b[0]).sort(); const fb = [...window.CD.C.f.brand].sort(); return { tags: [...window.CD.C.f.tag], brandsOk: g.length > 0 && g.join() === fb.join(), nb: fb.length, total: window.CD.C.cur && window.CD.C.cur.total, head: document.querySelector('#cd-head p')?.textContent || '', hash: location.hash }; });
+    const bids = (await page.evaluate(() => [...window.CD.C.f.brand]));
+    const truth = await rpc('cd_page', { ctx: 'discover', sort: 'newest', f: { ai: true, tag: [fm], brand: bids }, q: '', limit: 1 }).catch(() => ({}));
+    ok(`fixes: ${fm} from the JD tab opens Discover with the JD markets brands + ${fm}` + (fm === 'Montage' ? ' (223 expected)' : ''), o.tags.join() === fm && o.brandsOk && o.total != null && (fm !== 'Montage' || o.total === 223) && new RegExp('^' + (o.total || 0).toLocaleString('en-CA') + ' (of|results?)').test(o.head), JSON.stringify({ ...o, head: o.head.slice(0, 60), server: truth && truth.total }));
+    await page.screenshot({ path: path.join(OUT, 'd-fix-jd-format.png') });
+  }
+  ok('fixes: no page errors', !errors.length, errors.slice(0, 3).join(' | '));
+  await browser.close();
+}
+
 // Lazy loading (cd-lazy, 9 Nov 2026): timings, batches on scroll, counts against the old in-browser code and SQL, deep link cold open, hidden tab
 async function lazyChecks() {
   const perf = require('./cd-perf.js');
@@ -555,9 +603,10 @@ async function lazyChecks() {
   const sc = await page.evaluate(() => { const L = window.CD.C.lists.discover; const dom = [...document.querySelectorAll('#cd-body .cd-card[data-id]')].map(c => c.dataset.id);
     return { n: L.length, vgs: L.map(a => a.vg), ids: L.map(a => a.id), dom, total: window.CD.C.totals.discover }; });
   const rpc = async (fn, b) => (await fetch(SB_URL + 'rpc/' + fn, { method: 'POST', headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(['cd_page', 'cd_facets', 'cd_hooks', 'cd_hook_rows'].includes(fn) ? { p: b } : b) })).json();
-  let want = [], cur = null; for (let k = 0; k < Math.ceil(sc.n / 48); k++) { const r = await rpc('cd_page', { ctx: 'discover', sort: 'proven', f: { ai: true }, q: '', limit: 48, cursor: cur }); want = want.concat(r.rows.map(x => x.vg)); cur = r.next; if (!cur) break; }
+  let want = [], cur = null; for (let k = 0; k < Math.ceil(sc.n / 48); k++) { const r = await rpc('cd_page', { ctx: 'discover', sort: 'newest', f: { ai: true }, q: '', limit: 48, cursor: cur }); want = want.concat(r.rows.map(x => x.vg)); cur = r.next; if (!cur) break; }
   const dup = sc.vgs.length - new Set(sc.vgs).size; const domDup = sc.dom.length - new Set(sc.dom).size;
   ok('lazy scroll: 3 more batches load in order (192+ cards), no duplicates, no gaps', sc.n >= 192 && !dup && !domDup && sc.vgs.every((v, i) => v === want[i]) && sc.dom.length === sc.n, JSON.stringify({ n: sc.n, dup, domDup, mismatch: sc.vgs.findIndex((v, i) => v !== want[i]), dom: sc.dom.length, total: sc.total }));
+  // (cd-lazy-fixes: Discover's default sort is Newest, as on the live page since a508b9d)
   // counts against truth: the old in-browser code (the live page, every ad loaded) for the same filters and searches
   const cases = [['', 'all'], ['kind=video&asp=9%3A16&st=live', 'video 9:16 active'], ['q=north%20face', 'search north face'], ['q=knock%20knock', 'search knock knock'], ['hf=Question', 'hook format Question'],
     ['mkt=CA', 'market CA'], ['sig=proven', 'Proven'], ['sig=rising', 'Rising'], ['days=30-90', 'days 30 to 90'], ['tag=UGC%20Selfie', 'tag UGC Selfie'], ['lp=PDP&kind=image', 'PDP images'], ['launch=2026-09-01_2026-10-15', 'launch dates']];
@@ -597,6 +646,7 @@ if (require.main === module) (async () => {
   for (const vp of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) { try { await run(vp); } catch (e) { ok(`run ${vp.width}`, false, e.stack || e.message); } }
   try { await loadingRun(); } catch (e) { ok('loading run', false, e.stack || e.message); }
   if (!FX) try { await lazyChecks(); } catch (e) { ok('lazy checks', false, e.stack || e.message); }
+  if (!FX) try { await fixesChecks(); } catch (e) { ok('fixes checks', false, e.stack || e.message); }
   fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify({ base: BASE, when: new Date().toISOString(), passed: results.filter(r => r.pass).length, failed: results.filter(r => !r.pass).length, results }, null, 2));
   const f = results.filter(r => !r.pass).length; console.log(`\n${results.length - f} passed, ${f} failed`); process.exit(0); // failures are reported in results.json and the step summary, never as a failed job
 })();

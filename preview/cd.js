@@ -15,7 +15,7 @@ const MK={'66cf75a0e42d53dcea7879b5':'JD UK','67aa28cb0a70ccc0c54281c6':'JD US',
 const TRC=[['apparel','Apparel'],['sports-fitness','Sports & Fitness'],['retail','Retail'],['accessories','Accessories'],['health-wellness','Health & Wellness']];
 const TRN=Object.fromEntries(TRC);
 const TABS=[['discover','Discover'],['jd','JD'],['trending','Trending'],['brands','Brands'],['boards','Boards']];
-const SORTS={discover:[['proven','Proven'],['rising','Rising'],['newest','Newest'],['saved','Most saved']],jd:[['proven','Proven score'],['newest','Newest'],['longest','Longest running']],trending:[['rank','Rank'],['newest','Newest']],brand:[['proven','Proven'],['newest','Newest'],['saved','Most saved']],boards:[['added','Recently added']]};
+const SORTS={discover:[['newest','Newest'],['proven','Proven'],['rising','Rising'],['saved','Most saved']],jd:[['proven','Proven score'],['newest','Newest'],['longest','Longest running']],trending:[['rank','Rank'],['newest','Newest']],brand:[['proven','Proven'],['newest','Newest'],['saved','Most saved']],boards:[['added','Recently added']]};
 const PROVEN_TIP=`Proven score = days live (capped at ${CAP}) + variants of the same concept + parallel launches. Proven = running ${PROVEN_DAYS}+ days.`;
 
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>Array.from(r.querySelectorAll(s));
@@ -69,7 +69,7 @@ const sv=(s,n=16)=>s.replace('<svg',`<svg width="${n}" height="${n}" aria-hidden
 
 /* ---------- state ---------- */
 const C={tab:'discover',q:'',f:null,
- sort:{discover:'proven',jd:'proven',trending:'rank',brand:'proven',boards:'added'},brand:null,board:null,week:null,
+ sort:{discover:'newest',jd:'proven',trending:'rank',brand:'proven',boards:'added'},brand:null,board:null,week:null,
  fmt:{},filtersOpen:false,started:false,ready:false,err:null,tr:null,trErr:null,favs:new Set(),allFavs:{},boards:[],items:[],saveErr:null,lists:{},src:{},totals:{},viewer:null};
 let BYID={},BRANDS=[],BRAND_BY={},TR=[];
 
@@ -537,7 +537,7 @@ function vJD(body){const mkts=['all',...WORLD.map(w=>w[0]),'JD France'];
  ()=>{const prev=C.jdLast,gm=C.gmk||'all';if(!prev||!C.jdStats)return null;const items=prev.items.filter(a=>gm==='all'||a.mk===gm);
   return{items,total:gm==='all'?C.jdStats.all:(C.jdStats.mk||{})[gm]||items.length,jd:C.jdStats,first:true,done:true,prov:true,more:()=>getFeed(feedP('jd')).more()}})}
 function tipHTML(text,label='How the Proven score works'){return`<details class="tip"><summary aria-label="${esc(label)}">${sv(I.info,18)}</summary><div class="tipbox" role="note">${esc(text)}</div></details>`}
-function goTag(t){closeViewer('nav');fReset();C.f.tag.add(t);fSave();if(location.hash==='#discover')draw();else location.hash='discover'}
+function goTag(t){const fromJD=C.tab==='jd';closeViewer('nav');fReset();C.f.tag.add(t);if(fromJD){const g=quickGroups().find(x=>x[0]==='jd');if(g)g[2].forEach(b=>C.f.brand.add(b))}fSave();if(location.hash==='#discover')draw();else location.hash='discover'}
 function vTrending(body){if(C.trErr){head('Trending','');body.innerHTML=`<div class="cd-note"><b>Can't load trending ads.</b> ${esc(C.trErr)}</div>`;return}
  if(!C.tr){head('Trending','&nbsp;');body.innerHTML=LOADER;return}
  const weeks=[...new Set(TR.map(r=>r.week))];if(!C.week)C.week=weeks[0];
@@ -864,6 +864,7 @@ function onLayerClick(e){const t=e.target;
  const bd=t.closest('[data-board]');if(bd){e.stopPropagation();boardDialog(bd.dataset.board);return}
  const cp=t.closest('[data-copy]');if(cp){e.preventDefault();e.stopPropagation();copyLink(cp.dataset.copy);return}
  const rf=t.closest('[data-reelsfrom]');if(rf){const id=rf.dataset.reelsfrom;const list=C.viewer?C.viewer.list:[BYID[id]];closeViewer('nav');openReels(list,id);return}
+ const mm=t.closest('[data-mem]');if(mm&&C.viewer){const id=mm.dataset.mem;openViewer(id,C.viewer.ctx,false,true);try{history.replaceState(null,'',hashFor(id))}catch(e){}return}
  const g=t.closest('[data-golib]');if(g){goTag(g.dataset.golib.slice(4));return}
  const bl=t.closest('[data-brandlink]');if(bl){e.preventDefault();closeViewer('nav');location.hash='discover/brands/'+bl.dataset.brandlink;return}
  const op=t.closest('.cd-fr[data-open]');if(op&&C.viewer&&!t.closest('[data-cs]')){openViewer(op.dataset.open,op.dataset.ctx);return}}
@@ -948,7 +949,7 @@ function drawViewer(keepScroll,infoOnly){const V=C.viewer,it=V.it,L=$('#cd-vw');
     ${m.kind!=='video'?`<div class="lbl" style="margin:14px 0 8px">Hook line</div><p style="margin:0;font-size:14px">${hookHTML(m)}</p>`:''}
     <div class="lbl" style="margin:14px 0 8px">Ad headline (Meta)</div><p style="margin:0;font-size:14px">${esc(m.h||'None captured')}</p>
     <div class="lbl" style="margin:14px 0 8px">Ad copy</div><p style="margin:0;font-size:13.5px;color:var(--t2);white-space:pre-line">${esc(m.x||'No primary text')}</p></div>
-   ${it.members.length>1?`<div class="panel"><div class="lbl" style="margin-bottom:8px">In this card · ${it.members.length} ads</div><div class="chiprow">${it.members.map(x=>`<span class="tag ${x===m?'y':''}">${esc(x.asp)} · ${x.kind} · ${fmtDate(x.sd)}</span>`).join('')}</div></div>`:''}
+   ${it.members.length>1?`<div class="panel"><div class="lbl" style="margin-bottom:8px">In this card · ${it.members.length} ads</div><div class="chiprow">${it.members.map(x=>`<button type="button" class="tag ${x===m?'y':''}" data-mem="${esc(x.id)}" aria-pressed="${x===m}" title="Show this version">${esc(x.asp)} · ${x.kind} · ${fmtDate(x.sd)}</button>`).join('')}</div></div>`:''}
    <div class="panel"><div class="sec-h" style="margin-bottom:10px"><div><div class="lbl">Concept variants</div><p style="margin-top:4px">${!RL?'Loading creative':concept.length?`${concept.length} other ad${concept.length===1?'':'s'} from the same concept (${it.var} in all, ${it.par} launched in parallel).`:'No other ads from this concept yet.'}</p></div><a class="more" href="#discover/brands/${esc(it.bid)}" data-brandlink="${esc(it.bid)}">Brand page</a></div>
     ${concept.length?miniRow(concept,'concept'):''}
     ${same.length?`<div class="lbl" style="margin:14px 0 8px">More from ${esc(it.b)}</div>${miniRow(same,'cluster')}`:''}</div>
