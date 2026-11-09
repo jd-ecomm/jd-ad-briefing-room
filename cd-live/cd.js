@@ -90,7 +90,7 @@ function lpType(u) {
 function bucket(a){const m=/^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/.exec(a||'');if(!m||!+m[2])return null;const r=Math.log(m[1]/m[2]);let best=null,bd=9;
  [['9:16',9/16],['4:5',.8],['1:1',1],['16:9',16/9]].forEach(([k,v])=>{const d=Math.abs(r-Math.log(v));if(d<bd){bd=d;best=k}});return best}
 const ratioOf=s=>{const m=/^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/.exec(s||'');return m&&+m[2]?m[1]/m[2]:null};
-const COLS='id,brand,brand_id,brand_group,logo,logo_s,logo_r2,status,start_date,end_date,days_live,format,visual_formats,aspect,platforms,cards,headline,copy,cta,landing,video,video_s,video_r2,poster,poster_frame,images,images_s,images_r2,thumb_s,thumb_r2,saves,market,concept_key,variant_group,formats,first_seen,hook_text,onscreen_text,hook_kind,vf_source,focus';
+const COLS='id,brand,brand_id,brand_group,logo,logo_s,logo_r2,status,start_date,end_date,days_live,format,visual_formats,aspect,platforms,cards,headline,copy,cta,landing,video,video_s,video_r2,poster,poster_frame,images,images_s,images_r2,thumb_s,thumb_r2,saves,market,concept_key,variant_group,formats,first_seen,hook_text,onscreen_text,hook_kind,vf_source,focus,hook_format,hook_template,hook_source,ad_library';
 /* the anon role has a 3s statement timeout, and other jobs write to in_ads; retry a busy or failed page before giving up */
 async function apiRetry(path,opt,tries=4){let e;for(let i=0;i<tries;i++){try{return await api(path,opt)}catch(x){e=x;await new Promise(r=>setTimeout(r,800*Math.pow(2,i)))}}throw e}
 async function loadAds(){const q=`in_ads?select=${COLS}&batch=not.is.null&is_english=is.true&order=id.asc`;
@@ -115,7 +115,7 @@ function norm(r){
   logo:r.logo_r2||r.logo_s||r.logo||'',vf:r.visual_formats||[],ar:r.aspect||'',asp:bucket(r.aspect),ratio:ratioOf(r.aspect),
   pl:(r.platforms||[]).filter(p=>p&&p!=='unknown'),h:r.headline||'',x:r.copy||'',cta:r.cta||'Learn more',l:r.landing||'',sd,ed:r.end_date,d,st:r.status,
   mk:MK[r.brand_id]||null,market:r.market||null,ck:r.concept_key||('c_'+r.id),vg:r.variant_group||('vg_'+r.id),fs:r.first_seen,motion:r.saves||0,
-  poster:cleanPoster,c:r.cards||imgs.length||1,hk:r.hook_text||null,ost:r.onscreen_text||null,hkind:r.hook_kind||null,vfs:r.vf_source||null,focus:!!r.focus};
+  poster:cleanPoster,c:r.cards||imgs.length||1,hk:r.hook_text||null,ost:r.onscreen_text||null,hkind:r.hook_kind||null,hf:r.hook_format||null,ht:r.hook_template||null,hsrc:r.hook_source||null,lib:r.ad_library||null,vfs:r.vf_source||null,focus:!!r.focus};
  a.alts=[r.thumb_r2,r.thumb_s,(r.images_s||[])[0],r.poster,(r.images||[])[0]].filter(u=>u&&u!==thumb);
  a.valts=[r.video_s,r.video].filter(u=>u&&u!==vid);
  if(!a.asp){const f=(r.formats||[]).find(f=>f.ad_id===a.id);a.asp=(f&&f.aspect)||(kind==='carousel'?'1:1':'4:5');a.est=true}
@@ -130,14 +130,14 @@ function buildData(rows){
    st:ms.some(m=>m.st==='active')?'active':rep.st,vf:[...new Set(ms.flatMap(m=>m.vf))],age:Math.min(...ms.map(m=>m.age)),
    sv:ms.reduce((s,m)=>s+(C.allFavs[m.id]||0),0),motion:Math.max(...ms.map(m=>m.motion))});
   it.def=fm['4:5']?'4:5':fl[0]||rep.asp;it.kinds=new Set(ms.map(m=>m.kind));
-  it.vfm=[...new Set(ms.filter(m=>m.vfs==='motion').flatMap(m=>m.vf))];it.focus=ms.some(m=>m.focus);
+  it.vfm=[...new Set(ms.filter(m=>m.vfs==='motion').flatMap(m=>m.vf))];it.hfs=new Set(ms.map(m=>m.hf||'__none'));it.focus=ms.some(m=>m.focus);
   it.hay=' '+nz([it.b,...ms.map(m=>[m.h,m.x,m.hk,m.ost,m.l].join(' ')),it.vf.join(' '),[...it.kinds].join(' '),it.lp,it.cta,it.g,it.mk||'',it.market||'',MKT_L[it.market]||''].join(' '))+' ';
   return it});
  BYID={};ADS.forEach(it=>{BYID[it.id]=it;it.members.forEach(m=>{if(!BYID[m.id])BYID[m.id]=it})});
  const bb={};ADS.forEach(a=>{const b=bb[a.bid]=bb[a.bid]||{b:a.b,bid:a.bid,g:a.g,logo:'',n:0,live:0,nw:0,dsum:0,proven:0,mk:a.mk,market:a.market,top:[]};
   b.n++;if(a.focus)b.focus=true;if(a.st==='active')b.live++;if(a.age<=14)b.nw++;b.dsum+=a.d;if(a.proven)b.proven++;if(!b.logo&&a.logo)b.logo=a.logo;b.top.push(a)});
  BRANDS=Object.values(bb).map(b=>{b.avgd=Math.round(b.dsum/b.n);b.top.sort((x,y)=>y.ps-x.ps);b.top=b.top.slice(0,3);return b}).sort((p,q)=>q.n-p.n);
- BRAND_BY=Object.fromEntries(BRANDS.map(b=>[b.bid,b]))}
+ BRAND_BY=Object.fromEntries(BRANDS.map(b=>[b.bid,b]));buildNames()}
 function normTr(r,i){const imgs=(r.images_s&&r.images_s.length?r.images_s:r.images)||[];const video=r.video_s||r.video||null;
  const kind=r.kind==='video'&&video?'video':(r.kind==='carousel'||imgs.length>1?'carousel':'image');
  return{id:'tr'+i,src:'tr',b:r.brand||'Unknown brand',logo:r.logo_s||r.logo||'',kind,video,thumb:(r.poster_s||r.poster||imgs[0]||''),imgs,
@@ -154,8 +154,8 @@ const qTerms=()=>nz(C.q).split(' ').filter(Boolean);
 const qMatch=(a,terms)=>!terms.length||terms.every(t=>a.hay.includes(t));
 
 /* ---------- filters: state, matching, URL and per-browser memory ---------- */
-const F0=()=>({brand:new Set(),mkt:new Set(),kind:new Set(),asp:new Set(),tag:new Set(),st:new Set(),sig:new Set(),lp:new Set(),cta:new Set(),cat:new Set(),days:null,launch:null,ai:true});
-const SETS=['brand','mkt','kind','asp','tag','st','sig','lp','cta','cat'];
+const F0=()=>({hf:new Set(),brand:new Set(),mkt:new Set(),kind:new Set(),asp:new Set(),tag:new Set(),st:new Set(),sig:new Set(),lp:new Set(),cta:new Set(),cat:new Set(),days:null,launch:null,ai:true});
+const SETS=['brand','mkt','kind','asp','tag','hf','st','sig','lp','cta','cat'];
 const fClone=F=>{const o=F0();SETS.forEach(k=>o[k]=new Set(F[k]));o.days=F.days?F.days.slice():null;o.launch=F.launch?F.launch.slice():null;o.ai=F.ai;return o};
 const fCount=F=>SETS.reduce((s,k)=>s+F[k].size,0)+(F.days?1:0)+(F.launch?1:0)+(F.ai?0:1);
 const MKT_L={CA:'Canada',US:'USA',UK:'UK',AU:'Australia',NZ:'New Zealand',EU:'Europe',MX:'Mexico',CL:'Chile',FR:'France',Global:'Global','n/a':'Not set'};
@@ -169,6 +169,7 @@ function fMatch(a,F,skip){
  if(skip!=='kind'&&F.kind.size&&![...a.kinds].some(k=>F.kind.has(k)))return false;
  if(skip!=='asp'&&F.asp.size&&!a.fl.some(k=>F.asp.has(k)))return false;
  if(skip!=='tag'&&F.tag.size&&!(F.ai?a.vf:a.vfm).some(v=>F.tag.has(v)))return false;
+ if(skip!=='hf'&&F.hf.size&&![...a.hfs].some(v=>F.hf.has(v)))return false;
  if(skip!=='st'&&F.st.size&&!F.st.has(a.st==='active'?'live':'ended'))return false;
  if(skip!=='sig'&&F.sig.size){for(const s of F.sig){if(s==='proven'&&!a.proven)return false;if(s==='rising'&&!RISING(a))return false;if(s==='saved'&&!(a.sv>0))return false;if(s==='multi'&&a.nf<2)return false}}
  if(skip!=='lp'&&F.lp.size&&!F.lp.has(a.lp))return false;
@@ -183,11 +184,17 @@ function fFromQS(qs){const F=F0();const p=new URLSearchParams(qs);SETS.forEach(k
  if(p.get('ai')==='0')F.ai=false;return{F,q:p.get('q')||''}}
 function fSave(){store.set('filters',fToQS(C.f))}
 let CD_PATH='discover';
-function syncURL(){const qs=fToQS(C.f);const want='#'+CD_PATH+(qs?'?'+qs:'');if(location.hash!==want)history.replaceState(null,'',want)}
+function syncURL(){const want=hashFor(C.viewer?C.viewer.mid:C.pendingAd);if(location.hash!==want)history.replaceState(null,'',want)}
+/* shareable ad links: #<current path>/ad/<ad_id> (e.g. #discover/ad/<id>); old #ad/<id> links are accepted too */
+function hashFor(id){const qs=fToQS(C.f);return'#'+CD_PATH+(id?'/ad/'+id:'')+(qs?'?'+qs:'')}
+const shareURL=id=>location.origin+location.pathname+'#'+CD_PATH+'/ad/'+id;
+async function copyText(t){try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(t);return true}}catch(e){}
+ const ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}ta.remove();return ok}
+async function copyLink(id){const ok=await copyText(shareURL(id));toast(ok?'Link copied':'Could not copy the link')}
 function fCommit(F){C.f=F;fSave();draw()}
 
 /* ---------- filters drawer (right drawer on desktop, bottom sheet on phones) ---------- */
-function fBase(){if(C.tab==='trending')return TR.filter(r=>r.week===C.week);if(C.tab==='jd')return ADS.filter(a=>a.mk&&((C.gmk||'all')==='all'||a.mk===C.gmk));if(C.tab==='brands'&&C.brand)return ADS.filter(a=>a.bid===C.brand);return ADS}
+function fBase(){if(C.tab==='trending')return TR.filter(r=>r.week===C.week);if(C.tab==='jd')return ADS.filter(a=>a.mk&&((C.gmk||'all')==='all'||a.mk===C.gmk));if(C.tab==='brands'&&C.brand)return brandAds(C.brand);return ADS}
 const FD={D:null,bq:''};
 function quickGroups(){const jd=BRANDS.filter(b=>b.mk).map(b=>b.bid);const ca=BRANDS.filter(b=>b.market==='CA'&&b.g!=='JD Global'&&b.g!=='Category finds').map(b=>b.bid);const fo=BRANDS.filter(b=>b.focus).map(b=>b.bid);
  return[['jd','JD markets',jd],['ca','Canadian retailers',ca],['focus','Focus brands',fo]].filter(g=>g[2].length)}
@@ -203,6 +210,7 @@ function fGroups(D){const base=fBase();const terms=qTerms();const pool=g=>base.f
  {const c=cnt('asp',(a,v)=>a.fl.includes(v));g.push({k:'asp',l:'Aspect',opts:ASPECTS.map(v=>[v,v,c(v)])})}
  {const p=pool('tag');const tc={};p.forEach(a=>(D.ai?a.vf:a.vfm).forEach(v=>tc[v]=(tc[v]||0)+1));D.tag.forEach(v=>{if(!tc[v])tc[v]=0});
   g.push({k:'tag',l:'Visual format',opts:Object.keys(tc).sort((x,y)=>tc[y]-tc[x]).slice(0,48).map(v=>[v,v,tc[v]]),ai:true})}
+ {const c=cnt('hf',(a,v)=>a.hfs.has(v));const o=HFMTS.map(v=>[v,v,c(v)]).concat([['__none','Not read yet',c('__none')]]).filter(x=>x[2]||C.f.hf.has(x[0])||D.hf.has(x[0]));g.push({k:'hf',l:'Hook format',opts:o})}
  {const c=cnt('st',(a,v)=>(a.st==='active'?'live':'ended')===v);g.push({k:'st',l:'Status',opts:Object.keys(ST_L).map(v=>[v,ST_L[v],c(v)])})}
  {const p=pool('days');const mx=Math.max(1,...p.map(a=>a.d),...ADS.map(a=>a.d));g.push({k:'days',l:'Days live',range:[0,mx]})}
  {g.push({k:'launch',l:'Launch date',dates:true})}
@@ -248,7 +256,7 @@ function onFDInput(e){const t=e.target,D=FD.D;
 document.addEventListener('keydown',e=>{const o=$('#cd-fd');if(o&&!o.hidden&&e.key==='Escape'){e.stopPropagation();closeFilters()}},true);
 /* chips under the search bar: every active filter, removable */
 function activeChips(){const F=C.f,on=[];
- SETS.forEach(k=>F[k].forEach(v=>on.push([k,v,k==='brand'?(BRAND_BY[v]||{}).b||v:k==='cat'?TRN[v]||v:k==='mkt'?MKT_L[v]||v:k==='sig'?SIG_L[v]:k==='st'?ST_L[v]:k==='kind'?KIND_L[v]:v])));
+ SETS.forEach(k=>F[k].forEach(v=>on.push([k,v,k==='brand'?(BRAND_BY[v]||{}).b||v:k==='cat'?TRN[v]||v:k==='mkt'?MKT_L[v]||v:k==='sig'?SIG_L[v]:k==='st'?ST_L[v]:k==='kind'?KIND_L[v]:k==='hf'&&v==='__none'?'Hook not read yet':v])));
  if(F.days)on.push(['days','',`${F.days[0]} to ${F.days[1]} days`]);if(F.launch)on.push(['launch','',`Launched ${F.launch[0]?fmtDate(F.launch[0]):'any time'} to ${F.launch[1]?fmtDate(F.launch[1]):'now'}`]);if(!F.ai)on.push(['ai','','Motion tags only']);
  return on}
 function rmFilter(k,v){const F=fClone(C.f);if(k==='days')F.days=null;else if(k==='launch')F.launch=null;else if(k==='ai')F.ai=true;else F[k].delete(v);fCommit(F)}
@@ -292,7 +300,7 @@ function card(it,ctx){const m=cur(it);const saved=isSaved(it);
  return`<article class="cd-card" data-id="${esc(it.id)}">
   <header class="cd-ch">${logoHTML(it.b,it.logo)}<div class="cd-cht"><b>${esc(it.b)}</b><small>${topMeta(it)}</small></div></header>
   ${frameHTML(it,ctx)}${fseg}
-  <footer class="cd-cf">${pill}<span class="cd-meta">${meta.map(esc).join(' · ')}</span>${fb}${it.src==='ad'?`<button type="button" class="cd-save" data-save="${esc(it.id)}" aria-pressed="${saved}" aria-label="${saved?'Remove from saved':'Save'}">${sv(saved?I.bmf:I.bm,17)}</button>`:''}</footer></article>`}
+  <footer class="cd-cf">${pill}<span class="cd-meta">${meta.map(esc).join(' · ')}</span>${fb}${it.src==='ad'?`<button type="button" class="cd-save cd-share" data-copy="${esc(it.id)}" aria-label="Copy link" title="Copy link">${sv(I.link,16)}</button>`:''}${it.src==='ad'?`<button type="button" class="cd-save" data-save="${esc(it.id)}" aria-pressed="${saved}" aria-label="${saved?'Remove from saved':'Save'}">${sv(saved?I.bmf:I.bm,17)}</button>`:''}</footer></article>`}
 const fmtWeek=w=>w?'Week of '+new Date(w+'T12:00').toLocaleDateString('en-CA',{day:'numeric',month:'short'}):'';
 
 /* ---------- masonry grid (shortest column first, true aspect heights, grows on scroll) ---------- */
@@ -382,6 +390,7 @@ const sortKey=()=>C.tab==='brands'?(C.brand?'brand':null):C.tab==='jd'?null:C.ta
 function onClick(e){const t=e.target;
  const cs=t.closest('[data-cs]');if(cs){e.stopPropagation();stepCarousel(cs);return}
  const sb=t.closest('[data-save]');if(sb){toggleSave(sb.dataset.save);return}
+ const cp=t.closest('[data-copy]');if(cp){e.preventDefault();e.stopPropagation();copyLink(cp.dataset.copy);return}
  const fb=t.closest('[data-fmt]');if(fb){const[id,k]=fb.dataset.fmt.split('|');C.fmt[id]=k;const art=fb.closest('.cd-card');const it=BYID[id];if(art&&it){const ctx=art.querySelector('.cd-fr').dataset.ctx;const t2=document.createElement('template');t2.innerHTML=ctx==='jd'?jdCard(it,ctx):card(it,ctx);const nw=t2.content.firstElementChild;art.replaceWith(nw);apWatch(nw);apSync()}return}
  const fr=t.closest('.cd-fr');if(fr){openViewer(fr.dataset.open,fr.dataset.ctx);return}
  const rf=t.closest('[data-rmf]');if(rf){const[g,v]=rf.dataset.rmf.split(/\|(.*)/s);rmFilter(g,v||'');return}
@@ -394,8 +403,8 @@ function stepCarousel(b){const fr=b.closest('.cd-fr'),it=BYID[fr.dataset.open]||
  const i=((+fr.dataset.ci||0)+(+b.dataset.cs)+n)%n;fr.dataset.ci=i;const img=$('img.cd-po',fr);if(img)img.src=m.imgs[i];$('.cd-cnav span',fr).textContent=`${i+1}/${n}`}
 
 /* ---------- filter button, active chips and sort ---------- */
-function drawFilters(){const btn=$('#cd-fbtn'),act=$('#cd-act');const usable=C.ready&&C.tab!=='boards'&&!(C.tab==='brands'&&!C.brand);
- btn.hidden=!usable;$('.cd-q').hidden=C.tab==='boards';$('#cd-ap').hidden=!C.ready||(C.tab==='brands'&&!C.brand);
+function drawFilters(){const btn=$('#cd-fbtn'),act=$('#cd-act');const usable=C.ready&&C.tab!=='boards'&&!(C.tab==='brands'&&!C.brand)&&!(C.tab==='jd'&&C.jdv==='hooks');
+ btn.hidden=!usable;$('.cd-q').hidden=C.tab==='boards'||(C.tab==='brands'&&!C.brand)||(C.tab==='jd'&&C.jdv==='hooks');$('#cd-ap').hidden=!C.ready||(C.tab==='brands'&&!C.brand)||(C.tab==='jd'&&C.jdv==='hooks');
  const n=fCount(C.f);const fc=$('#cd-fcount');fc.hidden=!n;fc.textContent=n?' · '+n:'';btn.setAttribute('aria-label',n?`Filters, ${n} active`:'Filters');
  const on=usable?activeChips():[];
  act.hidden=!on.length;act.innerHTML=on.map(([g,v,l])=>`<button type="button" class="cd-chip on" data-rmf="${g}|${esc(v)}" aria-label="Remove filter ${esc(l)}">${esc(l)} ${sv(I.x,12)}</button>`).join('')+(on.length?`<button type="button" class="cd-link" data-fclear>Clear all</button>`:'');
@@ -410,8 +419,8 @@ function draw(){const el=host();if(!el||el.hidden)return;shell();syncURL();
  drawFilters();const body=$('#cd-body');
  if(C.err){head('Creative Discovery','');body.innerHTML=`<div class="cd-note"><b>Can't load ads right now.</b> The team database didn't answer (${esc(C.err.slice(0,90))}). <button type="button" class="cd-btn y" id="cd-retry">Try again</button></div>`;$('#cd-retry').onclick=()=>{C.err=null;C.started=false;start()};return}
  if(!C.ready){const T={discover:'Discover',jd:'JD Global',trending:'Trending',brands:'Brands',boards:'Boards'};head(T[C.tab]||'Discover','&nbsp;');body.innerHTML=LOADER;return}
- ({discover:vDiscover,jd:vJD,trending:vTrending,brands:vBrands,boards:vBoards}[C.tab]||vDiscover)(body)}
-function counts(){const set=(k,n)=>{const s=$(`[data-cnt="${k}"]`);if(s)s.textContent=n==null?'':fmtN(n)};set('discover',ADS.length);set('jd',ADS.filter(a=>a.mk).length);set('trending',C.tr?TR.filter(a=>a.week===C.week).length:null);set('brands',BRANDS.filter(b=>b.n>=3).length);set('boards',C.boards.length||null)}
+ ((C.tab==='jd'&&C.jdv==='hooks'?vHooks:null)||{discover:vDiscover,jd:vJD,trending:vTrending,brands:vBrands,boards:vBoards}[C.tab]||vDiscover)(body)}
+function counts(){const set=(k,n)=>{const s=$(`[data-cnt="${k}"]`);if(s)s.textContent=n==null?'':fmtN(n)};set('discover',ADS.length);set('jd',ADS.filter(a=>a.mk).length);set('trending',C.tr?TR.filter(a=>a.week===C.week).length:null);set('brands',PROF?profList().length:null);set('boards',C.boards.length||null)}
 /* Discover mixes brands: each brand's best ad first, then round-robin, so no single brand fills the screen */
 function mixBrands(arr){const by=new Map();arr.forEach(a=>{const k=a.bid||a.b;if(!by.has(k))by.set(k,[]);by.get(k).push(a)});const qs=[...by.values()],out=[];
  while(out.length<arr.length)for(const q of qs)if(q.length)out.push(q.shift());return out}
@@ -426,7 +435,7 @@ function jdCard(a,ctx){const m=cur(a);const saved=isSaved(a);const r=m.ratio||ra
  return`<article class="cd-card cd-jc" data-id="${esc(a.id)}"><div class="cd-jc-m" style="--r:${r.toFixed(4)}">${frameHTML(a,'jd')}</div>
   <div class="cd-jc-i"><b class="cd-jc-t">${esc(a.h||jdTitle(a))}</b><small class="cd-jc-s">${a.d} days · ${m.kind} · ${esc(a.lp)}</small>
    <div class="cd-jc-c"><span class="cd-mk">${esc(a.mk)}</span>${a.nf>=2?`<span class="cd-mk">${a.nf} formats</span>`:''}${a.vf.slice(0,2).map(v=>`<span class="cd-mk">${esc(v)}</span>`).join('')}</div>
-   ${fseg}<div class="cd-jc-f">${logoHTML(a.b,a.logo)}<span class="cd-jc-b">${esc(a.b)}</span><button type="button" class="cd-save" data-save="${esc(a.id)}" aria-pressed="${saved}" aria-label="${saved?'Remove from saved':'Save'}">${sv(saved?I.bmf:I.bm,17)}</button></div></div></article>`}
+   ${fseg}<div class="cd-jc-f">${logoHTML(a.b,a.logo)}<span class="cd-jc-b">${esc(a.b)}</span><button type="button" class="cd-save cd-share" data-copy="${esc(a.id)}" aria-label="Copy link" title="Copy link">${sv(I.link,16)}</button><button type="button" class="cd-save" data-save="${esc(a.id)}" aria-pressed="${saved}" aria-label="${saved?'Remove from saved':'Save'}">${sv(saved?I.bmf:I.bm,17)}</button></div></div></article>`}
 const jdCols=w=>w<760?1:2;
 const jdEst=(it,r)=>{const one=(host()&&host().clientWidth||1200)<760;return one?Math.min(1/r,1.25)+.45:Math.max(.62,Math.min(440,400/r)/620)+.04};
 function vJD(body){const mkts=['all',...WORLD.map(w=>w[0]),'JD France'];
@@ -434,7 +443,7 @@ function vJD(body){const mkts=['all',...WORLD.map(w=>w[0]),'JD France'];
  const list=all.filter(a=>gm==='all'||a.mk===gm).sort((a,b)=>b.ps-a.ps);
  const fmt={};all.forEach(a=>a.vf.forEach(v=>fmt[v]=(fmt[v]||0)+1));const live=all.filter(a=>a.st==='active').length;
  const show=Math.min(list.length,C.gshow||60);
- head(`JD Global <span class="cd-dv">${tipHTML(PROVEN_TIP)}</span>`,resultLine(list.length)||`What JD UK, US, Australia, New Zealand and Finish Line run, sorted by Proven score. Ideas to bring to JD Canada.`);
+ head(`JD Global <span class="cd-dv">${tipHTML(PROVEN_TIP)}</span>`,resultLine(list.length)||`What JD UK, US, Australia, New Zealand and Finish Line run, sorted by Proven score. Ideas to bring to JD Canada.`,jdSub('ads'));
  body.innerHTML=`<div class="cd-dv cd-jd">
   <div class="two three cd-jd-stats">
    <div class="panel"><div class="lbl">Ads from sister banners</div><div class="display num" style="font-size:52px;margin-top:6px">${fmtN(all.length)}</div><div style="color:var(--t3);font-size:12.5px">${fmtN(live)} live now · ${all.filter(a=>a.proven).length} Proven</div></div>
@@ -450,7 +459,7 @@ function vJD(body){const mkts=['all',...WORLD.map(w=>w[0]),'JD France'];
   if(e.target.closest('[data-gmore]')){const y=scrollY;C.gshow=show+60;draw();scrollTo(0,y);return}
   const g=e.target.closest('[data-golib]');if(g){goTag(g.dataset.golib.slice(4))}}}
 function tipHTML(text,label='How the Proven score works'){return`<details class="tip"><summary aria-label="${esc(label)}">${sv(I.info,18)}</summary><div class="tipbox" role="note">${esc(text)}</div></details>`}
-function goTag(t){closeViewer();fReset();C.f.tag.add(t);fSave();if(location.hash==='#discover')draw();else location.hash='discover'}
+function goTag(t){closeViewer('nav');fReset();C.f.tag.add(t);fSave();if(location.hash==='#discover')draw();else location.hash='discover'}
 function vTrending(body){if(C.trErr){head('Trending','');body.innerHTML=`<div class="cd-note"><b>Can't load trending ads.</b> ${esc(C.trErr)}</div>`;return}
  if(!C.tr){head('Trending','&nbsp;');body.innerHTML=LOADER;return}
  const weeks=[...new Set(TR.map(r=>r.week))];if(!C.week)C.week=weeks[0];
@@ -459,15 +468,202 @@ function vTrending(body){if(C.trErr){head('Trending','');body.innerHTML=`<div cl
   `<label class="cd-sel"><span class="lbl">Week</span><select id="cd-week" aria-label="Week">${weeks.map(w=>`<option value="${w}" ${w===C.week?'selected':''}>${esc(fmtWeek(w))}</option>`).join('')}</select></label>`);
  const ws=$('#cd-week');if(ws)ws.onchange=()=>{C.week=ws.value;draw()};
  grid(body,list,'trending',{base:TR})}
-function vBrands(body){if(C.brand){const b=BRAND_BY[C.brand];if(!b){location.hash='discover/brands';return}
-  const list=sorted(filtered(ADS.filter(a=>a.bid===b.bid),'brand'),C.sort.brand);
-  $('#cd-head').innerHTML=`<a class="cd-link back" href="#discover/brands">${sv(I.back,14)} All brands</a><div class="cd-bh">${logoHTML(b.b,b.logo,'cd-logo lg')}<div><h2 class="disp">${esc(b.b)}</h2><p>${esc(b.g==='JD Global'?'JD Group':b.g)}${b.market?' · '+esc(b.market):''} · ${b.n} ads · ${b.live} active · ${b.proven} proven · ${b.avgd} day average run</p></div></div>`;
-  grid(body,list,'brand');return}
- const q=C.q.trim().toLowerCase();const list=BRANDS.filter(b=>b.n>=3&&(!q||b.b.toLowerCase().includes(q)));
- head('Brands',`${list.length} brands with 3+ ads. Open one to see every ad it is running.`);
- body.innerHTML=`<div class="cd-bgrid">${list.map(b=>`<a class="cd-btile" href="#discover/brands/${esc(b.bid)}"><div class="cd-bt-h">${logoHTML(b.b,b.logo)}<div class="cd-cht"><b>${esc(b.b)}</b><small>${b.n} ads · ${b.live} active</small></div></div>
-  <div class="cd-bt-s">${b.top.map(a=>{const m=cur(a);return`<span>${m.thumb?`<img alt="" loading="lazy" src="${esc(m.thumb)}">`:''}</span>`}).join('')}</div>
-  <div class="cd-bt-f"><span>${b.nw} new in 2 weeks</span><span>${b.avgd}d avg run</span></div></a>`).join('')||'<div class="cd-empty">No brands match.</div>'}</div>`}
+/* ---------- Brands: profiles from cd_brand_profiles (stats over every English ad of the brand), list with search, category chips and sort; brand page ---------- */
+const BCATS=['JD (our markets)','Sportswear and Athletic','Footwear','Streetwear','Athleisure and Yoga','Outdoor','Fashion and Lifestyle','Luxury and Designer','Multi-brand Retailer','Canadian Retailer','Other'];
+const BSORTS=[['ads','Most ads'],['active','Most active'],['growth','Fastest growing (launches captured, 30 days)'],['longest','Longest running'],['az','A to Z']];
+const CTRY={CA:'Canada',US:'USA',UK:'UK',AU:'Australia',NZ:'New Zealand',DE:'Germany',FR:'France',ES:'Spain',NL:'Netherlands',SE:'Sweden',DK:'Denmark',CH:'Switzerland',JP:'Japan',IN:'India'};
+const MIXK=[['video','Video'],['image','Image'],['carousel','Carousel']];
+const pct1=v=>(Math.round((+v||0)*10)/10).toFixed(1).replace(/\.0$/,'.0');
+let PROF=null,PROF_ERR=null,NAMES={};
+async function loadProfiles(){try{const r=await apiRetry('cd_brand_profiles?select=brand,brand_id,category,subcategory,country,is_focus,stats,summary,summary_basis,updated_at');PROF=r.data||[]}catch(e){PROF_ERR=e.message;PROF=[]}}
+/* group released ads by brand name (a brand can have several Meta pages); the brand id in the URL can be any of its pages */
+function buildNames(){NAMES={};ADS.forEach(a=>{const n=NAMES[a.b]=NAMES[a.b]||{b:a.b,bids:new Set(),logo:'',n:0,ads:[]};n.bids.add(a.bid);n.n++;n.ads.push(a);if(!n.logo&&a.logo)n.logo=a.logo});
+ (PROF||[]).forEach(p=>{const n=NAMES[p.brand];if(n){n.p=p;n.bid=p.brand_id&&n.bids.has(p.brand_id)?p.brand_id:[...n.bids][0]}});Object.values(NAMES).forEach(n=>{if(!n.bid)n.bid=[...n.bids][0]})}
+const nameOfBid=bid=>{const b=BRAND_BY[bid];return b?b.b:null};
+const brandAds=bid=>{const nm=nameOfBid(bid);return nm&&NAMES[nm]?NAMES[nm].ads:ADS.filter(a=>a.bid===bid)};
+const isCanadian=p=>p.country==='CA'||p.category==='Canadian Retailer';
+function mixBar(mix,big){const segs=MIXK.filter(([k])=>+(mix||{})[k]>0);
+ return`<div class="cd-mix${big?' big':''}" role="img" aria-label="${esc(MIXK.map(([k,l])=>`${l} ${pct1((mix||{})[k])}%`).join(', '))}"><div class="cd-mix-b">${segs.map(([k,l])=>`<i class="m-${k}" style="width:${+mix[k]}%" title="${l} ${pct1(mix[k])}%"></i>`).join('')}</div>
+  <div class="cd-mix-l">${MIXK.map(([k,l])=>`<span data-mix="${k}"><i class="m-${k}"></i>${l} <b>${pct1((mix||{})[k])}%</b></span>`).join('')}</div></div>`}
+function trendHTML(l){if(!l)return'';const a=+l.last||0,b=+l.prior||0;
+ if(b>=5&&l.pct!=null){const up=+l.pct>=0;return`<span class="cd-trend ${up?'up':'dn'}">${up?'▲':'▼'} ${up?'+':''}${l.pct}%<small> launches captured, last 30 days vs prior 30</small></span>`}
+ return`<span class="cd-trend">${fmtN(a)}<small> launch${a===1?'':'es'} captured in the last 30 days</small></span>`}
+const firstSentence=s=>{s=String(s||'');const m=/^(.+?[.!?])(\s|$)/.exec(s.replace(/^Only \d+ English ads? captured, too few for a pattern\. /,''));return m?m[1]:s};
+function profList(){const list=Object.values(NAMES).filter(n=>n.p&&n.p.stats);return list}
+function bSort(arr,mode){const g=n=>n.p.stats,f={ads:n=>g(n).totals.ads,active:n=>g(n).totals.active,growth:n=>{const l=g(n).l30||{};return(+l.prior>=5&&l.pct!=null)?+l.pct:-1e9},longest:n=>+g(n).median_days||0}[mode];
+ return arr.slice().sort((x,y)=>mode==='az'?x.b.localeCompare(y.b,'en-CA',{sensitivity:'base'}):(f(y)-f(x))||x.b.localeCompare(y.b))}
+function bCard(n){const p=n.p,s=p.stats;return`<a class="cd-btile cd-bcard" href="#discover/brands/${esc(n.bid)}" data-brand="${esc(n.b)}">
+  <div class="cd-bt-h">${logoHTML(n.b,n.logo)}<div class="cd-cht"><b>${esc(n.b)}</b><small>${esc(p.category||'Other')}${p.is_focus?' · Focus':''}</small></div><span class="cd-bact"><b>${fmtN(s.totals.active)}</b><small>active</small></span></div>
+  ${mixBar(s.mix)}<div class="cd-bt-t">${trendHTML(s.l30)}</div><p class="cd-bsum">${esc(firstSentence(p.summary))}</p></a>`}
+function vBrandsList(body){
+ if(!PROF){head('Brands','&nbsp;');body.innerHTML=LOADER;return}
+ if(!C.bsort)C.bsort='ads';const all=profList();
+ head('Brands',PROF_ERR?`Brand profiles could not load (${esc(PROF_ERR.slice(0,80))}).`:`${fmtN(all.length)} brands. Stats cover every English ad we hold for each brand; summaries come from those numbers only.`);
+ body.innerHTML=`<div class="cd-btools"><label class="cd-q cd-bq">${sv(I.search,15)}<input id="cd-bq" type="search" placeholder="Search brands" aria-label="Search brands" autocomplete="off" value="${esc(C.bq||'')}"></label>
+  <label class="cd-sort"><span class="lbl">Sort</span><select id="cd-bsort" aria-label="Sort brands">${BSORTS.map(([v,l])=>`<option value="${v}" ${C.bsort===v?'selected':''}>${l}</option>`).join('')}</select></label></div>
+  <div class="cd-chips cd-bcats" id="cd-bcats"></div><div id="cd-blist"></div>`;
+ const q=$('#cd-bq',body);q.oninput=()=>{C.bq=q.value;drawBrandCards()};$('#cd-bsort',body).onchange=e=>{C.bsort=e.target.value;drawBrandCards()};
+ $('#cd-bcats',body).onclick=e=>{const c=e.target.closest('[data-bcat]');if(!c)return;const v=c.dataset.bcat;C.bcat=C.bcat===v?'':v;drawBrandCards()};
+ drawBrandCards()}
+function drawBrandCards(){const all=profList();const t=nz(C.bq||'');const byQ=all.filter(n=>!t||nz(n.b).includes(t)||nz(n.p.category).includes(t));
+ const cat=C.bcat||'';const inCat=(n,c)=>!c?true:c==='__focus'?n.p.is_focus:c==='__ca'?isCanadian(n.p):(n.p.category||'Other')===c;
+ const chip=(v,l)=>{const k=byQ.filter(n=>inCat(n,v)).length;return k||cat===v?`<button type="button" class="cd-chip${v.startsWith('__')?' q':''}" data-bcat="${esc(v)}" aria-pressed="${cat===v}">${esc(l)}<small>${k}</small></button>`:''};
+ $('#cd-bcats').innerHTML=chip('','All')+chip('__focus','Focus brands')+chip('__ca','Canadian')+BCATS.map(c=>chip(c,c)).join('');
+ const list=bSort(byQ.filter(n=>inCat(n,cat)),C.bsort);
+ $('#cd-blist').innerHTML=list.length?`<p class="cd-bcount">${fmtN(list.length)} brand${list.length===1?'':'s'}${t?` for "${esc(C.bq.trim())}"`:''}</p><div class="cd-bgrid">${list.map(bCard).join('')}</div>`:`<div class="cd-empty"><b>No brands match${t?` "${esc(C.bq.trim())}"`:''}.</b> Try another name or clear the category.</div>`}
+function tile(label,inner,cls=''){return`<section class="cd-stile ${cls}"><div class="lbl">${label}</div>${inner}</section>`}
+function hbars(rows,unit='%'){const mx=Math.max(1,...rows.map(r=>+r[1]||0));return`<div class="cd-hb">${rows.map(([l,v,note])=>`<div class="cd-hb-r" title="${esc(l)}: ${pct1(v)}${unit}${note?' · '+esc(note):''}"><span class="cd-hb-l">${esc(l)}</span><span class="cd-hb-t"><i style="width:${(+v||0)/mx*100}%"></i></span><b>${pct1(v)}${unit}</b></div>`).join('')}</div>`}
+function weeksChart(ws){const mx=Math.max(1,...ws.map(w=>MIXK.reduce((s,[k])=>s+(+w[k]||0),0)));
+ return`<div class="cd-wk" role="img" aria-label="Launches per week, last 8 weeks">${ws.map(w=>{const tot=MIXK.reduce((s,[k])=>s+(+w[k]||0),0);const d=new Date(w.start+'T12:00:00').toLocaleDateString('en-CA',{day:'numeric',month:'short'});
+  return`<div class="cd-wk-c" tabindex="0" title="Week of ${d}: ${tot} launches (${MIXK.map(([k,l])=>`${l} ${w[k]||0}`).join(', ')})"><b>${tot||''}</b><span class="cd-wk-s" style="height:${tot/mx*100}%">${MIXK.slice().reverse().filter(([k])=>+w[k]>0).map(([k])=>`<i class="m-${k}" style="flex:${+w[k]}"></i>`).join('')}</span><small>${d}</small></div>`}).join('')}</div>
+  <div class="cd-mix-l">${MIXK.map(([k,l])=>`<span><i class="m-${k}"></i>${l}</span>`).join('')}</div>`}
+function vBrandPage(body){const nm=nameOfBid(C.brand);const n=nm&&NAMES[nm];if(!n){location.hash='discover/brands';return}
+ const p=n.p,s=p&&p.stats;const list=sorted(filtered(n.ads,'brand'),C.sort.brand);
+ const sub=[p&&p.category,p&&p.country?(CTRY[p.country]||p.country):null,s?`${fmtN(s.totals.active)} active / ${fmtN(s.totals.ads)} total`:`${fmtN(n.n)} ads`,s&&s.median_days!=null?`median ${Math.round(s.median_days)} days live`:null].filter(Boolean).join(' · ');
+ $('#cd-head').innerHTML=`<a class="cd-link back" href="#discover/brands">${sv(I.back,14)} All brands</a><div class="cd-bh">${logoHTML(n.b,n.logo,'cd-logo lg')}<div><h2 class="disp">${esc(n.b)}</h2><p>${esc(sub)}</p></div></div>`;
+ let prof='';
+ if(s){const l=s.l30||{};const h=s.hooks||{};const hasHooks=(h.top||[]).length;
+  const asp=['9:16','4:5','1:1','16:9','unknown'].filter(k=>(s.aspect||{})[k]>0).map(k=>[k==='unknown'?'Not measured':k,s.aspect[k]]);
+  const top=(s.top_ads||[]).map(id=>BYID[id]).filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).slice(0,6);
+  prof=`<div class="cd-bprof">
+   <p class="cd-bsum-l">${esc(p.summary||'')}</p><p class="cd-basis">Based on ${esc(p.summary_basis||'')}.</p>
+   <div class="cd-stiles">
+    ${tile('Format mix',mixBar(s.mix,true),'w2')}
+    ${tile('Aspect mix',hbars(asp))}
+    ${tile('UGC share',`<div class="cd-big">${s.ugc_share==null?'n/a':pct1(s.ugc_share)+'%'}</div><small>of tagged ads use UGC Selfie, UGC Overlay, Yapper, Testimonial, Review, Influencer, Street Interview or POV</small>`)}
+    ${tile('Studio / product share',`<div class="cd-big">${s.studio_share==null?'n/a':pct1(s.studio_share)+'%'}</div><small>of tagged ads use Product Image, Studio Shot, Lifestyle Image, Cinematic B-Roll, Model Shot or Flatlay</small>`)}
+    ${tile('Launches captured, last 30 days',`<div class="cd-big">${fmtN(l.last||0)}</div>${trendHTML(l)}<small>Prior 30 days: ${fmtN(l.prior||0)}. The pull caps ads per brand, so this compares launches captured, not all launches. ${MIXK.map(([k,lb])=>{const f=(l.by_format||{})[k];return f?`${lb} ${f.last} (prior ${f.prior})`:null}).filter(Boolean).join(' · ')}</small>`)}
+   </div>
+   <div class="cd-bcols">
+    <section class="cd-panel2"><div class="lbl">Launches captured per week by format · last 8 weeks</div>${weeksChart(s.weeks||[])}</section>
+    <section class="cd-panel2"><div class="lbl">Top visual formats</div>${(s.top_tags||[]).length?hbars(s.top_tags.slice(0,8).map(t=>[t.tag,t.pct,t.n+' ads'])):'<p class="cd-muted">No visual format tags yet.</p>'}
+     <p class="cd-muted">Share of tagged ads. Tags cover ${pct1(s.tag_coverage)}% of this brand's ads (${fmtN(s.tagged||0)} of ${fmtN(s.totals.ads)}; Motion tags plus ours).${s.tag_coverage<40?' Limited tags: read these as indicative.':''}</p></section>
+    <section class="cd-panel2"><div class="lbl">Top hook formats</div>${hasHooks?hbars(h.top.map(x=>[x.format,x.n/Math.max(1,h.top.reduce((a,b)=>a+b.n,0))*100,x.n+' ads']))+(h.example?`<p class="cd-hex"><span class="lbl">Example · ${esc(h.example.format)}</span>"${esc(h.example.text)}"${h.example.source==='ocr'?' <em class="cd-mr">machine read</em>':''} <a class="cd-link" href="#discover/brands/${esc(n.bid)}/ad/${esc(h.example.id)}">Open ad</a></p>`:''):`<p class="cd-muted">${h.read?`${fmtN(h.read)} hooks read; formats not classified yet.`:'No hooks read for this brand yet.'}</p>`}
+     ${h.read?`<p class="cd-muted">Hooks read on ${fmtN(h.read)} ads${h.machine?', mostly machine read (indicative)':''}. Share of classified hooks.${h.read<20?' Fewer than 20 read, so the summary does not name a top format.':''}</p>`:''}</section>
+   </div>
+   ${top.length?`<section class="cd-panel2"><div class="lbl">Top ads · Proven score</div><div class="cd-bstrip">${top.map(x=>card(x,'btop')).join('')}</div></section>`:''}
+  </div>`;C.lists.btop=top}
+ else prof=`<div class="cd-note">No profile for this brand yet.</div>`;
+ body.innerHTML=`${prof}<div class="cd-h1 cd-ball"><div><h3 class="disp">All ${esc(n.b)} ads</h3><p>${fmtN(list.length)} of ${fmtN(n.n)} ads${fCount(C.f)||C.q.trim()?' match your filters':''}. Filters below apply to this brand only.</p></div></div><div id="cd-bads"></div>`;
+ grid($('#cd-bads',body),list,'brand',{base:n.ads})}
+function vBrands(body){if(C.brand)return vBrandPage(body);return vBrandsList(body)}
+/* ---------- JD tab, Hooks sub view: what JD markets put on screen in the first 3 seconds (in_ads.hook_text, hook_format, hook_template) ---------- */
+const HFMTS=['Teaser / Knock knock','Offer / Price first','Countdown / Urgency','Question','List / How to','Style tip / Outfit','POV / Relatable','Skit / Scenario','Creator / Talking head','Social proof / Trend','Callout','Drop / New in alert','Store / Location','Seasonal / Occasion','Collection / Campaign line','Brand or collab callout','Product name reveal','Statement / Claim','Visual only','Other / Unreadable'];
+const HKIND_L={text:'Video, text in first 3s',visual:'Video, visual hook (no text)',image_text:'Image or carousel with text',none:'Image or carousel, no text'};
+const HSORTS=[['proven','Proven'],['newest','Newest'],['longest','Longest running']];
+/* JD Canada ideas for the most reused JD templates. AI suggestions (written by Claude from the template), not ads that ran. */
+const HK_AI={
+ 'FIND YOUR FIT AT [STORE]':['FIND YOUR FIT AT JD [STORE]','FIND YOUR WINTER FIT AT JD [STORE]','[STORE], FIND YOUR FIT AT JD'],
+ '[PRODUCT] ONLY AT JD':['[PRODUCT], ONLY AT JD CANADA','[PRODUCT]. NOWHERE ELSE IN CANADA','ONLY AT JD CANADA: [PRODUCT]'],
+ 'THE [PRODUCT]':['THE [PRODUCT], NOW AT JD CANADA','THE [PRODUCT]. BUILT FOR WINTER','MEET THE [PRODUCT]'],
+ 'UP TO [N]% OFF':['UP TO [N]% OFF AT JD CANADA','UP TO [N]% OFF. BLACK FRIDAY STARTS NOW','UP TO [N]% OFF [PRODUCT] AND MORE'],
+ '[STORE] BACK WITH A BRAND-NEW LOOK':['JD [STORE], BACK WITH A BRAND-NEW LOOK','[STORE], YOUR JD JUST GOT A NEW LOOK','NEW LOOK, SAME JD: [STORE]'],
+ 'JD EXCLUSIVE [PRODUCT]':['JD EXCLUSIVE [PRODUCT], NOW IN CANADA','CANADA, THE JD EXCLUSIVE [PRODUCT] IS HERE','JD EXCLUSIVE: [PRODUCT] IN STORE AND ONLINE'],
+ 'THIS OR THAT? SHOP BOTH ON SALE AT [STORE]':['THIS OR THAT? SHOP BOTH ON SALE AT JD [STORE]','[PRODUCT] OR [PRODUCT]? BOTH ON SALE AT JD CANADA','THIS OR THAT? WHY NOT BOTH, ON SALE AT JD'],
+ "TODAY'S FIT, FROM JD: [PRODUCT]":["TODAY'S FIT, FROM JD CANADA: [PRODUCT]","TODAY'S WINTER FIT, FROM JD: [PRODUCT]","TODAY'S FIT, FROM JD [STORE]"],
+ 'NEW [PRODUCT]':['NEW [PRODUCT] AT JD CANADA','NEW [PRODUCT], JUST LANDED','NEW IN CANADA: [PRODUCT]'],
+ '[PRODUCT] >>>':['[PRODUCT] >>> EVERYTHING ELSE','[PRODUCT] FOR A CANADIAN WINTER >>>','[PRODUCT] FROM JD CANADA >>>'],
+ 'KNOCK KNOCK... [PRODUCT] AT JD':["KNOCK KNOCK... [PRODUCT] AT JD CANADA","KNOCK KNOCK... WHO'S THERE? [PRODUCT]","KNOCK KNOCK... THE [PRODUCT] JUST LANDED"]};
+const HK_AI_FMT={'Teaser / Knock knock':["KNOCK KNOCK... [PRODUCT] AT JD CANADA","WAIT FOR IT... [PRODUCT]","GUESS WHAT JUST LANDED AT JD CANADA"],
+ 'Callout':['IF YOU NEED A WINTER FIT, THIS IS YOUR SIGN','CALLING ALL [PRODUCT] FANS IN CANADA','YOU NEED THESE BEFORE THE FIRST SNOW'],
+ 'Question':['WHAT ARE YOU WEARING THIS WINTER?','THIS OR THAT? [PRODUCT] EDITION','WHO ELSE IS COPPING [PRODUCT]?'],
+ 'POV / Relatable':['POV: YOU FOUND [PRODUCT] AT JD CANADA','POV: THE FIRST SNOW AND YOUR FIT IS READY','ME WHEN THE [PRODUCT] RESTOCK HITS'],
+ 'Drop / New in alert':['NEW IN AT JD CANADA: [PRODUCT]','JUST LANDED: [PRODUCT]','THE [PRODUCT] IS HERE, CANADA'],
+ 'Offer / Price first':['UP TO [X]% OFF* AT JD CANADA','[PRICE] [PRODUCT], THIS WEEK ONLY','BLACK FRIDAY STARTS NOW AT JD CANADA'],
+ 'Product name reveal':['[PRODUCT]','[PRODUCT], ONLY AT JD CANADA','MEET THE [PRODUCT]'],
+ 'Countdown / Urgency':['LAST CHANCE: [PRODUCT]','ENDS SUNDAY AT JD CANADA','ONLY A FEW SIZES LEFT'],
+ 'List / How to':['3 WAYS TO STYLE [PRODUCT]','TOP 3 WINTER FITS AT JD CANADA','HOW TO LAYER FOR A CANADIAN WINTER'],
+ 'Statement / Claim':['[PRODUCT]: BUILT FOR A CANADIAN WINTER','[PRODUCT]: WARM, LIGHT, WATERPROOF','THE ONLY [PRODUCT] YOU NEED THIS WINTER'],
+ 'Style tip / Outfit':['HOW I STYLE [PRODUCT] FOR WINTER','[SEASON] FIT CHECK, ALL FROM JD CANADA','[N] WAYS TO WEAR [PRODUCT]'],
+ 'Skit / Scenario':['"WHERE\'D YOU GET THAT FIT?" "JD [STORE]"','WHEN THE FIRST SNOW HITS AND YOUR [PRODUCT] ARE READY','DAY [N] OF WEARING [PRODUCT] EVERYWHERE'],
+ 'Store / Location':['FIND YOUR FIT AT JD [STORE]','NOW OPEN: JD [STORE]','[PRODUCT], IN STORE NOW AT JD [STORE]'],
+ 'Seasonal / Occasion':['[SEASON] ESSENTIALS AT JD CANADA','READY FOR [SEASON]: [PRODUCT]','GIFTS FOR EVERYONE ON YOUR LIST, AT JD'],
+ 'Collection / Campaign line':['[COLLECTION], ONLY AT JD CANADA','[COLLECTION]: NOW IN CANADA','THE [COLLECTION] COLLECTION IS HERE'],
+ 'Brand or collab callout':['[BRAND] X [BRAND], ONLY AT JD CANADA','[BRAND] AT JD CANADA','NEW FROM [BRAND] AT JD'],
+ 'Social proof / Trend':['EVERYONE IN CANADA IS WEARING [PRODUCT]','THE [PRODUCT] EVERYONE IS ASKING ABOUT','SOLD OUT ONCE. BACK AT JD CANADA'],
+ 'Creator / Talking head':["RIGHT GUYS, I'M AT JD [STORE] AND...","OKAY SO I FOUND [PRODUCT] AT JD","LET ME SHOW YOU MY WINTER PICKS FROM JD"]};
+const HK={fmt:'',mkt:'',kind:'',min:0,q:'',sort:'proven',show:60,bym:false};
+let HROWS=[];
+function hookRows(scope){return ROWS.filter(m=>(scope==='all'||m.mk)&&m.hkind)}
+function hkFilter(rows){const t=nz(HK.q);return rows.filter(m=>(!HK.fmt||m.hf===HK.fmt)&&(!HK.mkt||m.mk===HK.mkt)&&(!HK.kind||m.hkind===HK.kind)&&m.d>=(+HK.min||0)&&(!t||nz([m.hk,m.ost,m.hf,m.ht,m.b].join(' ')).includes(t)))}
+function hkSort(rows){const f={proven:m=>m.ps*1e4-m.age,newest:m=>-m.age*1e3+m.ps,longest:m=>m.d*1e3+m.ps}[HK.sort];return rows.slice().sort((a,b)=>f(b)-f(a))}
+const median=a=>{if(!a.length)return null;const s=a.slice().sort((x,y)=>x-y),k=s.length>>1;return s.length%2?s[k]:(s[k-1]+s[k])/2};
+const jdSub=v=>`<div class="cd-seg2" role="tablist" aria-label="JD view"><span class="lbl">JD</span><a role="tab" href="#discover/jd" aria-selected="${v!=='hooks'}" data-jdv="ads">Ads</a><a role="tab" href="#discover/jd/hooks" aria-selected="${v==='hooks'}" data-jdv="hooks">Hooks</a></div>`;
+function vHooks(body){
+ const all=hookRows('jd');HROWS=all;const mk=[...new Set(all.map(m=>m.mk))].sort();
+ const withText=all.filter(m=>m.ost||m.hk).length;const fm={};all.forEach(m=>{const f=m.hf||'Not classified';fm[f]=(fm[f]||0)+1});
+ const fmts=Object.entries(fm).sort((a,b)=>b[1]-a[1]);const most=fmts.find(f=>f[0]!=='Visual only')||fmts[0];
+ const dates=all.map(m=>m.sd).filter(Boolean).sort();
+ head('JD Hooks',`What JD UK, US, Australia, New Zealand and Finish Line put on screen in the first 3 seconds. Hooks read by Claude from each ad's frames${all.some(m=>m.hsrc==='ocr')?' (a few machine read, marked)':''}.`,jdSub('hooks'));
+ const tot=all.length||1;
+ /* format breakdown: one bar per format (count and share); by market = share within each market */
+ const fmtRows=HFMTS.filter(f=>fm[f]).map(f=>[f,fm[f]]);
+ const bars=HK.bym?`<div class="cd-hm" role="table" aria-label="Hook format share by market" style="--n:${mk.length}"><div class="cd-hm-r cd-hm-h" role="row"><span role="columnheader">Format</span>${mk.map(k=>`<span role="columnheader">${esc(k.replace('JD ',''))}</span>`).join('')}</div>${fmtRows.map(([f])=>`<button type="button" class="cd-hm-r" role="row" data-hkf="${esc(f)}" aria-pressed="${HK.fmt===f}"><span role="cell">${esc(f)}</span>${mk.map(k=>{const n=all.filter(m=>m.mk===k).length||1,c=all.filter(m=>m.mk===k&&m.hf===f).length,p=c/n*100;return`<span role="cell" class="cd-hm-c" style="--a:${Math.min(1,p/40).toFixed(3)}${p/40>.55?';color:#000':''}" title="${esc(k)}: ${c} of ${n} (${pct1(p)}%)">${pct1(p)}%</span>`}).join('')}</button>`).join('')}</div><p class="cd-muted">Share of each market's hooks. Darker = larger share. Click a row to filter the library.</p>`
+  :`<div class="cd-hb cd-hbc">${fmtRows.map(([f,n])=>`<button type="button" class="cd-hb-r" data-hkf="${esc(f)}" aria-pressed="${HK.fmt===f}" title="${esc(f)}: ${n} hooks, ${pct1(n/tot*100)}%"><span class="cd-hb-l">${esc(f)}</span><span class="cd-hb-t"><i style="width:${n/Math.max(...fmtRows.map(x=>x[1]))*100}%"></i></span><b>${fmtN(n)} · ${pct1(n/tot*100)}%</b></button>`).join('')}</div><p class="cd-muted">Click a bar to filter the library below.</p>`;
+ const sig=fmtRows.map(([f,n])=>{const r=all.filter(m=>m.hf===f);return[f,n,median(r.map(m=>m.d)),r.reduce((s,m)=>s+m.ps,0)/r.length]});
+ /* monthly trend, top 5 formats (small multiples, one yellow series each) */
+ const months=[...new Set(all.map(m=>(m.sd||'').slice(0,7)).filter(Boolean))].sort().slice(-12);
+ const top5=fmtRows.slice().sort((a,b)=>b[1]-a[1]).slice(0,5).map(x=>x[0]);
+ const mx=Math.max(1,...top5.flatMap(f=>months.map(mo=>all.filter(m=>m.hf===f&&(m.sd||'').startsWith(mo)).length)));
+ const mlab=mo=>new Date(mo+'-15T12:00:00').toLocaleDateString('en-CA',{month:'short'});
+ const trend=top5.map(f=>{const v=months.map(mo=>all.filter(m=>m.hf===f&&(m.sd||'').startsWith(mo)).length);
+  return`<div class="cd-sm"><div class="cd-sm-h"><b>${esc(f)}</b><small>${fmtN(v[v.length-1]||0)} in ${months.length?mlab(months[months.length-1]):''}</small></div><div class="cd-sm-b">${v.map((x,i)=>`<i style="height:${x/mx*100}%" title="${esc(f)}, ${mlab(months[i])} ${months[i].slice(0,4)}: ${x} hooks"></i>`).join('')}</div><div class="cd-sm-x"><span>${months.length?mlab(months[0]):''}</span><span>${months.length?mlab(months[months.length-1]):''}</span></div></div>`}).join('');
+ /* templates: the most reused patterns */
+ const tp={};all.forEach(m=>{if(!m.ht)return;const t=tp[m.ht]=tp[m.ht]||{t:m.ht,n:0,mk:new Set(),ex:[],f:m.hf};t.n++;t.mk.add(m.mk);if(t.ex.length<3&&!t.ex.some(e=>e.hk===m.hk))t.ex.push(m)});
+ const tps=Object.values(tp).filter(t=>t.n>=2).sort((a,b)=>b.n-a.n||b.mk.size-a.mk.size).slice(0,12);
+ const ai=t=>HK_AI[t.t]||HK_AI_FMT[t.f]||HK_AI_FMT['Statement / Claim'];
+ body.innerHTML=`<div class="cd-hooks">
+  <div class="cd-hstrip">
+   <div class="cd-hs"><span class="lbl">Hooks read</span><b>${fmtN(all.length)}</b><small>JD ads, all formats</small></div>
+   <div class="cd-hs"><span class="lbl">With on-screen text</span><b>${pct1(withText/tot*100)}%</b><small>${fmtN(withText)} ads</small></div>
+   <div class="cd-hs"><span class="lbl">Hook formats</span><b>${fmtRows.length}</b><small>in use</small></div>
+   <div class="cd-hs"><span class="lbl">Most used</span><b class="sm">${esc(most?most[0]:'n/a')}</b><small>${most?fmtN(most[1])+' hooks, excluding visual only':''}</small></div>
+   <div class="cd-hs"><span class="lbl">Launch dates</span><b class="sm">${dates.length?fmtDate(dates[0])+' to '+fmtDate(dates[dates.length-1]):'n/a'}</b><small>${mk.length} markets</small></div>
+  </div>
+  <div class="cd-hgrid">
+   <section class="cd-panel2"><div class="cd-ph"><div class="lbl">Hook formats · count and share</div><div class="cd-seg" role="group" aria-label="Breakdown"><button type="button" data-hkbym="0" aria-pressed="${!HK.bym}">All</button><button type="button" data-hkbym="1" aria-pressed="${HK.bym}">By market</button></div></div>${bars}</section>
+   <section class="cd-panel2"><div class="lbl">Signals per format (not results)</div><div class="cd-tbl" role="table"><div class="cd-tr cd-th" role="row"><span>Format</span><span>Hooks</span><span>Median days live</span><span>Avg Proven</span></div>${sig.map(([f,n,md,ap])=>`<div class="cd-tr" role="row"><span>${esc(f)}</span><span>${fmtN(n)}</span><span>${md==null?'n/a':Math.round(md)}</span><span>${Math.round(ap)}</span></div>`).join('')}</div>
+    <p class="cd-muted">Days live and Proven score show how long ads ran, not how they performed. ${esc(PROVEN_TIP)}</p></section>
+  </div>
+  <section class="cd-panel2"><div class="lbl">Monthly trend · top 5 formats · hooks by launch month</div><div class="cd-sms">${trend}</div></section>
+  <section class="cd-panel2"><div class="lbl">Templates · most reused patterns</div><div class="cd-tps">${tps.map(t=>`<div class="cd-tp"><div class="cd-tp-h"><b>${esc(t.t)}</b><span class="cd-mk">${esc(t.f||'')}</span></div><small>${t.n} ads · ${[...t.mk].map(esc).join(', ')}</small>
+    <ul class="cd-tp-ex">${t.ex.map(m=>`<li><button type="button" class="cd-tp-a" data-hkopen="${esc(m.id)}">"${esc(m.hk)}"</button> <span>${esc(m.mk)}</span></li>`).join('')}</ul>
+    <div class="cd-tp-ai"><span class="lbl">For JD Canada · AI suggestions</span><ul>${ai(t).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div></div>`).join('')||'<p class="cd-muted">No template is used twice yet.</p>'}</div>
+   <p class="cd-muted">Templates swap products, brands, seasons, stores, collections, prices, numbers and dates for placeholders. Only patterns used on 2+ ads are shown; a hook with no reusable pattern has no template. AI suggestions are ideas written by Claude from the template, not ads that ran.</p></section>
+  <section class="cd-panel2" id="cd-hlib"><div class="cd-ph"><div class="lbl">Hook library</div><div class="cd-hdl"><button type="button" class="cd-btn" data-hkcsv="filtered">Download hooks (CSV)</button><button type="button" class="cd-btn" data-hkcsv="all" title="Every hook read in Creative Discovery, all brands">Download all (CSV)</button></div></div>
+   <div class="cd-hf">
+    <label class="cd-q">${sv(I.search,14)}<input id="cd-hq" type="search" placeholder="Search hooks" aria-label="Search hooks" value="${esc(HK.q)}" autocomplete="off"></label>
+    <label class="cd-sel"><span class="lbl">Format</span><select data-hk="fmt"><option value="">All formats</option>${fmtRows.map(([f,n])=>`<option value="${esc(f)}" ${HK.fmt===f?'selected':''}>${esc(f)} (${n})</option>`).join('')}</select></label>
+    <label class="cd-sel"><span class="lbl">Market</span><select data-hk="mkt"><option value="">All markets</option>${mk.map(k=>`<option value="${esc(k)}" ${HK.mkt===k?'selected':''}>${esc(k)}</option>`).join('')}</select></label>
+    <label class="cd-sel"><span class="lbl">Kind</span><select data-hk="kind"><option value="">All kinds</option>${Object.entries(HKIND_L).map(([k,l])=>`<option value="${k}" ${HK.kind===k?'selected':''}>${l}</option>`).join('')}</select></label>
+    <label class="cd-sel"><span class="lbl">Min days live</span><input type="number" min="0" step="1" data-hk="min" value="${+HK.min||0}" aria-label="Minimum days live"></label>
+    <label class="cd-sel"><span class="lbl">Sort</span><select data-hk="sort">${HSORTS.map(([v,l])=>`<option value="${v}" ${HK.sort===v?'selected':''}>${l}</option>`).join('')}</select></label>
+   </div><div id="cd-hrows"></div></section></div>`;
+ drawHookRows();
+ body.onclick=e=>{const t=e.target;
+  const f=t.closest('[data-hkf]');if(f){HK.fmt=HK.fmt===f.dataset.hkf?'':f.dataset.hkf;HK.show=60;keepY(()=>vHooks(body));const l=$('#cd-hlib');if(l&&HK.fmt)l.scrollIntoView({block:'start'});return}
+  const b=t.closest('[data-hkbym]');if(b){HK.bym=b.dataset.hkbym==='1';keepY(()=>vHooks(body));return}
+  const c=t.closest('[data-hkcsv]');if(c){hookCSV(c.dataset.hkcsv);return}
+  const o=t.closest('[data-hkopen]');if(o){e.preventDefault();C.lists.hooks=hkList();openViewer(o.dataset.hkopen,'hooks',false,true);return}
+  if(t.closest('[data-hkmore]')){HK.show+=60;drawHookRows();return}};
+ body.oninput=e=>{const t=e.target;if(t.id==='cd-hq'){HK.q=t.value;HK.show=60;drawHookRows();return}const k=t.dataset.hk;if(k){HK[k]=k==='min'?Math.max(0,+t.value||0):t.value;HK.show=60;drawHookRows()}};
+ body.onchange=body.oninput}
+function keepY(fn){const y=scrollY;fn();scrollTo(0,y)}
+function hkList(){const seen=new Set(),out=[];hkSort(hkFilter(HROWS)).forEach(m=>{const it=BYID[m.id];if(it&&!seen.has(it)){seen.add(it);out.push(it)}});return out}
+function drawHookRows(){const el=$('#cd-hrows');if(!el)return;const rows=hkSort(hkFilter(HROWS));const show=rows.slice(0,HK.show);C.lists.hooks=hkList();
+ el.innerHTML=`<p class="cd-bcount">${fmtN(rows.length)} hook${rows.length===1?'':'s'}${HK.fmt?' · '+esc(HK.fmt):''}</p>`+(rows.length?`<div class="cd-hl">${show.map(m=>{const r=m.ratio||ratioOf(m.asp)||.8;
+  return`<div class="cd-hr" data-id="${esc(m.id)}"><button type="button" class="cd-hr-m" data-hkopen="${esc(m.id)}" aria-label="Open ${esc(m.b)} ad" style="aspect-ratio:${r.toFixed(4)}">${m.thumb?`<img alt="" loading="lazy" src="${esc(m.thumb)}" data-alts="${esc(JSON.stringify(m.alts||[]))}">`:''}</button>
+   <div class="cd-hr-t"><button type="button" class="cd-hr-h" data-hkopen="${esc(m.id)}">${m.hk?esc(m.hk):`<span class="hk-none">${m.hkind==='visual'?'Visual hook, no text':'No on-screen text'}</span>`}</button>
+    <div class="cd-hr-c"><span class="cd-mk y">${esc(m.hf||'Not classified')}</span><span class="cd-mk">${esc(m.mk)}</span><span>${m.d} days live</span><span>${esc(kindLbl(m.kind))} · ${esc(m.asp)}</span>${m.hsrc==='ocr'?'<em class="cd-mr">machine read</em>':''}</div></div>
+   <div class="cd-hr-a"><span class="cd-badge sm${m.proven?'':' lo'}" title="${esc(PROVEN_TIP)}">${m.ps} Proven</span><button type="button" class="cd-save cd-share" data-copy="${esc(m.id)}" aria-label="Copy link" title="Copy link">${sv(I.link,16)}</button></div></div>`}).join('')}</div>
+  ${rows.length>show.length?`<div class="cd-more"><button type="button" class="cd-btn" data-hkmore>Show more (${fmtN(rows.length-show.length)} left)</button></div>`:''}`:`<div class="cd-empty">No hooks match these filters.</div>`)}
+/* CSV: UTF-8 with BOM, every field quoted */
+const HK_COLS=['ad_id','brand','market','launch_date','days_live','format','aspect','hook_text','hook_format','hook_template','onscreen_text','meta_headline','primary_text','landing_url','proven_score','ad_link','ad_library_link'];
+function hookCSV(which){const rows=which==='all'?hkSort(hookRows('all')):hkSort(hkFilter(HROWS));
+ const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';const base=location.origin+location.pathname+'#discover/ad/';
+ const lines=[HK_COLS.join(',')].concat(rows.map(m=>[m.id,m.b,m.mk||MKT_L[m.market]||m.market||'',m.sd||'',m.d,m.kind,m.ar||m.asp,m.hk||'',m.hf||'',m.ht||'',m.ost||'',m.h,m.x,m.l,m.ps,base+m.id,m.lib||''].map(q).join(',')));
+ const blob=new Blob(['﻿'+lines.join('\r\n')+'\r\n'],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+ a.download=`jd-hooks-${which==='all'?'all-brands':'jd'+(HK.fmt?'-'+slug(HK.fmt):'')}-${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);toast(`Downloaded ${fmtN(rows.length)} hooks`)}
 function vBoards(body){if(C.saveErr){head('Boards','');body.innerHTML=`<div class="cd-note"><b>Boards could not load.</b> ${esc(C.saveErr)}</div>`;return}
  const bd=C.boards.find(b=>b.id===C.board)||C.boards[0];
  const bar=`<div class="cd-chips">${C.boards.map(b=>`<button type="button" class="cd-chip" data-bd="${esc(b.id)}" aria-pressed="${bd&&b.id===bd.id}">${esc(b.name)}<small>${C.items.filter(x=>x.board_id===b.id).length}</small></button>`).join('')}<button type="button" class="cd-chip" data-newboard>${sv(I.plus,12)} New board</button></div>`;
@@ -563,28 +759,36 @@ function onLayerClick(e){const t=e.target;
  const fb=t.closest('[data-fmt]');if(fb&&C.viewer){e.stopPropagation();viewerFormat(fb.dataset.fmt.split('|')[1]);return}
  const sb=t.closest('[data-save]');if(sb){e.stopPropagation();toggleSave(sb.dataset.save).then(()=>{if(C.viewer){const b=$('#vw-save');const it=BYID[sb.dataset.save];if(b&&it)b.outerHTML=saveBtnViewer(it)}const on=isSaved(BYID[sb.dataset.save]||{members:[]});$$(`.cd-dv [data-save="${sb.dataset.save}"].it`).forEach(x=>{x.setAttribute('aria-pressed',on);x.innerHTML=on?I.bmf:I.bm})});return}
  const bd=t.closest('[data-board]');if(bd){e.stopPropagation();boardDialog(bd.dataset.board);return}
- const rf=t.closest('[data-reelsfrom]');if(rf){const id=rf.dataset.reelsfrom;const list=C.viewer?C.viewer.list:[BYID[id]];closeViewer();openReels(list,id);return}
+ const cp=t.closest('[data-copy]');if(cp){e.preventDefault();e.stopPropagation();copyLink(cp.dataset.copy);return}
+ const rf=t.closest('[data-reelsfrom]');if(rf){const id=rf.dataset.reelsfrom;const list=C.viewer?C.viewer.list:[BYID[id]];closeViewer('nav');openReels(list,id);return}
  const g=t.closest('[data-golib]');if(g){goTag(g.dataset.golib.slice(4));return}
- const bl=t.closest('[data-brandlink]');if(bl){e.preventDefault();closeViewer();location.hash='discover/brands/'+bl.dataset.brandlink;return}
+ const bl=t.closest('[data-brandlink]');if(bl){e.preventDefault();closeViewer('nav');location.hash='discover/brands/'+bl.dataset.brandlink;return}
  const op=t.closest('.cd-fr[data-open]');if(op&&C.viewer&&!t.closest('[data-cs]')){openViewer(op.dataset.open,op.dataset.ctx);return}}
-function openViewer(id,ctx){const it=BYID[id]||(C.trBy&&C.trBy[id]);if(!it)return;hoverOut();[...AP_ON].forEach(apStop);
- const lst=(C.lists[ctx]||[]).includes(it)?C.lists[ctx]:[it];let f=it.src==='ad'?(C.fmt[it.id]||it.def):null;
- if(it.src==='ad'&&id!==it.id){const mem=it.members.find(m=>m.id===id);if(mem&&it.fm[mem.asp]===mem){f=mem.asp;C.fmt[it.id]=f}}
- const keepFocus=C.viewer?C.viewer.focus:document.activeElement;
- C.viewer={it,list:lst,fmt:f,pl:plFor(f||'',null),ctx,focus:keepFocus};
+function openViewer(id,ctx,fromRoute,exactAd){const it=BYID[id]||(C.trBy&&C.trBy[id]);if(!it)return;hoverOut();[...AP_ON].forEach(apStop);
+ const lst=(C.lists[ctx]||[]).includes(it)?C.lists[ctx]:[it];let f=it.src==='ad'?(C.fmt[it.id]||it.def):null;let exact=null;
+ if(it.src==='ad'&&(id!==it.id||exactAd||fromRoute)){const mem=it.members.find(m=>m.id===id);if(mem&&(id!==it.id||it.fm[mem.asp]!==mem||exactAd||fromRoute)){f=mem.asp;C.fmt[it.id]=f;exact=mem}}
+ const was=C.viewer;const keepFocus=was?was.focus:document.activeElement;
+ /* a new history entry when an ad is opened from the page, so Back closes it; inside the viewer the entry is replaced */
+ const pushed=was?was.pushed:(!fromRoute&&it.src==='ad');
+ C.viewer={it,list:lst,fmt:f,pl:plFor(f||'',null),ctx,focus:keepFocus,exact,pushed};
+ if(it.src==='ad'&&!fromRoute&&!was)history.pushState(null,'',hashFor(id));
  const L=vLayer('cd-vw','layer','Ad viewer');L.hidden=false;document.documentElement.style.overflow='hidden';drawViewer();$('[data-x]',L).focus()}
-function closeViewer(){const L=$('#cd-vw');if(!L||L.hidden)return;$$('video',L).forEach(v=>{v.pause();v.removeAttribute('src');v.load()});L.hidden=true;L.innerHTML='';document.documentElement.style.overflow='';
- const f=C.viewer&&C.viewer.focus;C.viewer=null;if(f&&f.isConnected)try{f.focus({preventScroll:true})}catch(e){}apSync()}
-function stepViewer(d){const V=C.viewer;const i=V.list.indexOf(V.it);V.it=V.list[(i+d+V.list.length)%V.list.length];V.fmt=V.it.src==='ad'?(C.fmt[V.it.id]||V.it.def):null;V.pl=plFor(V.fmt||'',V.pl);V.plSet=0;drawViewer()}
-function viewerFormat(k){const V=C.viewer;if(!V||V.it.src!=='ad'||!V.it.fm[k])return;V.fmt=k;V.pl=plFor(k,V.pl);C.fmt[V.it.id]=k;drawViewer(true)}
+/* mode: 'user' (close button, Esc: Back if the viewer added a history entry), 'nav' (another view opens next), 'route' (the URL already changed) */
+function closeViewer(mode){const L=$('#cd-vw');if(!L||L.hidden)return;$$('video',L).forEach(v=>{v.pause();v.removeAttribute('src');v.load()});L.hidden=true;L.innerHTML='';document.documentElement.style.overflow='';
+ const V=C.viewer;const f=V&&V.focus;C.viewer=null;
+ if(mode!=='route'&&/^#discover[^?]*\/ad\//.test(location.hash)){if(mode==='user'&&V&&V.pushed)history.back();else history.replaceState(null,'',hashFor(null))}
+ if(f&&f.isConnected)try{f.focus({preventScroll:true})}catch(e){}apSync()}
+function stepViewer(d){const V=C.viewer;const i=V.list.indexOf(V.it);V.it=V.list[(i+d+V.list.length)%V.list.length];V.exact=null;V.fmt=V.it.src==='ad'?(C.fmt[V.it.id]||V.it.def):null;V.pl=plFor(V.fmt||'',V.pl);V.plSet=0;drawViewer()}
+function viewerFormat(k){const V=C.viewer;if(!V||V.it.src!=='ad'||!V.it.fm[k])return;V.fmt=k;V.exact=null;V.pl=plFor(k,V.pl);C.fmt[V.it.id]=k;drawViewer(true)}
 function viewerPlacement(pl){const V=C.viewer,it=V.it;V.pl=pl;V.plSet=1;
- if(it.src==='ad'){if(pl==='feed'&&V.fmt==='9:16'){const k=['4:5','1:1','16:9'].find(x=>it.fm[x]);if(k)V.fmt=k}if(pl!=='feed'&&V.fmt!=='9:16'&&it.fm['9:16'])V.fmt='9:16'}drawViewer(true)}
+ if(it.src==='ad'){const f0=V.fmt;if(pl==='feed'&&V.fmt==='9:16'){const k=['4:5','1:1','16:9'].find(x=>it.fm[x]);if(k)V.fmt=k}if(pl!=='feed'&&V.fmt!=='9:16'&&it.fm['9:16'])V.fmt='9:16';if(V.fmt!==f0)V.exact=null}drawViewer(true)}
 function cycleFormat(){const V=C.viewer,it=V.it;if(it.src!=='ad'||it.nf<2)return;const i=it.fl.indexOf(V.fmt);viewerFormat(it.fl[(i+1)%it.fl.length])}
 function miniRow(list,ctx){C.lists[ctx]=list;return`<div class="mini">${list.map(x=>card(x,ctx)).join('')}</div>`}
 function drawViewer(keepScroll){const V=C.viewer,it=V.it,L=$('#cd-vw');
  const sc=keepScroll&&L.querySelector('.vw-body')?L.querySelector('.vw-body').scrollTop:0;
  $$('video',L).forEach(v=>{v.pause();v.removeAttribute('src');v.load()});
- const tr=it.src==='tr';const m=tr?it:(it.fm[V.fmt]||cur(it));
+ const tr=it.src==='tr';const m=tr?it:(V.exact&&V.exact.asp===V.fmt?V.exact:(it.fm[V.fmt]||cur(it)));
+ V.mid=tr?null:m.id;if(!tr){const want=hashFor(m.id);if(location.hash!==want)history.replaceState(null,'',want)}
  if(tr&&!V.plSet){const r=parseFloat((document.querySelector(`.cd-fr[data-open="${it.id}"]`)||{dataset:{}}).dataset.nat||0);V.pl=r&&r<.7?'reels':'feed';m.asp=r?(r<.7?'9:16':r<.9?'4:5':r<1.3?'1:1':'16:9'):'4:5'}
  const i=V.list.indexOf(it);
  const plBtns=[['reels','Reels'],['stories','Stories'],['feed','Feed']];
@@ -609,7 +813,7 @@ function drawViewer(keepScroll){const V=C.viewer,it=V.it,L=$('#cd-vw');
   info=`<div class="vw-info">
    <div class="meta">${logoHTML(it.b,it.logo,'logo')}<div class="tx"><b>${esc(it.b)}</b><small>${esc(it.g)}${it.market?' · '+esc(it.market):''} · ${it.st==='active'?'Live':'Ended '+fmtDate(m.ed)}${m.pl.length?' · '+esc(m.pl.join(', ')):''}</small></div></div>
    <h2 class="display">${esc(m.h||jdTitle(m))}</h2>
-   <div class="actions">${saveBtnViewer(it)}<button type="button" class="pill" data-board="${esc(it.id)}">${sv(I.board)} Add to board</button><button type="button" class="pill" data-reelsfrom="${esc(it.id)}">${sv(I.reels)} Reels mode</button>${m.l?`<a class="pill ghost" href="${esc(m.l)}" target="_blank" rel="noopener">Landing page ${I.ext}</a>`:''}</div>
+   <div class="actions">${saveBtnViewer(it)}<button type="button" class="pill" data-board="${esc(it.id)}">${sv(I.board)} Add to board</button><button type="button" class="pill" data-reelsfrom="${esc(it.id)}">${sv(I.reels)} Reels mode</button><button type="button" class="pill" id="vw-copy" data-copy="${esc(m.id)}">${sv(I.link)} Copy link</button>${m.l?`<a class="pill ghost" href="${esc(m.l)}" target="_blank" rel="noopener">Landing page ${I.ext}</a>`:''}</div>
    <div class="kbd"><span><kbd>←</kbd><kbd>→</kbd>Previous, next</span>${it.nf>=2?'<span><kbd>F</kbd>Next format</span>':''}<span><kbd>S</kbd>Save</span><span><kbd>B</kbd>Board</span><span><kbd>M</kbd>Mute</span><span><kbd>Esc</kbd>Close</span></div>
    <div class="two">
     <div class="panel"><div class="lbl" style="margin-bottom:8px;display:flex;align-items:center;gap:6px">Proven score ${tipHTML(PROVEN_TIP)}</div>
@@ -638,7 +842,7 @@ function drawViewer(keepScroll){const V=C.viewer,it=V.it,L=$('#cd-vw');
     ${same.length?`<div class="lbl" style="margin:14px 0 8px">More from ${esc(it.b)}</div>${miniRow(same,'cluster')}`:''}</div>
    <div class="panel"><div class="lbl" style="margin-bottom:10px">More like this</div>${miniRow(like,'like')}</div></div>`}
  L.innerHTML=`${top}<div class="vw-body"><div class="vw-grid">${stage}${info}</div></div>`;
- L.querySelector('[data-x]').onclick=()=>closeViewer();L.querySelector('[data-prev]').onclick=()=>stepViewer(-1);L.querySelector('[data-next]').onclick=()=>stepViewer(1);
+ L.querySelector('[data-x]').onclick=()=>closeViewer('user');L.querySelector('[data-prev]').onclick=()=>stepViewer(-1);L.querySelector('[data-next]').onclick=()=>stepViewer(1);
  $$('button[data-pl]',L).forEach(b=>b.onclick=()=>viewerPlacement(b.dataset.pl));
  const pm=$('#pv-mute');if(pm)pm.onclick=togglePreviewMute;
  const tl=$('#tl');if(tl)tl.onclick=e=>{const v=$('#pv-video');if(!v||!v.duration)return;const r=tl.getBoundingClientRect();v.currentTime=(e.clientX-r.left)/r.width*v.duration};
@@ -686,7 +890,7 @@ document.addEventListener('keydown',e=>{if(e.target.matches&&e.target.matches('i
  if($('#cd-dlg')&&$('#cd-dlg').innerHTML){if(e.key==='Escape')$('#cd-dlg').innerHTML='';return}
  const R=$('#cd-reels');if(R&&!R.hidden){const k=e.key.toLowerCase();if(k==='escape')closeReels();else if(k==='arrowdown'||k==='arrowright'||k==='j'){e.preventDefault();reelStep(1)}else if(k==='arrowup'||k==='arrowleft'||k==='k'){e.preventDefault();reelStep(-1)}else if(k==='m')reelSound();else if(k==='s'){const a=currentReel();if(a)toggleSave(a)}return}
  if(!C.viewer)return;const k=e.key.toLowerCase();const ad=C.viewer.it.src==='ad';
- if(k==='escape')closeViewer();
+ if(k==='escape')closeViewer('user');
  else if(k==='arrowright'||k==='arrowdown'||k==='j'){e.preventDefault();stepViewer(1)}
  else if(k==='arrowleft'||k==='arrowup'||k==='k'){e.preventDefault();stepViewer(-1)}
  else if(k==='s'&&ad)toggleSave(C.viewer.it.id).then(()=>{const b=$('#vw-save');if(b&&C.viewer)b.outerHTML=saveBtnViewer(C.viewer.it)});
@@ -698,23 +902,36 @@ document.addEventListener('keydown',e=>{if(e.target.matches&&e.target.matches('i
 /* ---------- boot, routing and Briefing Room integration ---------- */
 async function start(){if(C.started)return;C.started=true;draw();
  const tr=loadTrending().then(rows=>{TR=rows.map(normTr);C.week=C.week||(TR[0]&&TR[0].week)||null;C.trBy=Object.fromEntries(TR.map(t=>[t.id,t]));C.tr=true;if(C.ready){counts();if(C.tab==='trending')draw()}}).catch(e=>{C.trErr=e.message;if(C.tab==='trending')draw()});
+ const pf=loadProfiles();
  try{const[rows]=await Promise.all([loadAds(),loadSaves()]);buildData(rows);C.ready=true}catch(e){C.err=e.message}
- draw();if(C.ready)counts();await tr.catch(()=>{})}
-function routeCD(h){const raw=location.hash.slice(1),rq=raw.indexOf('?');const qi=h.indexOf('?');const path=qi<0?h:h.slice(0,qi);if(rq>=0){const r=fFromQS(raw.slice(rq+1));C.f=r.F;C.q=r.q;const qe=$('#cd-q');if(qe)qe.value=C.q;fSave()}CD_PATH=path;const p=path.split('/');C.tab=TABS.some(t=>t[0]===p[1])?p[1]:'discover';C.brand=C.tab==='brands'&&p[2]?p[2]:null;if(C.tab==='boards'&&p[2])C.board=p[2];
- closeFilters();window.scrollTo({top:0});start();draw()}
+ pf.then(()=>{if(C.ready){buildNames();counts();if(C.tab==='brands')draw()}});
+ draw();if(C.ready){counts();openPending()}await tr.catch(()=>{})}
+const TAB_CTX={discover:'discover',jd:'jd',brands:'brand',boards:'board',trending:'trending'};
+function openPending(){const id=C.pendingAd;if(!id||!C.ready)return;C.pendingAd=null;
+ if(!BYID[id]){toast("That ad isn't in Creative Discovery yet");history.replaceState(null,'',hashFor(null));return}
+ if(C.viewer&&C.viewer.mid===id)return;openViewer(id,C.tab==='brands'&&!C.brand?'discover':C.tab==='jd'&&C.jdv==='hooks'?'hooks':TAB_CTX[C.tab]||'discover',true)}
+function routeCD(h){const raw=location.hash.slice(1),rq=raw.indexOf('?');const qi=h.indexOf('?');let path=qi<0?h:h.slice(0,qi);
+ const am=/^(?:(.*)\/)?ad\/([^/]+)$/.exec(path);const adId=am?am[2]:null;if(am)path=am[1]||'discover';
+ /* only the ad part changed (an ad opened or closed, Back or Forward): keep the grid and its scroll position */
+ if(C.started&&path===CD_PATH&&(rq<0?'':raw.slice(rq+1))===fToQS(C.f)&&host()&&host().dataset.built){
+  if(adId){if(!C.viewer||C.viewer.mid!==adId){C.pendingAd=adId;openPending()}}else if(C.viewer)closeViewer('route');return}
+ C.pendingAd=adId;if(C.viewer)closeViewer('route');
+ if(rq>=0){const r=fFromQS(raw.slice(rq+1));C.f=r.F;C.q=r.q;const qe=$('#cd-q');if(qe)qe.value=C.q;fSave()}CD_PATH=path;const p=path.split('/');C.tab=TABS.some(t=>t[0]===p[1])?p[1]:'discover';C.brand=C.tab==='brands'&&p[2]?p[2]:null;C.jdv=C.tab==='jd'&&p[2]==='hooks'?'hooks':'ads';if(C.tab==='boards'&&p[2])C.board=p[2];
+ closeFilters();window.scrollTo({top:0});start();draw();openPending()}
 function inject(){const row=document.querySelector('.proj .wrap');
  if(!document.getElementById('t-cd')){const g=document.createElement('span');g.className='tr-top';g.innerHTML='<span class="lbl">Always on</span><button type="button" class="pj tr-pj" id="t-cd"><i class="cd-dot"></i>Creative Discovery <i>Discover · JD · Trending</i></button>';row.appendChild(g);g.querySelector('button').onclick=()=>location.hash='discover'}
  if(!document.getElementById('v-cd')){const s=document.createElement('section');s.id='v-cd';s.hidden=true;document.querySelector('main').appendChild(s)}}
-const isCD=h0=>{const h=h0.split('?')[0];return h==='discover'||h.startsWith('discover/')||h==='trending'||h==='inspo'||h.startsWith('inspo/')};
+const isCD=h0=>{const h=h0.split('?')[0];return h==='discover'||h.startsWith('discover/')||h==='trending'||h==='inspo'||h.startsWith('inspo/')||h.startsWith('ad/')};
 function hook(){const _show=window.show;window.show=function(tab){const v=document.getElementById('v-cd'),t=document.getElementById('t-cd');const bar=document.querySelector('nav.bar'),pj=document.querySelector('.proj .pj.on:not(#t-cd), .proj .pj.was');
   if(tab==='cd'){document.querySelectorAll('main > section').forEach(x=>x.hidden=true);document.querySelectorAll('nav.bar [data-tab]').forEach(x=>x.setAttribute('aria-pressed',false));v.hidden=false;t.classList.add('on');t.setAttribute('aria-current','true');if(pj){pj.classList.remove('on');pj.classList.add('was')}if(bar)bar.hidden=true;return}
-  hoverOut();closeViewer();apReset();v.hidden=true;t.classList.remove('on');t.removeAttribute('aria-current');if(pj){pj.classList.add('on');pj.classList.remove('was')}if(bar)bar.hidden=false;return _show(tab)};
+  hoverOut();closeViewer('route');apReset();v.hidden=true;t.classList.remove('on');t.removeAttribute('aria-current');if(pj){pj.classList.add('on');pj.classList.remove('was')}if(bar)bar.hidden=false;return _show(tab)};
  const _route=window.route;window.route=function(){const h=decodeURIComponent(location.hash.slice(1));
   if(isCD(h)){document.getElementById('drawer').hidden=true;document.getElementById('scrim').hidden=true;
+   if(h.startsWith('ad/')){history.replaceState(null,'','#discover/'+h);return window.route()}
    if(h==='trending'||h==='inspo'||h.startsWith('inspo/')){history.replaceState(null,'','#discover'+(h==='trending'?'/trending':''));return window.route()}
    window.show('cd');routeCD(h);return}
   return _route()};
  window.removeEventListener('hashchange',_route);window.addEventListener('hashchange',window.route)}
 const wait=setInterval(()=>{if(typeof D==='undefined'||!D||!window.show||!document.getElementById('t-project')||!document.getElementById('t-delivered'))return;clearInterval(wait);inject();hook();if(isCD(decodeURIComponent(location.hash.slice(1))))window.route()},60);
-window.CD={C,open:(id)=>openViewer(id,'discover'),get AP(){return AP},get ADS(){return ADS},get TR(){return TR}};
+window.CD={C,open:(id)=>openViewer(id,'discover'),shareURL,get AP(){return AP},get ADS(){return ADS},get ROWS(){return ROWS},get TR(){return TR}};
 })();
