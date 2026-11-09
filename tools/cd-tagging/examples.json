@@ -1,0 +1,386 @@
+[
+{
+"id": "6af0d1f16c7ca7701767a7de",
+"label": "Headline"
+},
+{
+"id": "6aafcc1dfce96c9e2597424f",
+"label": "Headline"
+},
+{
+"id": "6acedca35c0724606c34c167",
+"label": "Headline"
+},
+{
+"id": "6ab541b0fce96c9e25ba472c",
+"label": "Montage"
+},
+{
+"id": "6ac8e8055c0724606c0d504e",
+"label": "Montage"
+},
+{
+"id": "6aafcc1dfce96c9e259741f7",
+"label": "Montage"
+},
+{
+"id": "6aa2ce13fce96c9e25447d58",
+"label": "Try-On"
+},
+{
+"id": "6aa2ce12fce96c9e25447ccd",
+"label": "Try-On"
+},
+{
+"id": "6aba5facfce96c9e25d9836a",
+"label": "Try-On"
+},
+{
+"id": "6ae5578a286187d48693e36e",
+"label": "Offer-First Banner"
+},
+{
+"id": "6aa69536fce96c9e255caff3",
+"label": "Offer-First Banner"
+},
+{
+"id": "6ac648115c0724606cfb7277",
+"label": "Offer-First Banner"
+},
+{
+"id": "6ab541b0fce96c9e25ba4722",
+"label": "Cinematic B-Roll"
+},
+{
+"id": "6ac648115c0724606cfb728e",
+"label": "Cinematic B-Roll"
+},
+{
+"id": "6aa69536fce96c9e255caff1",
+"label": "Cinematic B-Roll"
+},
+{
+"id": "6aa2ce13fce96c9e25447d6b",
+"label": "Split Screen"
+},
+{
+"id": "6a88fa4cbd1fb96166b73c1b",
+"label": "Split Screen"
+},
+{
+"id": "6a8fbdc354d81c5891f7210b",
+"label": "Split Screen"
+},
+{
+"id": "6ae5578a286187d48693e388",
+"label": "Product Image"
+},
+{
+"id": "6aa2ce12fce96c9e25447cd4",
+"label": "Product Image"
+},
+{
+"id": "6a917d8b0973d6759926f6ee",
+"label": "Product Image"
+},
+{
+"id": "6abf900767369d32ccdd01fa",
+"label": "UGC Overlay"
+},
+{
+"id": "6abf900767369d32ccdd0201",
+"label": "UGC Overlay"
+},
+{
+"id": "6aa2ce12fce96c9e25447cd0",
+"label": "UGC Overlay"
+},
+{
+"id": "6aee7a47326d6d369b4a3892",
+"label": "Demo"
+},
+{
+"id": "6a9cae630973d675996f1df8",
+"label": "Demo"
+},
+{
+"id": "6a84646bbd1fb96166972367",
+"label": "Demo"
+},
+{
+"id": "6a9cae630973d675996f1dd7",
+"label": "Slideshow"
+},
+{
+"id": "6aaaaca5fce96c9e2575a9aa",
+"label": "Slideshow"
+},
+{
+"id": "6a9cae630973d675996f1de0",
+"label": "Slideshow"
+},
+{
+"id": "6ad2a743085dc308b8950fdd",
+"label": "Celebrity"
+},
+{
+"id": "6abee68c67369d32ccd843cb",
+"label": "Celebrity"
+},
+{
+"id": "6ac2cbb767369d32ccf0ff6a",
+"label": "Celebrity"
+},
+{
+"id": "6a8d5faf54d81c5891e6ea5a",
+"label": "Lifestyle Image"
+},
+{
+"id": "6a8d5faf54d81c5891e6ea5b",
+"label": "Lifestyle Image"
+},
+{
+"id": "6adc341f4f255ae65f3c2412",
+"label": "Lifestyle Image"
+},
+{
+"id": "6aa2ce13fce96c9e25447d73",
+"label": "Yapper"
+},
+{
+"id": "6abf900767369d32ccdd020e",
+"label": "Yapper"
+},
+{
+"id": "6aaaaca4fce96c9e2575a953",
+"label": "Yapper"
+},
+{
+"id": "6af0d1f26c7ca7701767a843",
+"label": "Grid Swap"
+},
+{
+"id": "6aeca566e430389503a69701",
+"label": "Grid Swap"
+},
+{
+"id": "6ac94dfb5c0724606c108985",
+"label": "Grid Swap"
+},
+{
+"id": "6ae5578a286187d48693e381",
+"label": "Collage"
+},
+{
+"id": "6ae5578a286187d48693e385",
+"label": "Collage"
+},
+{
+"id": "6aaaaca5fce96c9e2575a9a1",
+"label": "Collage"
+},
+{
+"id": "6ae7d24e119f2013402f8e88",
+"label": "Feature Benefit Pointout"
+},
+{
+"id": "6ac2cb6b67369d32ccf0fc26",
+"label": "Feature Benefit Pointout"
+},
+{
+"id": "6aaf7fb1fce96c9e2595b0fb",
+"label": "Feature Benefit Pointout"
+},
+{
+"id": "6aa2ce13fce96c9e25447d1c",
+"label": "Static To Video Hybrid"
+},
+{
+"id": "6aaaaca5fce96c9e2575a9ca",
+"label": "Static To Video Hybrid"
+},
+{
+"id": "6a7e9f77bd1fb96166729760",
+"label": "Static To Video Hybrid"
+},
+{
+"id": "6add4d0b7c94558bca6dbf5b",
+"label": "Unboxing"
+},
+{
+"id": "6aee7a47326d6d369b4a3892",
+"label": "Unboxing"
+},
+{
+"id": "6a91efa70973d6759929d02b",
+"label": "Unboxing"
+},
+{
+"id": "6acc4ed75c0724606c241518",
+"label": "Behind The Scenes"
+},
+{
+"id": "6aa464a2fce96c9e2550586e",
+"label": "Behind The Scenes"
+},
+{
+"id": "6abf900767369d32ccdd020a",
+"label": "Behind The Scenes"
+},
+{
+"id": "6ac231e167369d32ccec7eb1",
+"label": "Text Overlay"
+},
+{
+"id": "6ab69da6fce96c9e25c3e093",
+"label": "Text Overlay"
+},
+{
+"id": "6a8a6a33bd1fb96166c0a544",
+"label": "Text Overlay"
+},
+{
+"id": "6aeb1107614cef70d7f1950f",
+"label": "Testimonial"
+},
+{
+"id": "6aee7a47326d6d369b4a388a",
+"label": "Testimonial"
+},
+{
+"id": "6a84646bbd1fb9616697235d",
+"label": "Testimonial"
+},
+{
+"id": "6aa2ce13fce96c9e25447d5e",
+"label": "Skit"
+},
+{
+"id": "6a9cae630973d675996f1de4",
+"label": "Skit"
+},
+{
+"id": "6ac85db45c0724606c09549b",
+"label": "Skit"
+},
+{
+"id": "6a9cae630973d675996f1dd8",
+"label": "UGC Selfie"
+},
+{
+"id": "6aaf27d9fce96c9e25934263",
+"label": "UGC Selfie"
+},
+{
+"id": "6abf10cf67369d32ccd932f8",
+"label": "UGC Selfie"
+},
+{
+"id": "6af0d1f431b38702a4138dae",
+"label": "Influencer Endorsement"
+},
+{
+"id": "6af0d1f431b38702a4138dbf",
+"label": "Influencer Endorsement"
+},
+{
+"id": "6abf900767369d32ccdd020d",
+"label": "Influencer Endorsement"
+},
+{
+"id": "6ae689f3119f2013402f63aa",
+"label": "Listicle"
+},
+{
+"id": "6aeafa7cae079e4f84c40b5b",
+"label": "Listicle"
+},
+{
+"id": "6ae689f3119f2013402f63a9",
+"label": "Listicle"
+},
+{
+"id": "6aa0ee40a059f830c273693d",
+"label": "Before and After"
+},
+{
+"id": "6ab541b0fce96c9e25ba470b",
+"label": "Before and After"
+},
+{
+"id": "6aa0ee40a059f830c273693e",
+"label": "Before and After"
+},
+{
+"id": "6aa464a2fce96c9e2550586e",
+"label": "POV"
+},
+{
+"id": "6a84646bbd1fb961669723c1",
+"label": "POV"
+},
+{
+"id": "6aeafa7cae079e4f84c40b67",
+"label": "POV"
+},
+{
+"id": "6af0d1f431b38702a4138de8",
+"label": "Greenscreen"
+},
+{
+"id": "6af0d1f331b38702a4138d3d",
+"label": "Greenscreen"
+},
+{
+"id": "6af0d1f431b38702a4138def",
+"label": "Greenscreen"
+},
+{
+"id": "6abb25e067369d32ccbfd08d",
+"label": "Transformation"
+},
+{
+"id": "6aa8b8b6fce96c9e2569b200",
+"label": "Transformation"
+},
+{
+"id": "6ac5f3935c0724606cf9962a",
+"label": "Transformation"
+},
+{
+"id": "6aa357d6fce96c9e2548a083",
+"label": "Review"
+},
+{
+"id": "6aca36c85c0724606c17195c",
+"label": "Review"
+},
+{
+"id": "6aca36c85c0724606c1719ff",
+"label": "Review"
+},
+{
+"id": "6aa0ee40a059f830c273693d",
+"label": "Street Interview"
+},
+{
+"id": "6aaaaca4fce96c9e2575a945",
+"label": "Street Interview"
+},
+{
+"id": "6aaaaca4fce96c9e2575a946",
+"label": "Street Interview"
+},
+{
+"id": "6ac2468567369d32cced52a6",
+"label": "Studio Shot"
+},
+{
+"id": "6abe0ddf67369d32ccd27f39",
+"label": "Studio Shot"
+},
+{
+"id": "6aefbc8d7f5a9a1e26201e96",
+"label": "Studio Shot"
+}
+]

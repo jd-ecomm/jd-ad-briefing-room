@@ -1,0 +1,55 @@
+name: Creative Discovery tagging contact sheets
+
+# Builds labelled contact sheets (JPEG) of ad media for visual-format tagging (scripts/cd_contact_sheets.py).
+on:
+  workflow_dispatch:
+    inputs:
+      set:
+        description: "Which set"
+        required: true
+        type: choice
+        options: [examples, blind, blind2, gaps]
+      part:
+        description: "Part number for gaps (1-based, blank = all)"
+        required: false
+        default: ""
+      part_size:
+        description: "Ads per part"
+        required: false
+        default: "300"
+
+concurrency:
+  group: cd-contact-sheets-${{ inputs.set }}-${{ inputs.part }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sheets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ffmpeg and Python deps
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+          pip install -q requests pillow
+      - name: Build contact sheets
+        env:
+          SUPABASE_URL: https://cymkcvdsxoneojfisjgk.supabase.co
+          # Public anon key (same as cd-media-copy.yml); read only use here.
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5bWtjdmRzeG9uZW9qZmlzamdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxMTg0ODQsImV4cCI6MjEwODY5NDQ4NH0.rgRRRXCab-s5xy4ICFa_l511Gol8EMqPEjBHThnAC9I' }}
+          SET: ${{ inputs.set }}
+          PART: ${{ inputs.part }}
+          PART_SIZE: ${{ inputs.part_size }}
+        run: python3 -u scripts/cd_contact_sheets.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sheets-${{ inputs.set }}${{ inputs.part && format('-p{0}', inputs.part) || '' }}
+          path: out/
+          retention-days: 7
