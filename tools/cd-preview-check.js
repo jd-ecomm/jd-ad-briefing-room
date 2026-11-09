@@ -24,7 +24,8 @@ function fixtureRows() {
       headline: 'Fixture headline ' + i, copy: 'Fixture ad copy for ad ' + i + '. Shop the drop.', cta: 'Shop now', landing: 'https://example.com/collections/x', video: null, video_s: null,
       video_r2: f === 'video' ? `https://pub-fx.r2.dev/cd/${id}/v_${k}.mp4` : null, poster: null, poster_frame: true, images: [], images_s: [],
       images_r2: f === 'video' ? { poster: `https://pub-fx.r2.dev/cd/${id}/p_${k}.jpg` } : f === 'carousel' ? [1, 2, 3].map(n => `https://pub-fx.r2.dev/cd/${id}/p_${k}.jpg?${n}`) : [`https://pub-fx.r2.dev/cd/${id}/p_${k}.jpg`],
-      thumb_s: null, thumb_r2: `https://pub-fx.r2.dev/cd/${id}/p_${k}.jpg`, saves: i % 13, market: mk, concept_key: bid + (i % 11), variant_group: i % 9 === 0 && i < 130 ? 'vg' + i : 'vgs' + i, formats: [], first_seen: sd, hook_text: i === 0 ? 'KNOCK KNOCK...NEW BALANCE 204L AT JD' : (i % 3 ? null : 'Fixture hook ' + i), onscreen_text: i % 4 ? null : 'On-screen ' + i, hook_kind: i % 5 === 1 ? 'visual' : 'text', vf_source: i % 2 ? 'motion' : 'claude', focus: i % 7 === 0 });
+      thumb_s: null, thumb_r2: `https://pub-fx.r2.dev/cd/${id}/p_${k}.jpg`, saves: i % 13, market: mk, concept_key: bid + (i % 11), variant_group: i % 9 === 0 && i < 130 ? 'vg' + i : 'vgs' + i, formats: [], first_seen: sd, hook_text: i === 0 ? 'KNOCK KNOCK...NEW BALANCE 204L AT JD' : (i % 3 ? null : 'Fixture hook ' + i), onscreen_text: i % 4 ? null : 'On-screen ' + i, hook_kind: i % 5 === 1 ? 'visual' : 'text', vf_source: i % 2 ? 'motion' : 'claude', focus: i % 7 === 0, hook_source: 'claude', ad_library: 'https://www.facebook.com/ads/library/?id=' + (1000 + i),
+      hook_format: i === 0 ? 'Teaser / Knock knock' : i % 5 === 1 ? 'Visual only' : ['Question', 'Callout', 'Drop / New in alert', 'Offer / Price first', 'Statement / Claim'][i % 5], hook_template: i === 0 ? 'KNOCK KNOCK...[PRODUCT] AT JD' : (i % 3 ? null : 'FIXTURE HOOK [N]') });
     if (i % 9 === 0 && i < 130) { const b2 = Object.assign({}, rows[rows.length - 1], { id: id + 'b', aspect: '9:16', format: 'video', video_r2: `https://pub-fx.r2.dev/cd/${id}b/v_9x16.mp4`, images_r2: { poster: `https://pub-fx.r2.dev/cd/${id}b/p_9x16.jpg` }, thumb_r2: `https://pub-fx.r2.dev/cd/${id}b/p_9x16.jpg` }); rows.push(b2); }
   }
   return rows;
@@ -235,6 +236,7 @@ async function run(vp) {
 
   await shareChecks(page, ctx, tag, shot);
   await brandChecks(page, tag, shot);
+  await hookChecks(page, tag, shot);
 
   // No diagonal placeholders or "Loading ads" text anywhere
   ok(`${tag} loading: no "Loading ads" bar or diagonal placeholders`, await page.evaluate(() => !/Loading ads/i.test(document.body.innerText) && !document.querySelector('#v-cd .ph, #cd-vw .ph')));
@@ -378,6 +380,56 @@ async function brandChecks(page, tag, shot) {
     ok(`${tag} Brands: back keeps the search`, back.q === qq && back.n >= 1, JSON.stringify(back));
   }
   await q('');
+}
+// Part 3: JD > Hooks view, chart click filters the library, CSV downloads, Hook format filter in the Filters drawer
+async function hookChecks(page, tag, shot) {
+  await page.evaluate(() => { location.hash = 'discover/jd'; }); await page.waitForTimeout(600);
+  ok(`${tag} JD: Ads | Hooks switch`, await page.evaluate(() => !!document.querySelector('.cd-seg2 [data-jdv="hooks"]') && document.querySelector('.cd-seg2 [data-jdv="ads"]').getAttribute('aria-selected') === 'true'));
+  await page.click('.cd-seg2 [data-jdv="hooks"]'); await page.waitForSelector('.cd-hooks', { timeout: 15000 }).catch(() => { }); await page.waitForTimeout(700);
+  const hv = await page.evaluate(() => ({ hash: location.hash, strip: [...document.querySelectorAll('.cd-hs .lbl')].map(x => x.textContent), bars: document.querySelectorAll('.cd-hbc [data-hkf]').length, sig: document.querySelectorAll('.cd-tbl .cd-tr:not(.cd-th)').length,
+    trend: document.querySelectorAll('.cd-sm').length, tps: document.querySelectorAll('.cd-tp').length, ai: document.querySelectorAll('.cd-tp-ai li').length, rows: document.querySelectorAll('.cd-hr').length, thumb: !!document.querySelector('.cd-hr-m img'), copy: document.querySelectorAll('.cd-hr [data-copy]').length,
+    signalsLbl: /not results/i.test(document.body.innerText), filters: ['fmt', 'mkt', 'kind', 'min', 'sort'].every(k => document.querySelector(`[data-hk="${k}"]`)), csv: document.querySelectorAll('[data-hkcsv]').length, fb: document.getElementById('cd-fbtn').hidden }));
+  ok(`${tag} Hooks: header strip, format bars, signals (not results), trend, templates with AI suggestions, library with thumbs and Copy link`, /#discover\/jd\/hooks/.test(hv.hash) && hv.strip.length === 5 && hv.bars >= 3 && hv.sig >= 3 && hv.trend >= 1 && hv.trend <= 5 && hv.tps >= 1 && hv.ai >= 3 && hv.rows > 0 && hv.thumb && hv.copy === hv.rows && hv.signalsLbl && hv.filters && hv.csv === 2, JSON.stringify(hv));
+  await noHScrollP(page, tag, 'Hooks');
+  await shot('hooks');
+  const fmt = await page.evaluate(() => { const b = [...document.querySelectorAll('.cd-hbc [data-hkf]')].find(b => b.dataset.hkf !== 'Visual only'); return b ? b.dataset.hkf : null; });
+  await page.click(`.cd-hbc [data-hkf="${fmt}"]`); await page.waitForTimeout(500);
+  const fl = await page.evaluate(f => ({ chips: [...document.querySelectorAll('.cd-hr .cd-mk.y')].map(x => x.textContent), count: document.querySelector('#cd-hrows .cd-bcount')?.textContent, want: window.CD.ROWS.filter(m => m.mk && m.hkind && m.hf === f).length, sel: document.querySelector('[data-hk="fmt"]').value }), fmt);
+  ok(`${tag} Hooks: clicking a bar ("${fmt}") filters the library`, fl.chips.length > 0 && fl.chips.every(x => x === fmt) && fl.sel === fmt && new RegExp('^' + fl.want.toLocaleString('en-CA') + ' hook').test(fl.count || ''), JSON.stringify({ ...fl, chips: fl.chips.length }));
+  await shot('hooks-filtered');
+  if (tag === 'd') {
+    const dl = async which => { const [d] = await Promise.all([page.waitForEvent('download', { timeout: 15000 }), page.click(`[data-hkcsv="${which}"]`)]); const f = await d.path(); const buf = fs.readFileSync(f); const txt = buf.toString('utf8');
+      const rows = []; let row = [], cur = '', q = false; const t = txt.replace(/^\ufeff/, ''); for (let i = 0; i < t.length; i++) { const c = t[i]; if (q) { if (c === '"') { if (t[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; } else if (c === '"') q = true; else if (c === ',') { row.push(cur); cur = ''; } else if (c === '\n') { row.push(cur.replace(/\r$/, '')); rows.push(row); row = []; cur = ''; } else cur += c; }
+      return { bom: buf[0] === 0xEF && buf[1] === 0xBB && buf[2] === 0xBF, header: rows[0], n: rows.length - 1, name: d.suggestedFilename(), widths: [...new Set(rows.map(r => r.length))] }; };
+    const want = 'ad_id,brand,market,launch_date,days_live,format,aspect,hook_text,hook_format,hook_template,onscreen_text,meta_headline,primary_text,landing_url,proven_score,ad_link,ad_library_link';
+    const c1 = await dl('filtered');
+    ok(`${tag} Hooks: "Download hooks (CSV)" has BOM, the right header and ${fl.want} rows`, c1.bom && c1.header.join(',') === want && c1.n === fl.want && c1.widths.length === 1, JSON.stringify(c1));
+    const wantAll = await page.evaluate(() => window.CD.ROWS.filter(m => m.hkind).length);
+    const c2 = await dl('all');
+    ok(`${tag} Hooks: "Download all (CSV)" has every hook read (${wantAll} rows), same header`, c2.bom && c2.header.join(',') === want && c2.n === wantAll && c2.widths.length === 1, JSON.stringify(c2));
+  }
+  await page.click(`.cd-hbc [data-hkf="${fmt}"]`); await page.waitForTimeout(300);
+  await page.evaluate(() => { location.hash = 'discover/jd/hooks'; }); await page.waitForTimeout(300);
+  await page.click('[data-hkbym="1"]'); await page.waitForTimeout(300);
+  ok(`${tag} Hooks: by-market toggle shows each market's share`, await page.evaluate(() => document.querySelectorAll('.cd-hm-h [role=columnheader]').length >= 3 && document.querySelectorAll('.cd-hm-c').length > 3));
+  await page.click('[data-hkbym="0"]'); await page.waitForTimeout(300);
+  const rid = await page.evaluate(() => document.querySelector('.cd-hr')?.dataset.id);
+  await page.evaluate(id => document.querySelector(`.cd-hr[data-id="${id}"] .cd-hr-h`).click(), rid); await page.waitForSelector('#cd-vw:not([hidden]) .phone', { timeout: 10000 }).catch(() => { }); await page.waitForTimeout(500);
+  const ov = await page.evaluate(() => ({ mid: window.CD.C.viewer && window.CD.C.viewer.mid, hash: location.hash }));
+  ok(`${tag} Hooks: clicking a hook opens the viewer on that ad`, ov.mid === rid && ov.hash.includes('/ad/' + rid), JSON.stringify(ov));
+  await page.keyboard.press('Escape'); await page.waitForTimeout(400);
+  ok(`${tag} Hooks: Esc returns to the Hooks view`, await page.evaluate(() => document.getElementById('cd-vw').hidden && !!document.querySelector('.cd-hooks') && location.hash === '#discover/jd/hooks'));
+  // Hook format in the Filters drawer (Discover)
+  await page.evaluate(() => { location.hash = 'discover'; }); await page.waitForTimeout(600);
+  await page.click('#cd-fbtn'); await page.waitForSelector('#cd-fd:not([hidden]) .cd-fd', { timeout: 5000 }).catch(() => { }); await page.waitForTimeout(300);
+  const g = await page.evaluate(() => { const s = [...document.querySelectorAll('#cd-fd .cd-fd-g')].find(x => x.querySelector('.lbl')?.textContent === 'Hook format'); return s ? [...s.querySelectorAll('[data-fd]')].map(b => [b.dataset.fd, +b.querySelector('small').textContent.replace(/,/g, '')]) : null; });
+  ok(`${tag} filters: Hook format group with counts`, g && g.length >= 3 && g.every(x => /^hf\|/.test(x[0])), JSON.stringify(g));
+  const pick = g && (g.find(x => x[0] === 'hf|Question') || g.find(x => x[1] > 0));
+  if (pick) { await page.click(`#cd-fd [data-fd="${pick[0]}"]`); await page.waitForTimeout(250); await page.click('#cd-fd [data-fdapply]'); await page.waitForTimeout(700);
+    const r = await page.evaluate(v => ({ n: window.CD.C.lists.discover.length, ok: window.CD.C.lists.discover.every(a => a.hfs.has(v)), chip: document.querySelectorAll('#cd-act [data-rmf^="hf|"]').length, hash: location.hash }), pick[0].slice(3));
+    ok(`${tag} filters: Hook format "${pick[0].slice(3)}" applies in Discover (${pick[1]} cards)`, r.n === pick[1] && r.ok && r.chip === 1 && /hf=/.test(r.hash), JSON.stringify(r));
+    await shot('filter-hookformat');
+    await page.click('#cd-act [data-fclear]'); await page.waitForTimeout(400); }
 }
 async function noHScrollP(page, tag, where) { const r = await page.evaluate(() => [document.documentElement.scrollWidth, window.innerWidth]); ok(`${tag} ${where}: no horizontal scroll`, r[0] <= r[1] + 1, `scrollWidth ${r[0]} vs ${r[1]}`); }
 async function settleP(page) { await page.waitForFunction(() => { const imgs = [...document.querySelectorAll('.cd-fr img.cd-po')].slice(0, 30); return imgs.length && imgs.every(i => i.complete); }, null, { timeout: 30000 }).catch(() => { }); await page.waitForTimeout(500); }
