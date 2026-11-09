@@ -183,7 +183,13 @@ function fFromQS(qs){const F=F0();const p=new URLSearchParams(qs);SETS.forEach(k
  if(p.get('ai')==='0')F.ai=false;return{F,q:p.get('q')||''}}
 function fSave(){store.set('filters',fToQS(C.f))}
 let CD_PATH='discover';
-function syncURL(){const qs=fToQS(C.f);const want='#'+CD_PATH+(qs?'?'+qs:'');if(location.hash!==want)history.replaceState(null,'',want)}
+function syncURL(){const want=hashFor(C.viewer?C.viewer.mid:C.pendingAd);if(location.hash!==want)history.replaceState(null,'',want)}
+/* shareable ad links: #<current path>/ad/<ad_id> (e.g. #discover/ad/<id>); old #ad/<id> links are accepted too */
+function hashFor(id){const qs=fToQS(C.f);return'#'+CD_PATH+(id?'/ad/'+id:'')+(qs?'?'+qs:'')}
+const shareURL=id=>location.origin+location.pathname+'#'+CD_PATH+'/ad/'+id;
+async function copyText(t){try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(t);return true}}catch(e){}
+ const ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}ta.remove();return ok}
+async function copyLink(id){const ok=await copyText(shareURL(id));toast(ok?'Link copied':'Could not copy the link')}
 function fCommit(F){C.f=F;fSave();draw()}
 
 /* ---------- filters drawer (right drawer on desktop, bottom sheet on phones) ---------- */
@@ -292,7 +298,7 @@ function card(it,ctx){const m=cur(it);const saved=isSaved(it);
  return`<article class="cd-card" data-id="${esc(it.id)}">
   <header class="cd-ch">${logoHTML(it.b,it.logo)}<div class="cd-cht"><b>${esc(it.b)}</b><small>${topMeta(it)}</small></div></header>
   ${frameHTML(it,ctx)}${fseg}
-  <footer class="cd-cf">${pill}<span class="cd-meta">${meta.map(esc).join(' · ')}</span>${fb}${it.src==='ad'?`<button type="button" class="cd-save" data-save="${esc(it.id)}" aria-pressed="${saved}" aria-label="${saved?'Remove from saved':'Save'}">${sv(saved?I.bmf:I.bm,17)}</button>`:''}</footer></article>`}
+  <footer class="cd-cf">${pill}<span class="cd-meta">${meta.map(esc).join(' · ')}</span>${fb}${it.src==='ad'?`<button type="button" class="cd-save cd-share" data-copy="${esc(it.id)}" aria-label="Copy link" title="Copy link">${sv(I.link,16)}</button>`:''}${it.src==='ad'?`<button type="button" class="cd-save" data-save="${esc(it.id)}" aria-pressed="${saved}" aria-label="${saved?'Remove from saved':'Save'}">${sv(saved?I.bmf:I.bm,17)}</button>`:''}</footer></article>`}
 const fmtWeek=w=>w?'Week of '+new Date(w+'T12:00').toLocaleDateString('en-CA',{day:'numeric',month:'short'}):'';
 
 /* ---------- masonry grid (shortest column first, true aspect heights, grows on scroll) ---------- */
@@ -382,6 +388,7 @@ const sortKey=()=>C.tab==='brands'?(C.brand?'brand':null):C.tab==='jd'?null:C.ta
 function onClick(e){const t=e.target;
  const cs=t.closest('[data-cs]');if(cs){e.stopPropagation();stepCarousel(cs);return}
  const sb=t.closest('[data-save]');if(sb){toggleSave(sb.dataset.save);return}
+ const cp=t.closest('[data-copy]');if(cp){e.preventDefault();e.stopPropagation();copyLink(cp.dataset.copy);return}
  const fb=t.closest('[data-fmt]');if(fb){const[id,k]=fb.dataset.fmt.split('|');C.fmt[id]=k;const art=fb.closest('.cd-card');const it=BYID[id];if(art&&it){const ctx=art.querySelector('.cd-fr').dataset.ctx;const t2=document.createElement('template');t2.innerHTML=ctx==='jd'?jdCard(it,ctx):card(it,ctx);const nw=t2.content.firstElementChild;art.replaceWith(nw);apWatch(nw);apSync()}return}
  const fr=t.closest('.cd-fr');if(fr){openViewer(fr.dataset.open,fr.dataset.ctx);return}
  const rf=t.closest('[data-rmf]');if(rf){const[g,v]=rf.dataset.rmf.split(/\|(.*)/s);rmFilter(g,v||'');return}
@@ -426,7 +433,7 @@ function jdCard(a,ctx){const m=cur(a);const saved=isSaved(a);const r=m.ratio||ra
  return`<article class="cd-card cd-jc" data-id="${esc(a.id)}"><div class="cd-jc-m" style="--r:${r.toFixed(4)}">${frameHTML(a,'jd')}</div>
   <div class="cd-jc-i"><b class="cd-jc-t">${esc(a.h||jdTitle(a))}</b><small class="cd-jc-s">${a.d} days · ${m.kind} · ${esc(a.lp)}</small>
    <div class="cd-jc-c"><span class="cd-mk">${esc(a.mk)}</span>${a.nf>=2?`<span class="cd-mk">${a.nf} formats</span>`:''}${a.vf.slice(0,2).map(v=>`<span class="cd-mk">${esc(v)}</span>`).join('')}</div>
-   ${fseg}<div class="cd-jc-f">${logoHTML(a.b,a.logo)}<span class="cd-jc-b">${esc(a.b)}</span><button type="button" class="cd-save" data-save="${esc(a.id)}" aria-pressed="${saved}" aria-label="${saved?'Remove from saved':'Save'}">${sv(saved?I.bmf:I.bm,17)}</button></div></div></article>`}
+   ${fseg}<div class="cd-jc-f">${logoHTML(a.b,a.logo)}<span class="cd-jc-b">${esc(a.b)}</span><button type="button" class="cd-save cd-share" data-copy="${esc(a.id)}" aria-label="Copy link" title="Copy link">${sv(I.link,16)}</button><button type="button" class="cd-save" data-save="${esc(a.id)}" aria-pressed="${saved}" aria-label="${saved?'Remove from saved':'Save'}">${sv(saved?I.bmf:I.bm,17)}</button></div></div></article>`}
 const jdCols=w=>w<760?1:2;
 const jdEst=(it,r)=>{const one=(host()&&host().clientWidth||1200)<760;return one?Math.min(1/r,1.25)+.45:Math.max(.62,Math.min(440,400/r)/620)+.04};
 function vJD(body){const mkts=['all',...WORLD.map(w=>w[0]),'JD France'];
@@ -450,7 +457,7 @@ function vJD(body){const mkts=['all',...WORLD.map(w=>w[0]),'JD France'];
   if(e.target.closest('[data-gmore]')){const y=scrollY;C.gshow=show+60;draw();scrollTo(0,y);return}
   const g=e.target.closest('[data-golib]');if(g){goTag(g.dataset.golib.slice(4))}}}
 function tipHTML(text,label='How the Proven score works'){return`<details class="tip"><summary aria-label="${esc(label)}">${sv(I.info,18)}</summary><div class="tipbox" role="note">${esc(text)}</div></details>`}
-function goTag(t){closeViewer();fReset();C.f.tag.add(t);fSave();if(location.hash==='#discover')draw();else location.hash='discover'}
+function goTag(t){closeViewer('nav');fReset();C.f.tag.add(t);fSave();if(location.hash==='#discover')draw();else location.hash='discover'}
 function vTrending(body){if(C.trErr){head('Trending','');body.innerHTML=`<div class="cd-note"><b>Can't load trending ads.</b> ${esc(C.trErr)}</div>`;return}
  if(!C.tr){head('Trending','&nbsp;');body.innerHTML=LOADER;return}
  const weeks=[...new Set(TR.map(r=>r.week))];if(!C.week)C.week=weeks[0];
@@ -563,28 +570,36 @@ function onLayerClick(e){const t=e.target;
  const fb=t.closest('[data-fmt]');if(fb&&C.viewer){e.stopPropagation();viewerFormat(fb.dataset.fmt.split('|')[1]);return}
  const sb=t.closest('[data-save]');if(sb){e.stopPropagation();toggleSave(sb.dataset.save).then(()=>{if(C.viewer){const b=$('#vw-save');const it=BYID[sb.dataset.save];if(b&&it)b.outerHTML=saveBtnViewer(it)}const on=isSaved(BYID[sb.dataset.save]||{members:[]});$$(`.cd-dv [data-save="${sb.dataset.save}"].it`).forEach(x=>{x.setAttribute('aria-pressed',on);x.innerHTML=on?I.bmf:I.bm})});return}
  const bd=t.closest('[data-board]');if(bd){e.stopPropagation();boardDialog(bd.dataset.board);return}
- const rf=t.closest('[data-reelsfrom]');if(rf){const id=rf.dataset.reelsfrom;const list=C.viewer?C.viewer.list:[BYID[id]];closeViewer();openReels(list,id);return}
+ const cp=t.closest('[data-copy]');if(cp){e.preventDefault();e.stopPropagation();copyLink(cp.dataset.copy);return}
+ const rf=t.closest('[data-reelsfrom]');if(rf){const id=rf.dataset.reelsfrom;const list=C.viewer?C.viewer.list:[BYID[id]];closeViewer('nav');openReels(list,id);return}
  const g=t.closest('[data-golib]');if(g){goTag(g.dataset.golib.slice(4));return}
- const bl=t.closest('[data-brandlink]');if(bl){e.preventDefault();closeViewer();location.hash='discover/brands/'+bl.dataset.brandlink;return}
+ const bl=t.closest('[data-brandlink]');if(bl){e.preventDefault();closeViewer('nav');location.hash='discover/brands/'+bl.dataset.brandlink;return}
  const op=t.closest('.cd-fr[data-open]');if(op&&C.viewer&&!t.closest('[data-cs]')){openViewer(op.dataset.open,op.dataset.ctx);return}}
-function openViewer(id,ctx){const it=BYID[id]||(C.trBy&&C.trBy[id]);if(!it)return;hoverOut();[...AP_ON].forEach(apStop);
- const lst=(C.lists[ctx]||[]).includes(it)?C.lists[ctx]:[it];let f=it.src==='ad'?(C.fmt[it.id]||it.def):null;
- if(it.src==='ad'&&id!==it.id){const mem=it.members.find(m=>m.id===id);if(mem&&it.fm[mem.asp]===mem){f=mem.asp;C.fmt[it.id]=f}}
- const keepFocus=C.viewer?C.viewer.focus:document.activeElement;
- C.viewer={it,list:lst,fmt:f,pl:plFor(f||'',null),ctx,focus:keepFocus};
+function openViewer(id,ctx,fromRoute){const it=BYID[id]||(C.trBy&&C.trBy[id]);if(!it)return;hoverOut();[...AP_ON].forEach(apStop);
+ const lst=(C.lists[ctx]||[]).includes(it)?C.lists[ctx]:[it];let f=it.src==='ad'?(C.fmt[it.id]||it.def):null;let exact=null;
+ if(it.src==='ad'&&id!==it.id){const mem=it.members.find(m=>m.id===id);if(mem){f=mem.asp;C.fmt[it.id]=f;exact=mem}}
+ const was=C.viewer;const keepFocus=was?was.focus:document.activeElement;
+ /* a new history entry when an ad is opened from the page, so Back closes it; inside the viewer the entry is replaced */
+ const pushed=was?was.pushed:(!fromRoute&&it.src==='ad');
+ C.viewer={it,list:lst,fmt:f,pl:plFor(f||'',null),ctx,focus:keepFocus,exact,pushed};
+ if(it.src==='ad'&&!fromRoute&&!was)history.pushState(null,'',hashFor(id));
  const L=vLayer('cd-vw','layer','Ad viewer');L.hidden=false;document.documentElement.style.overflow='hidden';drawViewer();$('[data-x]',L).focus()}
-function closeViewer(){const L=$('#cd-vw');if(!L||L.hidden)return;$$('video',L).forEach(v=>{v.pause();v.removeAttribute('src');v.load()});L.hidden=true;L.innerHTML='';document.documentElement.style.overflow='';
- const f=C.viewer&&C.viewer.focus;C.viewer=null;if(f&&f.isConnected)try{f.focus({preventScroll:true})}catch(e){}apSync()}
-function stepViewer(d){const V=C.viewer;const i=V.list.indexOf(V.it);V.it=V.list[(i+d+V.list.length)%V.list.length];V.fmt=V.it.src==='ad'?(C.fmt[V.it.id]||V.it.def):null;V.pl=plFor(V.fmt||'',V.pl);V.plSet=0;drawViewer()}
-function viewerFormat(k){const V=C.viewer;if(!V||V.it.src!=='ad'||!V.it.fm[k])return;V.fmt=k;V.pl=plFor(k,V.pl);C.fmt[V.it.id]=k;drawViewer(true)}
+/* mode: 'user' (close button, Esc: Back if the viewer added a history entry), 'nav' (another view opens next), 'route' (the URL already changed) */
+function closeViewer(mode){const L=$('#cd-vw');if(!L||L.hidden)return;$$('video',L).forEach(v=>{v.pause();v.removeAttribute('src');v.load()});L.hidden=true;L.innerHTML='';document.documentElement.style.overflow='';
+ const V=C.viewer;const f=V&&V.focus;C.viewer=null;
+ if(mode!=='route'&&/^#discover[^?]*\/ad\//.test(location.hash)){if(mode==='user'&&V&&V.pushed)history.back();else history.replaceState(null,'',hashFor(null))}
+ if(f&&f.isConnected)try{f.focus({preventScroll:true})}catch(e){}apSync()}
+function stepViewer(d){const V=C.viewer;const i=V.list.indexOf(V.it);V.it=V.list[(i+d+V.list.length)%V.list.length];V.exact=null;V.fmt=V.it.src==='ad'?(C.fmt[V.it.id]||V.it.def):null;V.pl=plFor(V.fmt||'',V.pl);V.plSet=0;drawViewer()}
+function viewerFormat(k){const V=C.viewer;if(!V||V.it.src!=='ad'||!V.it.fm[k])return;V.fmt=k;V.exact=null;V.pl=plFor(k,V.pl);C.fmt[V.it.id]=k;drawViewer(true)}
 function viewerPlacement(pl){const V=C.viewer,it=V.it;V.pl=pl;V.plSet=1;
- if(it.src==='ad'){if(pl==='feed'&&V.fmt==='9:16'){const k=['4:5','1:1','16:9'].find(x=>it.fm[x]);if(k)V.fmt=k}if(pl!=='feed'&&V.fmt!=='9:16'&&it.fm['9:16'])V.fmt='9:16'}drawViewer(true)}
+ if(it.src==='ad'){const f0=V.fmt;if(pl==='feed'&&V.fmt==='9:16'){const k=['4:5','1:1','16:9'].find(x=>it.fm[x]);if(k)V.fmt=k}if(pl!=='feed'&&V.fmt!=='9:16'&&it.fm['9:16'])V.fmt='9:16';if(V.fmt!==f0)V.exact=null}drawViewer(true)}
 function cycleFormat(){const V=C.viewer,it=V.it;if(it.src!=='ad'||it.nf<2)return;const i=it.fl.indexOf(V.fmt);viewerFormat(it.fl[(i+1)%it.fl.length])}
 function miniRow(list,ctx){C.lists[ctx]=list;return`<div class="mini">${list.map(x=>card(x,ctx)).join('')}</div>`}
 function drawViewer(keepScroll){const V=C.viewer,it=V.it,L=$('#cd-vw');
  const sc=keepScroll&&L.querySelector('.vw-body')?L.querySelector('.vw-body').scrollTop:0;
  $$('video',L).forEach(v=>{v.pause();v.removeAttribute('src');v.load()});
- const tr=it.src==='tr';const m=tr?it:(it.fm[V.fmt]||cur(it));
+ const tr=it.src==='tr';const m=tr?it:(V.exact&&V.exact.asp===V.fmt?V.exact:(it.fm[V.fmt]||cur(it)));
+ V.mid=tr?null:m.id;if(!tr){const want=hashFor(m.id);if(location.hash!==want)history.replaceState(null,'',want)}
  if(tr&&!V.plSet){const r=parseFloat((document.querySelector(`.cd-fr[data-open="${it.id}"]`)||{dataset:{}}).dataset.nat||0);V.pl=r&&r<.7?'reels':'feed';m.asp=r?(r<.7?'9:16':r<.9?'4:5':r<1.3?'1:1':'16:9'):'4:5'}
  const i=V.list.indexOf(it);
  const plBtns=[['reels','Reels'],['stories','Stories'],['feed','Feed']];
@@ -609,7 +624,7 @@ function drawViewer(keepScroll){const V=C.viewer,it=V.it,L=$('#cd-vw');
   info=`<div class="vw-info">
    <div class="meta">${logoHTML(it.b,it.logo,'logo')}<div class="tx"><b>${esc(it.b)}</b><small>${esc(it.g)}${it.market?' · '+esc(it.market):''} · ${it.st==='active'?'Live':'Ended '+fmtDate(m.ed)}${m.pl.length?' · '+esc(m.pl.join(', ')):''}</small></div></div>
    <h2 class="display">${esc(m.h||jdTitle(m))}</h2>
-   <div class="actions">${saveBtnViewer(it)}<button type="button" class="pill" data-board="${esc(it.id)}">${sv(I.board)} Add to board</button><button type="button" class="pill" data-reelsfrom="${esc(it.id)}">${sv(I.reels)} Reels mode</button>${m.l?`<a class="pill ghost" href="${esc(m.l)}" target="_blank" rel="noopener">Landing page ${I.ext}</a>`:''}</div>
+   <div class="actions">${saveBtnViewer(it)}<button type="button" class="pill" data-board="${esc(it.id)}">${sv(I.board)} Add to board</button><button type="button" class="pill" data-reelsfrom="${esc(it.id)}">${sv(I.reels)} Reels mode</button><button type="button" class="pill" id="vw-copy" data-copy="${esc(m.id)}">${sv(I.link)} Copy link</button>${m.l?`<a class="pill ghost" href="${esc(m.l)}" target="_blank" rel="noopener">Landing page ${I.ext}</a>`:''}</div>
    <div class="kbd"><span><kbd>←</kbd><kbd>→</kbd>Previous, next</span>${it.nf>=2?'<span><kbd>F</kbd>Next format</span>':''}<span><kbd>S</kbd>Save</span><span><kbd>B</kbd>Board</span><span><kbd>M</kbd>Mute</span><span><kbd>Esc</kbd>Close</span></div>
    <div class="two">
     <div class="panel"><div class="lbl" style="margin-bottom:8px;display:flex;align-items:center;gap:6px">Proven score ${tipHTML(PROVEN_TIP)}</div>
@@ -638,7 +653,7 @@ function drawViewer(keepScroll){const V=C.viewer,it=V.it,L=$('#cd-vw');
     ${same.length?`<div class="lbl" style="margin:14px 0 8px">More from ${esc(it.b)}</div>${miniRow(same,'cluster')}`:''}</div>
    <div class="panel"><div class="lbl" style="margin-bottom:10px">More like this</div>${miniRow(like,'like')}</div></div>`}
  L.innerHTML=`${top}<div class="vw-body"><div class="vw-grid">${stage}${info}</div></div>`;
- L.querySelector('[data-x]').onclick=()=>closeViewer();L.querySelector('[data-prev]').onclick=()=>stepViewer(-1);L.querySelector('[data-next]').onclick=()=>stepViewer(1);
+ L.querySelector('[data-x]').onclick=()=>closeViewer('user');L.querySelector('[data-prev]').onclick=()=>stepViewer(-1);L.querySelector('[data-next]').onclick=()=>stepViewer(1);
  $$('button[data-pl]',L).forEach(b=>b.onclick=()=>viewerPlacement(b.dataset.pl));
  const pm=$('#pv-mute');if(pm)pm.onclick=togglePreviewMute;
  const tl=$('#tl');if(tl)tl.onclick=e=>{const v=$('#pv-video');if(!v||!v.duration)return;const r=tl.getBoundingClientRect();v.currentTime=(e.clientX-r.left)/r.width*v.duration};
@@ -686,7 +701,7 @@ document.addEventListener('keydown',e=>{if(e.target.matches&&e.target.matches('i
  if($('#cd-dlg')&&$('#cd-dlg').innerHTML){if(e.key==='Escape')$('#cd-dlg').innerHTML='';return}
  const R=$('#cd-reels');if(R&&!R.hidden){const k=e.key.toLowerCase();if(k==='escape')closeReels();else if(k==='arrowdown'||k==='arrowright'||k==='j'){e.preventDefault();reelStep(1)}else if(k==='arrowup'||k==='arrowleft'||k==='k'){e.preventDefault();reelStep(-1)}else if(k==='m')reelSound();else if(k==='s'){const a=currentReel();if(a)toggleSave(a)}return}
  if(!C.viewer)return;const k=e.key.toLowerCase();const ad=C.viewer.it.src==='ad';
- if(k==='escape')closeViewer();
+ if(k==='escape')closeViewer('user');
  else if(k==='arrowright'||k==='arrowdown'||k==='j'){e.preventDefault();stepViewer(1)}
  else if(k==='arrowleft'||k==='arrowup'||k==='k'){e.preventDefault();stepViewer(-1)}
  else if(k==='s'&&ad)toggleSave(C.viewer.it.id).then(()=>{const b=$('#vw-save');if(b&&C.viewer)b.outerHTML=saveBtnViewer(C.viewer.it)});
@@ -699,22 +714,33 @@ document.addEventListener('keydown',e=>{if(e.target.matches&&e.target.matches('i
 async function start(){if(C.started)return;C.started=true;draw();
  const tr=loadTrending().then(rows=>{TR=rows.map(normTr);C.week=C.week||(TR[0]&&TR[0].week)||null;C.trBy=Object.fromEntries(TR.map(t=>[t.id,t]));C.tr=true;if(C.ready){counts();if(C.tab==='trending')draw()}}).catch(e=>{C.trErr=e.message;if(C.tab==='trending')draw()});
  try{const[rows]=await Promise.all([loadAds(),loadSaves()]);buildData(rows);C.ready=true}catch(e){C.err=e.message}
- draw();if(C.ready)counts();await tr.catch(()=>{})}
-function routeCD(h){const raw=location.hash.slice(1),rq=raw.indexOf('?');const qi=h.indexOf('?');const path=qi<0?h:h.slice(0,qi);if(rq>=0){const r=fFromQS(raw.slice(rq+1));C.f=r.F;C.q=r.q;const qe=$('#cd-q');if(qe)qe.value=C.q;fSave()}CD_PATH=path;const p=path.split('/');C.tab=TABS.some(t=>t[0]===p[1])?p[1]:'discover';C.brand=C.tab==='brands'&&p[2]?p[2]:null;if(C.tab==='boards'&&p[2])C.board=p[2];
- closeFilters();window.scrollTo({top:0});start();draw()}
+ draw();if(C.ready){counts();openPending()}await tr.catch(()=>{})}
+const TAB_CTX={discover:'discover',jd:'jd',brands:'brand',boards:'board',trending:'trending'};
+function openPending(){const id=C.pendingAd;if(!id||!C.ready)return;C.pendingAd=null;
+ if(!BYID[id]){toast("That ad isn't in Creative Discovery yet");history.replaceState(null,'',hashFor(null));return}
+ if(C.viewer&&C.viewer.mid===id)return;openViewer(id,C.tab==='brands'&&!C.brand?'discover':TAB_CTX[C.tab]||'discover',true)}
+function routeCD(h){const raw=location.hash.slice(1),rq=raw.indexOf('?');const qi=h.indexOf('?');let path=qi<0?h:h.slice(0,qi);
+ const am=/^(?:(.*)\/)?ad\/([^/]+)$/.exec(path);const adId=am?am[2]:null;if(am)path=am[1]||'discover';
+ /* only the ad part changed (an ad opened or closed, Back or Forward): keep the grid and its scroll position */
+ if(C.started&&path===CD_PATH&&(rq<0?'':raw.slice(rq+1))===fToQS(C.f)&&host()&&host().dataset.built){
+  if(adId){if(!C.viewer||C.viewer.mid!==adId){C.pendingAd=adId;openPending()}}else if(C.viewer)closeViewer('route');return}
+ C.pendingAd=adId;if(C.viewer)closeViewer('route');
+ if(rq>=0){const r=fFromQS(raw.slice(rq+1));C.f=r.F;C.q=r.q;const qe=$('#cd-q');if(qe)qe.value=C.q;fSave()}CD_PATH=path;const p=path.split('/');C.tab=TABS.some(t=>t[0]===p[1])?p[1]:'discover';C.brand=C.tab==='brands'&&p[2]?p[2]:null;if(C.tab==='boards'&&p[2])C.board=p[2];
+ closeFilters();window.scrollTo({top:0});start();draw();openPending()}
 function inject(){const row=document.querySelector('.proj .wrap');
  if(!document.getElementById('t-cd')){const g=document.createElement('span');g.className='tr-top';g.innerHTML='<span class="lbl">Always on</span><button type="button" class="pj tr-pj" id="t-cd"><i class="cd-dot"></i>Creative Discovery <i>Discover · JD · Trending</i></button>';row.appendChild(g);g.querySelector('button').onclick=()=>location.hash='discover'}
  if(!document.getElementById('v-cd')){const s=document.createElement('section');s.id='v-cd';s.hidden=true;document.querySelector('main').appendChild(s)}}
-const isCD=h0=>{const h=h0.split('?')[0];return h==='discover'||h.startsWith('discover/')||h==='trending'||h==='inspo'||h.startsWith('inspo/')};
+const isCD=h0=>{const h=h0.split('?')[0];return h==='discover'||h.startsWith('discover/')||h==='trending'||h==='inspo'||h.startsWith('inspo/')||h.startsWith('ad/')};
 function hook(){const _show=window.show;window.show=function(tab){const v=document.getElementById('v-cd'),t=document.getElementById('t-cd');const bar=document.querySelector('nav.bar'),pj=document.querySelector('.proj .pj.on:not(#t-cd), .proj .pj.was');
   if(tab==='cd'){document.querySelectorAll('main > section').forEach(x=>x.hidden=true);document.querySelectorAll('nav.bar [data-tab]').forEach(x=>x.setAttribute('aria-pressed',false));v.hidden=false;t.classList.add('on');t.setAttribute('aria-current','true');if(pj){pj.classList.remove('on');pj.classList.add('was')}if(bar)bar.hidden=true;return}
-  hoverOut();closeViewer();apReset();v.hidden=true;t.classList.remove('on');t.removeAttribute('aria-current');if(pj){pj.classList.add('on');pj.classList.remove('was')}if(bar)bar.hidden=false;return _show(tab)};
+  hoverOut();closeViewer('route');apReset();v.hidden=true;t.classList.remove('on');t.removeAttribute('aria-current');if(pj){pj.classList.add('on');pj.classList.remove('was')}if(bar)bar.hidden=false;return _show(tab)};
  const _route=window.route;window.route=function(){const h=decodeURIComponent(location.hash.slice(1));
   if(isCD(h)){document.getElementById('drawer').hidden=true;document.getElementById('scrim').hidden=true;
+   if(h.startsWith('ad/')){history.replaceState(null,'','#discover/'+h);return window.route()}
    if(h==='trending'||h==='inspo'||h.startsWith('inspo/')){history.replaceState(null,'','#discover'+(h==='trending'?'/trending':''));return window.route()}
    window.show('cd');routeCD(h);return}
   return _route()};
  window.removeEventListener('hashchange',_route);window.addEventListener('hashchange',window.route)}
 const wait=setInterval(()=>{if(typeof D==='undefined'||!D||!window.show||!document.getElementById('t-project')||!document.getElementById('t-delivered'))return;clearInterval(wait);inject();hook();if(isCD(decodeURIComponent(location.hash.slice(1))))window.route()},60);
-window.CD={C,open:(id)=>openViewer(id,'discover'),get AP(){return AP},get ADS(){return ADS},get TR(){return TR}};
+window.CD={C,open:(id)=>openViewer(id,'discover'),shareURL,get AP(){return AP},get ADS(){return ADS},get TR(){return TR}};
 })();

@@ -251,3 +251,6 @@
  .cd-fb span.cd-fl{display:inline!important}
 }
 @media (prefers-reduced-motion:reduce){.cd-load-mk b{animation:none;left:30%}.cd-shim{animation:none}.cd-fr img.cd-po{transition:none}}
+
+/* Copy link (shareable ad links) */
+.cd-cf .cd-share,.cd-jc-f .cd-share{margin-right:-8px}

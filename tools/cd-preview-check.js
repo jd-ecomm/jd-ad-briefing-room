@@ -58,7 +58,7 @@ async function routeFixture(ctx, fx = FX) {
 async function run(vp) {
   const tag = vp.width < 600 ? 'm' : 'd';
   const browser = await chromium.launch({ ...(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}), args: ['--autoplay-policy=no-user-gesture-required'] });
-  const ctx = await browser.newContext({ viewport: vp, colorScheme: 'dark', deviceScaleFactor: tag === 'm' ? 2 : 1, hasTouch: tag === 'm', isMobile: tag === 'm' });
+  const ctx = await browser.newContext({ viewport: vp, colorScheme: 'dark', deviceScaleFactor: tag === 'm' ? 2 : 1, hasTouch: tag === 'm', isMobile: tag === 'm', permissions: ['clipboard-read', 'clipboard-write'] });
   await ctx.addInitScript(() => { try { localStorage.setItem('jd-email', JSON.stringify('preview-check@ryanclarke.co')); } catch (e) { } });
   if (FX) await routeFixture(ctx);
   const page = await ctx.newPage();
@@ -221,6 +221,8 @@ async function run(vp) {
   ok(`${tag} viewer: ad ${KNOCK_ID} Hook line starts "KNOCK KNOCK", Meta headline shown separately`, /^KNOCK KNOCK/.test(kk.hook || '') && kk.headline !== null && kk.headline !== kk.hook, JSON.stringify(kk));
   await page.keyboard.press('Escape'); await page.waitForTimeout(300);
 
+  await shareChecks(page, ctx, tag, shot);
+
   // No diagonal placeholders or "Loading ads" text anywhere
   ok(`${tag} loading: no "Loading ads" bar or diagonal placeholders`, await page.evaluate(() => !/Loading ads/i.test(document.body.innerText) && !document.querySelector('#v-cd .ph, #cd-vw .ph')));
 
@@ -274,6 +276,56 @@ async function run(vp) {
   results.push({ name: `${tag} media load failures (info)`, pass: true, detail: loadFails.length + ' failed resource loads' });
   await browser.close();
 }
+
+// Part 1: shareable ad links (#discover/ad/<id>), Copy link in the viewer and on cards, Back / Esc returns to the same scroll position
+async function shareChecks(page, ctx, tag, shot) {
+  const clip = () => page.evaluate(() => navigator.clipboard.readText().catch(e => 'ERR ' + e.message));
+  const base = await page.evaluate(() => location.origin + location.pathname);
+  // fresh deep link
+  const p2 = await ctx.newPage();
+  await p2.goto(BASE + 'preview/#discover/ad/' + KNOCK_ID, { waitUntil: 'domcontentloaded' });
+  const open = await p2.waitForSelector('#cd-vw:not([hidden]) .phone', { timeout: 60000 }).then(() => true).catch(() => false); await p2.waitForTimeout(800);
+  const dl = await p2.evaluate(() => { const L = document.getElementById('cd-vw'); const p = L && ([...L.querySelectorAll('p')].find(x => /Hook line:/.test(x.textContent)) || [...L.querySelectorAll('.lbl')].find(x => x.textContent === 'Hook line')?.nextElementSibling);
+    return { hash: location.hash, mid: window.CD.C.viewer && window.CD.C.viewer.mid, hook: p ? p.textContent.replace('Hook line:', '').trim().slice(0, 40) : null, copyBtn: !!document.querySelector('#cd-vw #vw-copy') }; });
+  ok(`${tag} share: fresh deep link #discover/ad/<id> opens that ad's viewer`, open && dl.mid === KNOCK_ID && /^KNOCK KNOCK/.test(dl.hook || '') && dl.hash.includes('/ad/' + KNOCK_ID), JSON.stringify(dl));
+  ok(`${tag} share: viewer has a Copy link button`, dl.copyBtn);
+  await p2.screenshot({ path: path.join(OUT, `${tag}-share-deeplink.png`) });
+  await p2.click('#vw-copy'); await p2.waitForTimeout(400);
+  const c1 = await p2.evaluate(() => navigator.clipboard.readText().catch(e => 'ERR ' + e.message)); const t1 = await p2.evaluate(() => { const t = document.getElementById('toast'); return t && !t.hidden ? t.textContent : ''; });
+  ok(`${tag} share: viewer Copy link writes the full URL and shows "Link copied"`, c1 === base + '#discover/ad/' + KNOCK_ID && /Link copied/.test(t1), c1 + ' | ' + t1);
+  await p2.keyboard.press('Escape'); await p2.waitForTimeout(500);
+  ok(`${tag} share: Esc on a deep link closes to the grid`, await p2.evaluate(() => document.getElementById('cd-vw').hidden && !/\/ad\//.test(location.hash) && document.querySelectorAll('.cd-card').length > 0), await p2.evaluate(() => location.hash));
+  // old #ad/<id> link
+  await p2.goto(BASE + 'preview/#ad/' + KNOCK_ID, { waitUntil: 'domcontentloaded' }); await p2.reload({ waitUntil: 'domcontentloaded' });
+  const old = await p2.waitForSelector('#cd-vw:not([hidden]) .phone', { timeout: 60000 }).then(() => true).catch(() => false);
+  const oh = await p2.evaluate(() => ({ hash: location.hash, mid: window.CD && window.CD.C.viewer && window.CD.C.viewer.mid }));
+  ok(`${tag} share: old #ad/<id> links still open the ad`, old && oh.mid === KNOCK_ID && oh.hash.startsWith('#discover/ad/'), JSON.stringify(oh));
+  await p2.close();
+  // open from the grid, Esc and Back return to the same scroll position
+  await page.evaluate(() => { location.hash = 'discover'; }); await page.waitForTimeout(600); await settleP(page);
+  await page.evaluate(() => window.scrollTo(0, 1400)); await page.waitForTimeout(700);
+  const pick = async () => page.evaluate(() => { const f = [...document.querySelectorAll('.cd-mas .cd-fr')].find(f => { const b = f.getBoundingClientRect(); return b.top > 140 && b.bottom < innerHeight - 20; }); return f ? f.dataset.open : null; });
+  const id1 = await pick(); const y0 = await page.evaluate(() => scrollY);
+  if (id1) {
+    await page.evaluate(id => document.querySelector(`.cd-mas .cd-fr[data-open="${id}"]`).click(), id1); await page.waitForTimeout(700);
+    const h1 = await page.evaluate(() => location.hash);
+    ok(`${tag} share: opening an ad puts /ad/<id> in the URL`, /\/ad\/[^/?]+/.test(h1), h1);
+    await page.keyboard.press('Escape'); await page.waitForTimeout(700);
+    const e1 = await page.evaluate(() => ({ y: scrollY, hidden: document.getElementById('cd-vw').hidden, hash: location.hash }));
+    ok(`${tag} share: Esc closes and keeps the scroll position`, e1.hidden && Math.abs(e1.y - y0) <= 4 && !/\/ad\//.test(e1.hash), JSON.stringify({ y0, ...e1 }));
+    await page.evaluate(id => document.querySelector(`.cd-mas .cd-fr[data-open="${id}"]`).click(), id1); await page.waitForTimeout(700);
+    await page.goBack(); await page.waitForTimeout(800);
+    const b1 = await page.evaluate(() => ({ y: scrollY, hidden: document.getElementById('cd-vw').hidden, hash: location.hash }));
+    ok(`${tag} share: browser Back closes the viewer and keeps the scroll position`, b1.hidden && Math.abs(b1.y - y0) <= 4 && /^#discover/.test(b1.hash) && !/\/ad\//.test(b1.hash), JSON.stringify({ y0, ...b1 }));
+  } else ok(`${tag} share: found a card to open`, false);
+  // Copy link on a card
+  const cid = await page.evaluate(() => { const b = [...document.querySelectorAll('.cd-mas .cd-card [data-copy]')].find(b => { const r = b.getBoundingClientRect(); return r.top > 120 && r.bottom < innerHeight; }); return b ? b.dataset.copy : null; });
+  if (cid) { await page.locator(`.cd-mas .cd-card [data-copy="${cid}"]`).first().click(); await page.waitForTimeout(400);
+    const c2 = await clip(); ok(`${tag} share: card Copy link copies #discover/ad/<id>`, c2 === base + '#discover/ad/' + cid && await page.evaluate(() => document.getElementById('cd-vw').hidden), c2);
+    await shot('share-card-copied');
+  } else ok(`${tag} share: card has a Copy link button`, false);
+}
+async function settleP(page) { await page.waitForFunction(() => { const imgs = [...document.querySelectorAll('.cd-fr img.cd-po')].slice(0, 30); return imgs.length && imgs.every(i => i.complete); }, null, { timeout: 30000 }).catch(() => { }); await page.waitForTimeout(500); }
 
 async function loadingRun() {
   const browser = await chromium.launch({ ...(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}), args: ['--autoplay-policy=no-user-gesture-required'] });
