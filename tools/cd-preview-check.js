@@ -29,6 +29,17 @@ function fixtureRows() {
   }
   return rows;
 }
+function fixtureProfiles(rows) {
+  const by = {}; rows.forEach(r => (by[r.brand] = by[r.brand] || []).push(r));
+  const cat = { 'Nike': 'Sportswear and Athletic', 'adidas': 'Sportswear and Athletic', 'Foot Locker Canada': 'Canadian Retailer', 'Gymshark': 'Sportswear and Athletic', 'New Balance': 'Footwear', 'Aritzia': 'Canadian Retailer', 'The North Face': 'Outdoor' };
+  const lr = c => { const t = Object.values(c).reduce((a, b) => a + b, 0) || 1; const f = Object.entries(c).map(([k, n]) => [k, Math.floor(n * 1000 / t), n * 1000 / t % 1]); let need = 1000 - f.reduce((a, x) => a + x[1], 0); f.sort((a, b) => b[2] - a[2]).forEach(x => { if (need > 0) { x[1]++; need--; } }); return Object.fromEntries(f.map(x => [x[0], x[1] / 10])); };
+  return Object.entries(by).map(([b, rs]) => { const mix = lr({ video: rs.filter(r => r.format === 'video').length, image: rs.filter(r => r.format === 'image').length, carousel: rs.filter(r => r.format === 'carousel').length });
+    return { brand: b, brand_id: rs[0].brand_id, category: /^JD/.test(b) ? 'JD (our markets)' : (cat[b] || 'Other'), subcategory: null, country: rs[0].market === 'CA' ? 'CA' : 'US', is_focus: ['Gymshark', 'The North Face', 'Nike'].includes(b),
+      stats: { totals: { ads: rs.length, active: rs.filter(r => r.status === 'active').length, concepts: 5, cards: rs.length }, mix, aspect: lr({ '9:16': 3, '4:5': 2, '1:1': 2 }), tag_coverage: 100, tagged: rs.length,
+        top_tags: [{ tag: 'Try-On', n: 5, pct: 40 }, { tag: 'Model Shot', n: 3, pct: 25 }], ugc_share: 30.5, studio_share: 22.1, weeks: [0, 1, 2, 3, 4, 5, 6, 7].map(w => ({ w, start: '2026-09-' + String(14 + w).padStart(2, '0'), video: w, image: 2, carousel: w % 2 })),
+        l30: { last: 12, prior: 8, pct: 50, by_format: { video: { last: 6, prior: 4, pct: 50 } }, tags: [] }, median_days: 21, live30_share: 40.2, hooks: { read: 6, top: [{ format: 'Callout', n: 4 }, { format: 'Question', n: 2 }], example: { id: rs[0].id, text: 'You need this', format: 'Callout', source: 'ocr' }, machine: true },
+        top_ads: rs.slice(0, 6).map(r => r.id), as_of: '2026-11-09' }, summary: 'Leans on video ads (50% video, mostly Try-On and Model Shot). Ads run a median of 21 days.', summary_basis: 'fixture' }; });
+}
 function fixtureTr() {
   const cats = ['apparel', 'sports-fitness', 'retail', 'accessories', 'health-wellness'], out = [];
   for (let i = 0; i < 40; i++) { const k = ['9x16', '4x5', '1x1'][i % 3]; const v = i % 2 === 0;
@@ -43,6 +54,7 @@ async function routeFixture(ctx, fx = FX) {
     const u = r.request().url();
     if (/\/in_ads\?/.test(u)) { const h = r.request().headers(); const m = /(\d+)-(\d+)/.exec(h.range || '0-999'); const a = +m[1], b = +m[2]; const sl = rows.slice(a, b + 1);
       return r.fulfill({ status: 200, contentType: 'application/json', headers: { 'content-range': `${a}-${a + sl.length - 1}/${rows.length}`, 'access-control-expose-headers': 'content-range' }, body: JSON.stringify(sl) }); }
+    if (/\/cd_brand_profiles\?/.test(u)) return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(fixtureProfiles(rows)) });
     if (/\/tr_ads\?/.test(u)) return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(tr) });
     return r.fulfill({ status: 200, contentType: 'application/json', body: r.request().method() === 'GET' ? '[]' : '' });
   });
@@ -222,6 +234,7 @@ async function run(vp) {
   await page.keyboard.press('Escape'); await page.waitForTimeout(300);
 
   await shareChecks(page, ctx, tag, shot);
+  await brandChecks(page, tag, shot);
 
   // No diagonal placeholders or "Loading ads" text anywhere
   ok(`${tag} loading: no "Loading ads" bar or diagonal placeholders`, await page.evaluate(() => !/Loading ads/i.test(document.body.innerText) && !document.querySelector('#v-cd .ph, #cd-vw .ph')));
@@ -325,6 +338,48 @@ async function shareChecks(page, ctx, tag, shot) {
     await shot('share-card-copied');
   } else ok(`${tag} share: card has a Copy link button`, false);
 }
+// Part 2: Brands section (search, category chips, sort, brand cards with format mix, brand pages)
+async function brandChecks(page, tag, shot) {
+  await page.evaluate(() => { location.hash = 'discover/brands'; }); await page.waitForSelector('.cd-bcard', { timeout: 30000 }).catch(() => { }); await page.waitForTimeout(500);
+  const mixOk = () => page.evaluate(() => { const bad = []; let n = 0; document.querySelectorAll('.cd-mix').forEach(m => { n++; const v = [...m.querySelectorAll('.cd-mix-l b')].map(b => parseFloat(b.textContent)); const t = v.reduce((a, b) => a + b, 0); if (Math.abs(t - 100) > 0.05) bad.push(m.closest('[data-brand]')?.dataset.brand + ' ' + t.toFixed(1)); }); return { n, bad }; });
+  const l0 = await page.evaluate(() => ({ n: document.querySelectorAll('.cd-bcard').length, chips: document.querySelectorAll('[data-bcat]').length, focus: !!document.querySelector('[data-bcat="__focus"]'), ca: !!document.querySelector('[data-bcat="__ca"]'), sort: document.querySelectorAll('#cd-bsort option').length, search: !!document.getElementById('cd-bq'),
+    card: (() => { const c = document.querySelector('.cd-bcard'); return c ? { logo: !!c.querySelector('.cd-logo'), name: c.querySelector('.cd-cht b')?.textContent, cat: c.querySelector('.cd-cht small')?.textContent, active: c.querySelector('.cd-bact b')?.textContent, bar: c.querySelectorAll('.cd-mix-b i').length, trend: !!c.querySelector('.cd-trend'), sum: (c.querySelector('.cd-bsum')?.textContent || '').length } : null; })() }));
+  ok(`${tag} Brands: search bar, category chips with counts, Focus and Canadian chips, 5 sorts`, l0.search && l0.chips >= 4 && l0.focus && l0.ca && l0.sort === 5, JSON.stringify(l0));
+  ok(`${tag} Brands: card has logo, name, category, active ads, mix bar, 30-day trend, summary`, l0.card && l0.card.logo && l0.card.name && l0.card.cat && l0.card.active && l0.card.bar > 0 && l0.card.trend && l0.card.sum > 10, JSON.stringify(l0.card));
+  const m0 = await mixOk(); ok(`${tag} Brands: video / image / carousel % sums to 100 on every card`, m0.n > 0 && !m0.bad.length, JSON.stringify(m0));
+  await noHScrollP(page, tag, 'Brands list');
+  await shot('brands');
+  const q = async t => { await page.fill('#cd-bq', t); await page.waitForTimeout(250); return page.evaluate(() => [...document.querySelectorAll('.cd-bcard')].map(c => c.dataset.brand)); };
+  const g = await q('gym'); ok(`${tag} Brands: search "gym" finds Gymshark`, g.length >= 1 && g.includes('Gymshark') && g.every(b => /gym/i.test(b)), JSON.stringify(g));
+  const nf = await q('NÖRTH'); ok(`${tag} Brands: search "north" (case and accent insensitive) finds The North Face`, nf.includes('The North Face'), JSON.stringify(nf));
+  await shot('brands-search');
+  await q('');
+  const cat = await page.evaluate(() => { const c = [...document.querySelectorAll('[data-bcat]')].find(b => b.dataset.bcat && !b.dataset.bcat.startsWith('__') && +b.querySelector('small').textContent > 0); return c ? c.dataset.bcat : null; });
+  if (cat) { await page.click(`[data-bcat="${cat}"]`); await page.waitForTimeout(250);
+    const cs = await page.evaluate(() => [...document.querySelectorAll('.cd-bcard .cd-cht small')].map(s => s.textContent.split(' · ')[0]));
+    ok(`${tag} Brands: category chip "${cat}" filters the list`, cs.length > 0 && cs.every(x => x === cat), JSON.stringify(cs.slice(0, 8)));
+    await page.click(`[data-bcat="${cat}"]`); await page.waitForTimeout(200); }
+  await page.click('[data-bcat="__focus"]'); await page.waitForTimeout(200);
+  const fb = await page.evaluate(() => [...document.querySelectorAll('.cd-bcard')].map(c => c.dataset.brand)); ok(`${tag} Brands: Focus brands chip`, fb.includes('Gymshark') && fb.includes('The North Face'), JSON.stringify(fb.slice(0, 12)));
+  await page.click('[data-bcat="__focus"]'); await page.waitForTimeout(200);
+  for (const [b, qq] of [['Gymshark', 'gym'], ['The North Face', 'north']]) {
+    await q(qq); await page.click(`.cd-bcard[data-brand="${b}"]`); await page.waitForSelector('.cd-bprof, #cd-bads', { timeout: 15000 }).catch(() => { }); await page.waitForTimeout(800);
+    const bp = await page.evaluate(() => ({ h: document.querySelector('#cd-head h2')?.textContent, sub: document.querySelector('#cd-head p')?.textContent, sum: document.querySelector('.cd-bsum-l')?.textContent.length || 0,
+      tiles: [...document.querySelectorAll('.cd-stile .lbl')].map(x => x.textContent), panels: [...document.querySelectorAll('.cd-panel2 > .lbl')].map(x => x.textContent), weeks: document.querySelectorAll('.cd-wk-c').length, strip: document.querySelectorAll('.cd-bstrip .cd-card').length,
+      grid: document.querySelectorAll('#cd-bads .cd-card').length, brands: [...new Set((window.CD.C.lists.brand || []).map(a => a.b))], filters: !document.getElementById('cd-fbtn').hidden }));
+    const want = ['Format mix', 'Aspect mix', 'UGC share', 'Studio / product share', 'Launches, last 30 days'];
+    ok(`${tag} Brand page ${b}: header, summary, 5 stat tiles, 8-week chart, tags, hooks, top ads, grid of only this brand, Filters`, new RegExp(b, 'i').test(bp.h || '') && /active \/ [\d,]+ total/.test(bp.sub || '') && /median \d+ days live/.test(bp.sub || '') && bp.sum > 20 && want.every(w => bp.tiles.includes(w)) && bp.weeks === 8 && bp.panels.some(p => /visual formats/i.test(p)) && bp.panels.some(p => /hook/i.test(p)) && bp.strip > 0 && bp.grid > 0 && bp.brands.length === 1 && bp.brands[0] === b && bp.filters, JSON.stringify(bp));
+    const m1 = await mixOk(); ok(`${tag} Brand page ${b}: format mix sums to 100`, m1.n > 0 && !m1.bad.length, JSON.stringify(m1));
+    await noHScrollP(page, tag, 'Brand page ' + b);
+    await shot('brand-' + (b === 'Gymshark' ? 'gymshark' : 'tnf'));
+    await page.evaluate(() => window.scrollTo(0, document.getElementById('cd-bads').offsetTop - 80)); await page.waitForTimeout(500); await shot('brand-' + (b === 'Gymshark' ? 'gymshark' : 'tnf') + '-grid');
+    await page.click('#cd-head .cd-link.back'); await page.waitForTimeout(500);
+    const back = await page.evaluate(() => ({ q: document.getElementById('cd-bq')?.value, n: document.querySelectorAll('.cd-bcard').length }));
+    ok(`${tag} Brands: back keeps the search`, back.q === qq && back.n >= 1, JSON.stringify(back));
+  }
+  await q('');
+}
+async function noHScrollP(page, tag, where) { const r = await page.evaluate(() => [document.documentElement.scrollWidth, window.innerWidth]); ok(`${tag} ${where}: no horizontal scroll`, r[0] <= r[1] + 1, `scrollWidth ${r[0]} vs ${r[1]}`); }
 async function settleP(page) { await page.waitForFunction(() => { const imgs = [...document.querySelectorAll('.cd-fr img.cd-po')].slice(0, 30); return imgs.length && imgs.every(i => i.complete); }, null, { timeout: 30000 }).catch(() => { }); await page.waitForTimeout(500); }
 
 async function loadingRun() {

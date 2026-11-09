@@ -137,7 +137,7 @@ function buildData(rows){
  const bb={};ADS.forEach(a=>{const b=bb[a.bid]=bb[a.bid]||{b:a.b,bid:a.bid,g:a.g,logo:'',n:0,live:0,nw:0,dsum:0,proven:0,mk:a.mk,market:a.market,top:[]};
   b.n++;if(a.focus)b.focus=true;if(a.st==='active')b.live++;if(a.age<=14)b.nw++;b.dsum+=a.d;if(a.proven)b.proven++;if(!b.logo&&a.logo)b.logo=a.logo;b.top.push(a)});
  BRANDS=Object.values(bb).map(b=>{b.avgd=Math.round(b.dsum/b.n);b.top.sort((x,y)=>y.ps-x.ps);b.top=b.top.slice(0,3);return b}).sort((p,q)=>q.n-p.n);
- BRAND_BY=Object.fromEntries(BRANDS.map(b=>[b.bid,b]))}
+ BRAND_BY=Object.fromEntries(BRANDS.map(b=>[b.bid,b]));buildNames()}
 function normTr(r,i){const imgs=(r.images_s&&r.images_s.length?r.images_s:r.images)||[];const video=r.video_s||r.video||null;
  const kind=r.kind==='video'&&video?'video':(r.kind==='carousel'||imgs.length>1?'carousel':'image');
  return{id:'tr'+i,src:'tr',b:r.brand||'Unknown brand',logo:r.logo_s||r.logo||'',kind,video,thumb:(r.poster_s||r.poster||imgs[0]||''),imgs,
@@ -193,7 +193,7 @@ async function copyLink(id){const ok=await copyText(shareURL(id));toast(ok?'Link
 function fCommit(F){C.f=F;fSave();draw()}
 
 /* ---------- filters drawer (right drawer on desktop, bottom sheet on phones) ---------- */
-function fBase(){if(C.tab==='trending')return TR.filter(r=>r.week===C.week);if(C.tab==='jd')return ADS.filter(a=>a.mk&&((C.gmk||'all')==='all'||a.mk===C.gmk));if(C.tab==='brands'&&C.brand)return ADS.filter(a=>a.bid===C.brand);return ADS}
+function fBase(){if(C.tab==='trending')return TR.filter(r=>r.week===C.week);if(C.tab==='jd')return ADS.filter(a=>a.mk&&((C.gmk||'all')==='all'||a.mk===C.gmk));if(C.tab==='brands'&&C.brand)return brandAds(C.brand);return ADS}
 const FD={D:null,bq:''};
 function quickGroups(){const jd=BRANDS.filter(b=>b.mk).map(b=>b.bid);const ca=BRANDS.filter(b=>b.market==='CA'&&b.g!=='JD Global'&&b.g!=='Category finds').map(b=>b.bid);const fo=BRANDS.filter(b=>b.focus).map(b=>b.bid);
  return[['jd','JD markets',jd],['ca','Canadian retailers',ca],['focus','Focus brands',fo]].filter(g=>g[2].length)}
@@ -402,7 +402,7 @@ function stepCarousel(b){const fr=b.closest('.cd-fr'),it=BYID[fr.dataset.open]||
 
 /* ---------- filter button, active chips and sort ---------- */
 function drawFilters(){const btn=$('#cd-fbtn'),act=$('#cd-act');const usable=C.ready&&C.tab!=='boards'&&!(C.tab==='brands'&&!C.brand);
- btn.hidden=!usable;$('.cd-q').hidden=C.tab==='boards';$('#cd-ap').hidden=!C.ready||(C.tab==='brands'&&!C.brand);
+ btn.hidden=!usable;$('.cd-q').hidden=C.tab==='boards'||(C.tab==='brands'&&!C.brand);$('#cd-ap').hidden=!C.ready||(C.tab==='brands'&&!C.brand);
  const n=fCount(C.f);const fc=$('#cd-fcount');fc.hidden=!n;fc.textContent=n?' · '+n:'';btn.setAttribute('aria-label',n?`Filters, ${n} active`:'Filters');
  const on=usable?activeChips():[];
  act.hidden=!on.length;act.innerHTML=on.map(([g,v,l])=>`<button type="button" class="cd-chip on" data-rmf="${g}|${esc(v)}" aria-label="Remove filter ${esc(l)}">${esc(l)} ${sv(I.x,12)}</button>`).join('')+(on.length?`<button type="button" class="cd-link" data-fclear>Clear all</button>`:'');
@@ -418,7 +418,7 @@ function draw(){const el=host();if(!el||el.hidden)return;shell();syncURL();
  if(C.err){head('Creative Discovery','');body.innerHTML=`<div class="cd-note"><b>Can't load ads right now.</b> The team database didn't answer (${esc(C.err.slice(0,90))}). <button type="button" class="cd-btn y" id="cd-retry">Try again</button></div>`;$('#cd-retry').onclick=()=>{C.err=null;C.started=false;start()};return}
  if(!C.ready){const T={discover:'Discover',jd:'JD Global',trending:'Trending',brands:'Brands',boards:'Boards'};head(T[C.tab]||'Discover','&nbsp;');body.innerHTML=LOADER;return}
  ({discover:vDiscover,jd:vJD,trending:vTrending,brands:vBrands,boards:vBoards}[C.tab]||vDiscover)(body)}
-function counts(){const set=(k,n)=>{const s=$(`[data-cnt="${k}"]`);if(s)s.textContent=n==null?'':fmtN(n)};set('discover',ADS.length);set('jd',ADS.filter(a=>a.mk).length);set('trending',C.tr?TR.filter(a=>a.week===C.week).length:null);set('brands',BRANDS.filter(b=>b.n>=3).length);set('boards',C.boards.length||null)}
+function counts(){const set=(k,n)=>{const s=$(`[data-cnt="${k}"]`);if(s)s.textContent=n==null?'':fmtN(n)};set('discover',ADS.length);set('jd',ADS.filter(a=>a.mk).length);set('trending',C.tr?TR.filter(a=>a.week===C.week).length:null);set('brands',PROF?profList().length:null);set('boards',C.boards.length||null)}
 /* Discover mixes brands: each brand's best ad first, then round-robin, so no single brand fills the screen */
 function mixBrands(arr){const by=new Map();arr.forEach(a=>{const k=a.bid||a.b;if(!by.has(k))by.set(k,[]);by.get(k).push(a)});const qs=[...by.values()],out=[];
  while(out.length<arr.length)for(const q of qs)if(q.length)out.push(q.shift());return out}
@@ -466,15 +466,85 @@ function vTrending(body){if(C.trErr){head('Trending','');body.innerHTML=`<div cl
   `<label class="cd-sel"><span class="lbl">Week</span><select id="cd-week" aria-label="Week">${weeks.map(w=>`<option value="${w}" ${w===C.week?'selected':''}>${esc(fmtWeek(w))}</option>`).join('')}</select></label>`);
  const ws=$('#cd-week');if(ws)ws.onchange=()=>{C.week=ws.value;draw()};
  grid(body,list,'trending',{base:TR})}
-function vBrands(body){if(C.brand){const b=BRAND_BY[C.brand];if(!b){location.hash='discover/brands';return}
-  const list=sorted(filtered(ADS.filter(a=>a.bid===b.bid),'brand'),C.sort.brand);
-  $('#cd-head').innerHTML=`<a class="cd-link back" href="#discover/brands">${sv(I.back,14)} All brands</a><div class="cd-bh">${logoHTML(b.b,b.logo,'cd-logo lg')}<div><h2 class="disp">${esc(b.b)}</h2><p>${esc(b.g==='JD Global'?'JD Group':b.g)}${b.market?' · '+esc(b.market):''} · ${b.n} ads · ${b.live} active · ${b.proven} proven · ${b.avgd} day average run</p></div></div>`;
-  grid(body,list,'brand');return}
- const q=C.q.trim().toLowerCase();const list=BRANDS.filter(b=>b.n>=3&&(!q||b.b.toLowerCase().includes(q)));
- head('Brands',`${list.length} brands with 3+ ads. Open one to see every ad it is running.`);
- body.innerHTML=`<div class="cd-bgrid">${list.map(b=>`<a class="cd-btile" href="#discover/brands/${esc(b.bid)}"><div class="cd-bt-h">${logoHTML(b.b,b.logo)}<div class="cd-cht"><b>${esc(b.b)}</b><small>${b.n} ads · ${b.live} active</small></div></div>
-  <div class="cd-bt-s">${b.top.map(a=>{const m=cur(a);return`<span>${m.thumb?`<img alt="" loading="lazy" src="${esc(m.thumb)}">`:''}</span>`}).join('')}</div>
-  <div class="cd-bt-f"><span>${b.nw} new in 2 weeks</span><span>${b.avgd}d avg run</span></div></a>`).join('')||'<div class="cd-empty">No brands match.</div>'}</div>`}
+/* ---------- Brands: profiles from cd_brand_profiles (stats over every English ad of the brand), list with search, category chips and sort; brand page ---------- */
+const BCATS=['JD (our markets)','Sportswear and Athletic','Footwear','Streetwear','Athleisure and Yoga','Outdoor','Fashion and Lifestyle','Luxury and Designer','Multi-brand Retailer','Canadian Retailer','Other'];
+const BSORTS=[['ads','Most ads'],['active','Most active'],['growth','Fastest growing (30 days)'],['longest','Longest running'],['az','A to Z']];
+const CTRY={CA:'Canada',US:'USA',UK:'UK',AU:'Australia',NZ:'New Zealand',DE:'Germany',FR:'France',ES:'Spain',NL:'Netherlands',SE:'Sweden',DK:'Denmark',CH:'Switzerland',JP:'Japan',IN:'India'};
+const MIXK=[['video','Video'],['image','Image'],['carousel','Carousel']];
+const pct1=v=>(Math.round((+v||0)*10)/10).toFixed(1).replace(/\.0$/,'.0');
+let PROF=null,PROF_ERR=null,NAMES={};
+async function loadProfiles(){try{const r=await apiRetry('cd_brand_profiles?select=brand,brand_id,category,subcategory,country,is_focus,stats,summary,summary_basis,updated_at');PROF=r.data||[]}catch(e){PROF_ERR=e.message;PROF=[]}}
+/* group released ads by brand name (a brand can have several Meta pages); the brand id in the URL can be any of its pages */
+function buildNames(){NAMES={};ADS.forEach(a=>{const n=NAMES[a.b]=NAMES[a.b]||{b:a.b,bids:new Set(),logo:'',n:0,ads:[]};n.bids.add(a.bid);n.n++;n.ads.push(a);if(!n.logo&&a.logo)n.logo=a.logo});
+ (PROF||[]).forEach(p=>{const n=NAMES[p.brand];if(n){n.p=p;n.bid=p.brand_id&&n.bids.has(p.brand_id)?p.brand_id:[...n.bids][0]}});Object.values(NAMES).forEach(n=>{if(!n.bid)n.bid=[...n.bids][0]})}
+const nameOfBid=bid=>{const b=BRAND_BY[bid];return b?b.b:null};
+const brandAds=bid=>{const nm=nameOfBid(bid);return nm&&NAMES[nm]?NAMES[nm].ads:ADS.filter(a=>a.bid===bid)};
+const isCanadian=p=>p.country==='CA'||p.category==='Canadian Retailer';
+function mixBar(mix,big){const segs=MIXK.filter(([k])=>+(mix||{})[k]>0);
+ return`<div class="cd-mix${big?' big':''}" role="img" aria-label="${esc(MIXK.map(([k,l])=>`${l} ${pct1((mix||{})[k])}%`).join(', '))}"><div class="cd-mix-b">${segs.map(([k,l])=>`<i class="m-${k}" style="width:${+mix[k]}%" title="${l} ${pct1(mix[k])}%"></i>`).join('')}</div>
+  <div class="cd-mix-l">${MIXK.map(([k,l])=>`<span data-mix="${k}"><i class="m-${k}"></i>${l} <b>${pct1((mix||{})[k])}%</b></span>`).join('')}</div></div>`}
+function trendHTML(l){if(!l)return'';const a=+l.last||0,b=+l.prior||0;
+ if(b>=5&&l.pct!=null){const up=+l.pct>=0;return`<span class="cd-trend ${up?'up':'dn'}">${up?'▲':'▼'} ${up?'+':''}${l.pct}%<small> launches, last 30 days vs prior 30</small></span>`}
+ return`<span class="cd-trend">${fmtN(a)}<small> launch${a===1?'':'es'} in the last 30 days</small></span>`}
+const firstSentence=s=>{s=String(s||'');const m=/^(.+?[.!?])(\s|$)/.exec(s.replace(/^Only \d+ English ads? captured, too few for a pattern\. /,''));return m?m[1]:s};
+function profList(){const list=Object.values(NAMES).filter(n=>n.p&&n.p.stats);return list}
+function bSort(arr,mode){const g=n=>n.p.stats,f={ads:n=>g(n).totals.ads,active:n=>g(n).totals.active,growth:n=>{const l=g(n).l30||{};return(+l.prior>=5&&l.pct!=null)?+l.pct:-1e9},longest:n=>+g(n).median_days||0}[mode];
+ return arr.slice().sort((x,y)=>mode==='az'?x.b.localeCompare(y.b,'en-CA',{sensitivity:'base'}):(f(y)-f(x))||x.b.localeCompare(y.b))}
+function bCard(n){const p=n.p,s=p.stats;return`<a class="cd-btile cd-bcard" href="#discover/brands/${esc(n.bid)}" data-brand="${esc(n.b)}">
+  <div class="cd-bt-h">${logoHTML(n.b,n.logo)}<div class="cd-cht"><b>${esc(n.b)}</b><small>${esc(p.category||'Other')}${p.is_focus?' · Focus':''}</small></div><span class="cd-bact"><b>${fmtN(s.totals.active)}</b><small>active</small></span></div>
+  ${mixBar(s.mix)}<div class="cd-bt-t">${trendHTML(s.l30)}</div><p class="cd-bsum">${esc(firstSentence(p.summary))}</p></a>`}
+function vBrandsList(body){
+ if(!PROF){head('Brands','&nbsp;');body.innerHTML=LOADER;return}
+ if(!C.bsort)C.bsort='ads';const all=profList();
+ head('Brands',PROF_ERR?`Brand profiles could not load (${esc(PROF_ERR.slice(0,80))}).`:`${fmtN(all.length)} brands. Stats cover every English ad we hold for each brand; summaries come from those numbers only.`);
+ body.innerHTML=`<div class="cd-btools"><label class="cd-q cd-bq">${sv(I.search,15)}<input id="cd-bq" type="search" placeholder="Search brands" aria-label="Search brands" autocomplete="off" value="${esc(C.bq||'')}"></label>
+  <label class="cd-sort"><span class="lbl">Sort</span><select id="cd-bsort" aria-label="Sort brands">${BSORTS.map(([v,l])=>`<option value="${v}" ${C.bsort===v?'selected':''}>${l}</option>`).join('')}</select></label></div>
+  <div class="cd-chips cd-bcats" id="cd-bcats"></div><div id="cd-blist"></div>`;
+ const q=$('#cd-bq',body);q.oninput=()=>{C.bq=q.value;drawBrandCards()};$('#cd-bsort',body).onchange=e=>{C.bsort=e.target.value;drawBrandCards()};
+ $('#cd-bcats',body).onclick=e=>{const c=e.target.closest('[data-bcat]');if(!c)return;const v=c.dataset.bcat;C.bcat=C.bcat===v?'':v;drawBrandCards()};
+ drawBrandCards()}
+function drawBrandCards(){const all=profList();const t=nz(C.bq||'');const byQ=all.filter(n=>!t||nz(n.b).includes(t)||nz(n.p.category).includes(t));
+ const cat=C.bcat||'';const inCat=(n,c)=>!c?true:c==='__focus'?n.p.is_focus:c==='__ca'?isCanadian(n.p):(n.p.category||'Other')===c;
+ const chip=(v,l)=>{const k=byQ.filter(n=>inCat(n,v)).length;return k||cat===v?`<button type="button" class="cd-chip${v.startsWith('__')?' q':''}" data-bcat="${esc(v)}" aria-pressed="${cat===v}">${esc(l)}<small>${k}</small></button>`:''};
+ $('#cd-bcats').innerHTML=chip('','All')+chip('__focus','Focus brands')+chip('__ca','Canadian')+BCATS.map(c=>chip(c,c)).join('');
+ const list=bSort(byQ.filter(n=>inCat(n,cat)),C.bsort);
+ $('#cd-blist').innerHTML=list.length?`<p class="cd-bcount">${fmtN(list.length)} brand${list.length===1?'':'s'}${t?` for "${esc(C.bq.trim())}"`:''}</p><div class="cd-bgrid">${list.map(bCard).join('')}</div>`:`<div class="cd-empty"><b>No brands match${t?` "${esc(C.bq.trim())}"`:''}.</b> Try another name or clear the category.</div>`}
+function tile(label,inner,cls=''){return`<section class="cd-stile ${cls}"><div class="lbl">${label}</div>${inner}</section>`}
+function hbars(rows,unit='%'){const mx=Math.max(1,...rows.map(r=>+r[1]||0));return`<div class="cd-hb">${rows.map(([l,v,note])=>`<div class="cd-hb-r" title="${esc(l)}: ${pct1(v)}${unit}${note?' · '+esc(note):''}"><span class="cd-hb-l">${esc(l)}</span><span class="cd-hb-t"><i style="width:${(+v||0)/mx*100}%"></i></span><b>${pct1(v)}${unit}</b></div>`).join('')}</div>`}
+function weeksChart(ws){const mx=Math.max(1,...ws.map(w=>MIXK.reduce((s,[k])=>s+(+w[k]||0),0)));
+ return`<div class="cd-wk" role="img" aria-label="Launches per week, last 8 weeks">${ws.map(w=>{const tot=MIXK.reduce((s,[k])=>s+(+w[k]||0),0);const d=new Date(w.start+'T12:00:00').toLocaleDateString('en-CA',{day:'numeric',month:'short'});
+  return`<div class="cd-wk-c" tabindex="0" title="Week of ${d}: ${tot} launches (${MIXK.map(([k,l])=>`${l} ${w[k]||0}`).join(', ')})"><b>${tot||''}</b><span class="cd-wk-s" style="height:${tot/mx*100}%">${MIXK.slice().reverse().filter(([k])=>+w[k]>0).map(([k])=>`<i class="m-${k}" style="flex:${+w[k]}"></i>`).join('')}</span><small>${d}</small></div>`}).join('')}</div>
+  <div class="cd-mix-l">${MIXK.map(([k,l])=>`<span><i class="m-${k}"></i>${l}</span>`).join('')}</div>`}
+function vBrandPage(body){const nm=nameOfBid(C.brand);const n=nm&&NAMES[nm];if(!n){location.hash='discover/brands';return}
+ const p=n.p,s=p&&p.stats;const list=sorted(filtered(n.ads,'brand'),C.sort.brand);
+ const sub=[p&&p.category,p&&p.country?(CTRY[p.country]||p.country):null,s?`${fmtN(s.totals.active)} active / ${fmtN(s.totals.ads)} total`:`${fmtN(n.n)} ads`,s&&s.median_days!=null?`median ${Math.round(s.median_days)} days live`:null].filter(Boolean).join(' · ');
+ $('#cd-head').innerHTML=`<a class="cd-link back" href="#discover/brands">${sv(I.back,14)} All brands</a><div class="cd-bh">${logoHTML(n.b,n.logo,'cd-logo lg')}<div><h2 class="disp">${esc(n.b)}</h2><p>${esc(sub)}</p></div></div>`;
+ let prof='';
+ if(s){const l=s.l30||{};const h=s.hooks||{};const hasHooks=(h.top||[]).length;
+  const asp=['9:16','4:5','1:1','16:9','unknown'].filter(k=>(s.aspect||{})[k]>0).map(k=>[k==='unknown'?'Not measured':k,s.aspect[k]]);
+  const top=(s.top_ads||[]).map(id=>BYID[id]).filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).slice(0,6);
+  prof=`<div class="cd-bprof">
+   <p class="cd-bsum-l">${esc(p.summary||'')}</p><p class="cd-basis">Based on ${esc(p.summary_basis||'')}.</p>
+   <div class="cd-stiles">
+    ${tile('Format mix',mixBar(s.mix,true),'w2')}
+    ${tile('Aspect mix',hbars(asp))}
+    ${tile('UGC share',`<div class="cd-big">${s.ugc_share==null?'n/a':pct1(s.ugc_share)+'%'}</div><small>of tagged ads use UGC Selfie, UGC Overlay, Yapper, Testimonial, Review, Influencer, Street Interview or POV</small>`)}
+    ${tile('Studio / product share',`<div class="cd-big">${s.studio_share==null?'n/a':pct1(s.studio_share)+'%'}</div><small>of tagged ads use Product Image, Studio Shot, Lifestyle Image, Cinematic B-Roll, Model Shot or Flatlay</small>`)}
+    ${tile('Launches, last 30 days',`<div class="cd-big">${fmtN(l.last||0)}</div>${trendHTML(l)}<small>Prior 30 days: ${fmtN(l.prior||0)}. ${MIXK.map(([k,lb])=>{const f=(l.by_format||{})[k];return f?`${lb} ${f.last} (prior ${f.prior})`:null}).filter(Boolean).join(' · ')}</small>`)}
+   </div>
+   <div class="cd-bcols">
+    <section class="cd-panel2"><div class="lbl">Launches per week by format · last 8 weeks</div>${weeksChart(s.weeks||[])}</section>
+    <section class="cd-panel2"><div class="lbl">Top visual formats</div>${(s.top_tags||[]).length?hbars(s.top_tags.slice(0,8).map(t=>[t.tag,t.pct,t.n+' ads'])):'<p class="cd-muted">No visual format tags yet.</p>'}
+     <p class="cd-muted">Share of tagged ads. Tags cover ${pct1(s.tag_coverage)}% of this brand's ads (${fmtN(s.tagged||0)} of ${fmtN(s.totals.ads)}; Motion tags plus ours).${s.tag_coverage<40?' Limited tags: read these as indicative.':''}</p></section>
+    <section class="cd-panel2"><div class="lbl">Top hook formats</div>${hasHooks?hbars(h.top.map(x=>[x.format,x.n/Math.max(1,h.top.reduce((a,b)=>a+b.n,0))*100,x.n+' ads']))+(h.example?`<p class="cd-hex"><span class="lbl">Example · ${esc(h.example.format)}</span>"${esc(h.example.text)}"${h.example.source==='ocr'?' <em class="cd-mr">machine read</em>':''} <a class="cd-link" href="#discover/brands/${esc(n.bid)}/ad/${esc(h.example.id)}">Open ad</a></p>`:''):`<p class="cd-muted">${h.read?`${fmtN(h.read)} hooks read; formats not classified yet.`:'No hooks read for this brand yet.'}</p>`}
+     ${h.read?`<p class="cd-muted">Hooks read on ${fmtN(h.read)} ads${h.machine?', mostly machine read (indicative)':''}. Share of classified hooks.</p>`:''}</section>
+   </div>
+   ${top.length?`<section class="cd-panel2"><div class="lbl">Top ads · Proven score</div><div class="cd-bstrip">${top.map(x=>card(x,'btop')).join('')}</div></section>`:''}
+  </div>`;C.lists.btop=top}
+ else prof=`<div class="cd-note">No profile for this brand yet.</div>`;
+ body.innerHTML=`${prof}<div class="cd-h1 cd-ball"><div><h3 class="disp">All ${esc(n.b)} ads</h3><p>${fmtN(list.length)} of ${fmtN(n.n)} ads${fCount(C.f)||C.q.trim()?' match your filters':''}. Filters below apply to this brand only.</p></div></div><div id="cd-bads"></div>`;
+ grid($('#cd-bads',body),list,'brand',{base:n.ads})}
+function vBrands(body){if(C.brand)return vBrandPage(body);return vBrandsList(body)}
 function vBoards(body){if(C.saveErr){head('Boards','');body.innerHTML=`<div class="cd-note"><b>Boards could not load.</b> ${esc(C.saveErr)}</div>`;return}
  const bd=C.boards.find(b=>b.id===C.board)||C.boards[0];
  const bar=`<div class="cd-chips">${C.boards.map(b=>`<button type="button" class="cd-chip" data-bd="${esc(b.id)}" aria-pressed="${bd&&b.id===bd.id}">${esc(b.name)}<small>${C.items.filter(x=>x.board_id===b.id).length}</small></button>`).join('')}<button type="button" class="cd-chip" data-newboard>${sv(I.plus,12)} New board</button></div>`;
@@ -713,7 +783,9 @@ document.addEventListener('keydown',e=>{if(e.target.matches&&e.target.matches('i
 /* ---------- boot, routing and Briefing Room integration ---------- */
 async function start(){if(C.started)return;C.started=true;draw();
  const tr=loadTrending().then(rows=>{TR=rows.map(normTr);C.week=C.week||(TR[0]&&TR[0].week)||null;C.trBy=Object.fromEntries(TR.map(t=>[t.id,t]));C.tr=true;if(C.ready){counts();if(C.tab==='trending')draw()}}).catch(e=>{C.trErr=e.message;if(C.tab==='trending')draw()});
+ const pf=loadProfiles();
  try{const[rows]=await Promise.all([loadAds(),loadSaves()]);buildData(rows);C.ready=true}catch(e){C.err=e.message}
+ pf.then(()=>{if(C.ready){buildNames();counts();if(C.tab==='brands')draw()}});
  draw();if(C.ready){counts();openPending()}await tr.catch(()=>{})}
 const TAB_CTX={discover:'discover',jd:'jd',brands:'brand',boards:'board',trending:'trending'};
 function openPending(){const id=C.pendingAd;if(!id||!C.ready)return;C.pendingAd=null;
