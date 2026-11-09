@@ -1,7 +1,7 @@
 {
   "base": "https://jd-ecomm.github.io/jd-ad-briefing-room/",
-  "when": "2026-11-09T07:29:38.729Z",
-  "passed": 66,
+  "when": "2026-11-09T08:11:47.835Z",
+  "passed": 87,
   "failed": 0,
   "results": [
     {
@@ -35,6 +35,11 @@
       "detail": ""
     },
     {
+      "name": "d discover: gutters equal within 2px, equal column widths",
+      "pass": true,
+      "detail": "{\"hg\":[\"16.0\"],\"vg\":[\"16.0\"],\"spread\":0,\"wspread\":0,\"n\":24}"
+    },
+    {
       "name": "d discover: no horizontal scroll",
       "pass": true,
       "detail": "scrollWidth 1440 vs 1440"
@@ -65,19 +70,14 @@
       "detail": ""
     },
     {
-      "name": "d hover: the video is visible above the poster while scrubbing",
+      "name": "d hover: the video is visible above the poster",
       "pass": true,
-      "detail": "VIDEO"
+      "detail": ""
     },
     {
-      "name": "d hover: scrub to 50% sets the video to the middle",
+      "name": "d hover: moving the pointer never pauses or seeks (plays straight through)",
       "pass": true,
-      "detail": "{\"t\":4.5015,\"d\":9.003,\"p\":true,\"bar\":\"scaleX(0.5)\",\"cls\":\"cd-fr hov vis scrub\",\"top\":\"VIDEO\"}"
-    },
-    {
-      "name": "d hover: scrub back follows the pointer",
-      "pass": true,
-      "detail": "0.200"
+      "detail": "[0.17,0.25,0.34,0.42,0.5,0.58,0.67,0.75,0.83,0.92,1.02,1.1,1.18,1.27,1.35,1.43,1.52]"
     },
     {
       "name": "d hover: mouse out pauses and returns to poster",
@@ -85,12 +85,27 @@
       "detail": "{\"p\":true,\"vis\":false}"
     },
     {
-      "name": "d JD: grid with Proven badge",
+      "name": "d hover: no scrub code path (no pointermove seeking)",
       "pass": true,
-      "detail": "{\"n\":36,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\"}"
+      "detail": ""
     },
     {
-      "name": "d JD: no creative cropped (27 measured)",
+      "name": "d JD: JD Global section (stats, market chips, Show more)",
+      "pass": true,
+      "detail": "{\"n\":36,\"cols\":2,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":248,\"ch\":440,\"rows\":0,\"more\":true,\"filters\":false}"
+    },
+    {
+      "name": "d JD: larger cards, 2 per row, sorted by Proven, no list rows",
+      "pass": true,
+      "detail": "{\"n\":36,\"cols\":2,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":248,\"ch\":440,\"rows\":0,\"more\":true,\"filters\":false}"
+    },
+    {
+      "name": "d JD: card keeps Proven score, market pill, days · format · landing",
+      "pass": true,
+      "detail": "{\"n\":36,\"cols\":2,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":248,\"ch\":440,\"rows\":0,\"more\":true,\"filters\":false}"
+    },
+    {
+      "name": "d JD: no creative cropped (10 measured)",
       "pass": true,
       "detail": ""
     },
@@ -103,6 +118,11 @@
       "name": "d JD: no video playing without hover",
       "pass": true,
       "detail": "0 playing"
+    },
+    {
+      "name": "d JD: market chip filters to that market",
+      "pass": true,
+      "detail": ""
     },
     {
       "name": "d Trending: native cards with rank badge, no iframe",
@@ -121,6 +141,26 @@
     },
     {
       "name": "d Trending: no video playing without hover",
+      "pass": true,
+      "detail": "0 playing"
+    },
+    {
+      "name": "d autoplay: toggle visible and off by default",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d autoplay on: videos in view play muted, max 8, none off screen",
+      "pass": true,
+      "detail": "{\"n\":6,\"muted\":true,\"stored\":\"true\",\"offscreen\":0}"
+    },
+    {
+      "name": "d autoplay: choice remembered in this browser",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "d autoplay off again: nothing plays",
       "pass": true,
       "detail": "0 playing"
     },
@@ -145,19 +185,29 @@
       "detail": "scrollWidth 1440 vs 1440"
     },
     {
-      "name": "d viewer: Reels frame has no numbers",
+      "name": "d viewer: Reels frame matches Instagram (rail icons, no numbers)",
       "pass": true,
-      "detail": "{\"reels\":true,\"digits\":[],\"controls\":true,\"vids\":1}"
+      "detail": "{\"reels\":true,\"digits\":[],\"w\":340,\"vw\":1440,\"rail\":5}"
     },
     {
-      "name": "d viewer: one video with native controls (single scrubber)",
+      "name": "d viewer: batch 1 panels and actions present",
       "pass": true,
-      "detail": "{\"reels\":true,\"digits\":[],\"controls\":true,\"vids\":1}"
+      "detail": "{\"labels\":[],\"acts\":[],\"hookTxt\":\"Hook not read yet\",\"hk\":null,\"hkind\":null,\"h\":\"Where to Next?\",\"hookOk\":true}"
+    },
+    {
+      "name": "d viewer: Hook line = hook_text (never the Meta headline)",
+      "pass": true,
+      "detail": "{\"labels\":[],\"acts\":[],\"hookTxt\":\"Hook not read yet\",\"hk\":null,\"hkind\":null,\"h\":\"Where to Next?\",\"hookOk\":true}"
     },
     {
       "name": "d viewer: no horizontal scroll",
       "pass": true,
       "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d Reels mode: opens full height, icons only",
+      "pass": true,
+      "detail": "{\"open\":true,\"digits\":[],\"w\":506,\"h\":900,\"vw\":1440,\"vh\":900,\"playing\":1}"
     },
     {
       "name": "d viewer: Esc closes",
@@ -210,6 +260,11 @@
       "detail": ""
     },
     {
+      "name": "m discover: gutters equal within 2px, equal column widths",
+      "pass": true,
+      "detail": "{\"hg\":[\"12.0\"],\"vg\":[\"12.0\"],\"spread\":0,\"wspread\":0,\"n\":12}"
+    },
+    {
       "name": "m discover: no horizontal scroll",
       "pass": true,
       "detail": "scrollWidth 390 vs 390"
@@ -240,12 +295,22 @@
       "detail": "0 playing"
     },
     {
-      "name": "m JD: grid with Proven badge",
+      "name": "m JD: JD Global section (stats, market chips, Show more)",
       "pass": true,
-      "detail": "{\"n\":36,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\"}"
+      "detail": "{\"n\":36,\"cols\":1,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":294,\"ch\":523,\"rows\":0,\"more\":true,\"filters\":false}"
     },
     {
-      "name": "m JD: no creative cropped (14 measured)",
+      "name": "m JD: larger cards, 1 per row, sorted by Proven, no list rows",
+      "pass": true,
+      "detail": "{\"n\":36,\"cols\":1,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":294,\"ch\":523,\"rows\":0,\"more\":true,\"filters\":false}"
+    },
+    {
+      "name": "m JD: card keeps Proven score, market pill, days · format · landing",
+      "pass": true,
+      "detail": "{\"n\":36,\"cols\":1,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":294,\"ch\":523,\"rows\":0,\"more\":true,\"filters\":false}"
+    },
+    {
+      "name": "m JD: no creative cropped (4 measured)",
       "pass": true,
       "detail": ""
     },
@@ -258,6 +323,11 @@
       "name": "m JD: no video playing without hover",
       "pass": true,
       "detail": "0 playing"
+    },
+    {
+      "name": "m JD: market chip filters to that market",
+      "pass": true,
+      "detail": ""
     },
     {
       "name": "m Trending: native cards with rank badge, no iframe",
@@ -276,6 +346,26 @@
     },
     {
       "name": "m Trending: no video playing without hover",
+      "pass": true,
+      "detail": "0 playing"
+    },
+    {
+      "name": "m autoplay: toggle visible and off by default",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m autoplay on: videos in view play muted, max 8, none off screen",
+      "pass": true,
+      "detail": "{\"n\":4,\"muted\":true,\"stored\":\"true\",\"offscreen\":0}"
+    },
+    {
+      "name": "m autoplay: choice remembered in this browser",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "m autoplay off again: nothing plays",
       "pass": true,
       "detail": "0 playing"
     },
@@ -300,19 +390,34 @@
       "detail": "scrollWidth 390 vs 390"
     },
     {
-      "name": "m viewer: Reels frame has no numbers",
+      "name": "m viewer: Reels frame matches Instagram (rail icons, no numbers)",
       "pass": true,
-      "detail": "{\"reels\":true,\"digits\":[],\"controls\":true,\"vids\":1}"
+      "detail": "{\"reels\":true,\"digits\":[],\"w\":358,\"vw\":390,\"rail\":5}"
     },
     {
-      "name": "m viewer: one video with native controls (single scrubber)",
+      "name": "m viewer: Reels frame fits a 390px screen",
       "pass": true,
-      "detail": "{\"reels\":true,\"digits\":[],\"controls\":true,\"vids\":1}"
+      "detail": "{\"reels\":true,\"digits\":[],\"w\":358,\"vw\":390,\"rail\":5}"
+    },
+    {
+      "name": "m viewer: batch 1 panels and actions present",
+      "pass": true,
+      "detail": "{\"labels\":[],\"acts\":[],\"hookTxt\":\"The SC Rebel\",\"hk\":\"The SC Rebel\",\"hkind\":\"text\",\"h\":\"The SC Rebel\",\"hookOk\":true}"
+    },
+    {
+      "name": "m viewer: Hook line = hook_text (never the Meta headline)",
+      "pass": true,
+      "detail": "{\"labels\":[],\"acts\":[],\"hookTxt\":\"The SC Rebel\",\"hk\":\"The SC Rebel\",\"hkind\":\"text\",\"h\":\"The SC Rebel\",\"hookOk\":true}"
     },
     {
       "name": "m viewer: no horizontal scroll",
       "pass": true,
       "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m Reels mode: opens full height, icons only",
+      "pass": true,
+      "detail": "{\"open\":true,\"digits\":[],\"w\":390,\"h\":844,\"vw\":390,\"vh\":844,\"playing\":1}"
     },
     {
       "name": "m viewer: Esc closes",
@@ -332,7 +437,7 @@
     {
       "name": "m media load failures (info)",
       "pass": true,
-      "detail": "1 failed resource loads"
+      "detail": "2 failed resource loads"
     }
   ]
 }
