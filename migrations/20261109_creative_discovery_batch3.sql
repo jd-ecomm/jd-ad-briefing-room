@@ -45,3 +45,9 @@ update public.in_ads set batch = 3 where batch is null;
 
 -- 6. brand profiles for the batch 3 brands (stats were already computed over all English rows; refreshed after release)
 select public.cd_refresh_brand_profiles();
+
+-- 7. load speed: after the release the page's deep OFFSET pages (1,000 rows, ordered by id, anon 3s statement timeout)
+--    took about 2.1s at offset 12,000 and one phone check run hit the timeout (57014). A partial index plus analyze
+--    brought the same query to about 25ms (no page code change):
+create index if not exists in_ads_released_en_id on public.in_ads (id) where batch is not null and is_english;
+analyze public.in_ads;
