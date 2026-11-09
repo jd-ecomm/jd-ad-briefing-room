@@ -1,0 +1,116 @@
+{
+  "base": "https://jd-ecomm.github.io/jd-ad-briefing-room/",
+  "page": "preview/",
+  "when": "2026-11-09T16:38:45.737Z",
+  "results": [
+    {
+      "name": "desktop",
+      "vp": "1440x900",
+      "cpu": 0,
+      "net": "none",
+      "hidden": false,
+      "firstCard": 4961,
+      "firstPoster": 5467,
+      "usable": 4961,
+      "longTasks": {
+        "n": 1,
+        "max": 59,
+        "total": 59
+      },
+      "bytes": {
+        "all": 2958184,
+        "supabase": 184907,
+        "supabaseRequests": 23
+      },
+      "cards": 48,
+      "nextBatch": [
+        33,
+        78,
+        59
+      ],
+      "longTasksAfterScroll": {
+        "n": 1,
+        "max": 59
+      },
+      "domCards": {
+        "cards": 192,
+        "withContent": 65,
+        "videos": 0
+      },
+      "hooks": 2745,
+      "brands": 430,
+      "brandPage": 449,
+      "errors": []
+    },
+    {
+      "name": "phone",
+      "vp": "390x844",
+      "cpu": 4,
+      "net": "none",
+      "hidden": false,
+      "firstCard": 2033,
+      "firstPoster": 2259,
+      "usable": 2033,
+      "longTasks": {
+        "n": 3,
+        "max": 155,
+        "total": 329
+      },
+      "bytes": {
+        "all": 1052778,
+        "supabase": 184806,
+        "supabaseRequests": 22
+      },
+      "cards": 48,
+      "nextBatch": [
+        119,
+        206,
+        198
+      ],
+      "longTasksAfterScroll": {
+        "n": 16,
+        "max": 155
+      },
+      "domCards": {
+        "cards": 192,
+        "withContent": 37,
+        "videos": 0
+      },
+      "hooks": 1321,
+      "brands": 580,
+      "brandPage": 388,
+      "errors": []
+    },
+    {
+      "name": "fast3g",
+      "vp": "1440x900",
+      "cpu": 0,
+      "net": "Fast 3G",
+      "hidden": false,
+      "firstCard": 9272,
+      "firstPoster": 15387,
+      "usable": 9272,
+      "longTasks": {
+        "n": 0,
+        "max": 0,
+        "total": 0
+      },
+      "bytes": {
+        "all": 1017677,
+        "supabase": 53469,
+        "supabaseRequests": 21
+      },
+      "cards": 48,
+      "errors": []
+    },
+    {
+      "name": "hidden",
+      "vp": "1440x900",
+      "cpu": 0,
+      "net": "none",
+      "hidden": true,
+      "firstCard": 1073,
+      "errors": []
+    }
+  ]
+}
