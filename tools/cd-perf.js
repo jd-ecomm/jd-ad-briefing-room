@@ -60,6 +60,10 @@ async function scenario(browser, base, pagePath, name, { vp, mobile = false, cpu
       out.longTasks = { n: lt.length, max: lt.reduce((m, x) => Math.max(m, x[1]), 0), total: lt.reduce((s, x) => s + x[1], 0) };
       out.bytes = { all: bytes.all, supabase: bytes.sb, supabaseRequests: bytes.reqSb };
       out.cards = await page.evaluate(() => document.querySelectorAll('#v-cd .cd-card').length);
+      out.timeline = await page.evaluate(() => { const n = performance.getEntriesByType('navigation')[0] || {};
+        const r = performance.getEntriesByType('resource').filter(e => /supabase\.co|data\.json|\.js(\?|$)|fonts\.g/.test(e.name) && e.startTime < (window.__cdp.usable || 1e9) + 50)
+          .map(e => [e.name.replace(/^https?:\/\/[^/]+\//, '').replace(/\?.*$/, '').slice(0, 40), Math.round(e.startTime), Math.round(e.responseEnd)]);
+        return { html: Math.round(n.responseEnd || 0), dcl: Math.round(n.domContentLoadedEventEnd || 0), res: r }; });
       if (extras) {
         /* next batch: jump to the bottom of the grid, time until more cards are in the DOM */
         const nb = [];
