@@ -308,3 +308,12 @@ begin return cd_cached('hooks:' || coalesce(p->>'scope','jd'), 'hooks', p); end 
 create or replace function public.cd_brand_names() returns jsonb language plpgsql security definer set search_path = public as $$
 begin return cd_cached('names', 'names', null); end $$;
 -- cd_hooks_raw templates: counts per template in one pass (count(distinct mk), first hook format by id) instead of a sub-query per template (1.9s -> 30ms).
+
+-- ===== Round 3 (same day) =====
+-- Tables compacted after the first builds: cluster cd_members using cd_members_vg; cd_mt using cd_mt_vg; cd_ct, cd_cf, cd_hk, cd_card_hay, cd_cards on their primary keys
+-- (cd_members 96 -> 32 MB, cd_cards 65 -> 24 MB), so a card's variants sit on the same page.
+-- cd_slim: stubs are built from plain cd_members columns (aspect bucket, dates, status, kind, tags, hook format), only the lead ad and one ad per format read the JSON.
+-- cd_hook_rows: thin wrapper over cd_hook_rows_raw; first pages without market / kind / days / search filters are cached per sync (one per hook format and sort).
+--   full = true (CSV) returns the computed columns only (id, brand, market, launch date, days live, format, aspect bucket, hook text / format / template, Proven score) in one
+--   request (limit up to 8000); the page reads headline, primary text, landing URL, on-screen text, Ad Library link and raw aspect from in_ads in parallel chunks.
+-- cd_page wrapper: brand pages are not cached (one per brand would make the cache large).
