@@ -1,0 +1,82 @@
+name: Creative Discovery loading timings
+
+# Measures first card, usable grid, long tasks, payload, next batch, Hooks and Brands open times for a Creative Discovery page
+# (desktop 1440, phone 390 with CPU 4x, desktop on Fast 3G, hidden tab). Results go to the step summary, perf.json,
+# and a cd-perf/run-<id> branch. Never fails on slow numbers.
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Site root"
+        required: false
+        default: "https://jd-ecomm.github.io/jd-ad-briefing-room/"
+      page:
+        description: "Page path under the site root"
+        required: false
+        default: "preview/"
+      runs:
+        description: "Runs per scenario"
+        required: false
+        default: "2"
+      wait_for_commit:
+        description: "Wait until Pages serves this commit's preview/cd.js (1) or not (0)"
+        required: false
+        default: "0"
+
+concurrency:
+  group: cd-perf
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  perf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null
+          npm install --no-save playwright@1.48.2
+          npx playwright install --with-deps chromium
+          npx playwright install chrome
+      - name: Wait for Pages to serve this commit's preview
+        if: ${{ inputs.wait_for_commit == '1' }}
+        env:
+          BASE: ${{ inputs.base_url }}
+        run: |
+          want=$(md5sum preview/cd.js | cut -d' ' -f1)
+          for i in $(seq 1 60); do
+            got=$(curl -fsSL "${BASE}preview/cd.js?nocache=$RANDOM$i" | md5sum | cut -d' ' -f1 || true)
+            if [ "$got" = "$want" ]; then echo "Pages is serving this commit (try $i)"; exit 0; fi
+            echo "waiting for Pages ($i)"; sleep 20
+          done
+          exit 1
+      - name: Measure
+        continue-on-error: true
+        env:
+          BASE: ${{ inputs.base_url }}
+          PG: ${{ inputs.page }}
+          RUNS: ${{ inputs.runs }}
+          PW_CHANNEL: chrome
+        run: node tools/cd-perf.js "$BASE" cd-perf "$PG"
+      - name: Push results to a run branch
+        if: always()
+        run: |
+          [ -d cd-perf ] || exit 0
+          b="cd-perf/run-${{ github.run_id }}"
+          mkdir -p /tmp/perf && cp -r cd-perf/. /tmp/perf/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan "$b"
+          git rm -rqf . >/dev/null 2>&1 || true
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -r /tmp/perf/. .
+          git add -A
+          git commit -qm "Creative Discovery loading timings (run ${{ github.run_id }})"
+          git push -q origin "$b"
