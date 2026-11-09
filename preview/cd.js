@@ -274,7 +274,7 @@ function drawFilters(){const fp=$('#cd-fp'),btn=$('#cd-fbtn'),act=$('#cd-act');c
  btn.hidden=!usable;$('.cd-q').hidden=C.tab==='boards';
  const n=Object.values(C.f).reduce((s,x)=>s+x.size,0);const fc=$('#cd-fcount');fc.hidden=!n;fc.textContent=n;
  fp.hidden=!(usable&&C.filtersOpen);btn.setAttribute('aria-expanded',!fp.hidden);
- if(!fp.hidden)fp.innerHTML=fGroups().map(([g,l,opts])=>`<div class="cd-fg"><span class="lbl">${l}</span><div class="cd-chips">${opts.map(([v,lab,c])=>`<button type="button" class="cd-chip" data-f="${g}|${esc(v)}" aria-pressed="${C.f[g].has(v)}">${esc(lab)}<small>${fmtN(c)}</small></button>`).join('')}</div></div>`).join('')+`<div class="cd-fg end"><button type="button" class="cd-btn" data-fclear>Clear all</button><button type="button" class="cd-btn y" id="cd-fdone">Done</button></div>`;
+ if(!fp.hidden)fp.innerHTML=fGroups().map(([g,l,opts])=>`<div class="cd-fg ${opts.length>8?'wide':''}"><span class="lbl">${l}</span><div class="cd-chips">${opts.map(([v,lab,c])=>`<button type="button" class="cd-chip" data-f="${g}|${esc(v)}" aria-pressed="${C.f[g].has(v)}">${esc(lab)}<small>${fmtN(c)}</small></button>`).join('')}</div></div>`).join('')+`<div class="cd-fg end"><button type="button" class="cd-btn" data-fclear>Clear all</button><button type="button" class="cd-btn y" id="cd-fdone">Done</button></div>`;
  const d=$('#cd-fdone');if(d)d.onclick=()=>{C.filtersOpen=false;drawFilters()};
  const on=[];Object.entries(C.f).forEach(([g,s])=>s.forEach(v=>on.push([g,v,g==='brand'?(BRAND_BY[v]||{}).b||v:g==='cat'?TRN[v]||v:g==='status'?{proven:'Proven',rising:'Rising',live:'Active',multi:'2+ formats'}[v]:v])));
  act.hidden=!usable||!on.length;act.innerHTML=on.map(([g,v,l])=>`<button type="button" class="cd-chip on" data-f="${g}|${esc(v)}" aria-label="Remove filter ${esc(l)}">${esc(l)} ${sv(I.x,12)}</button>`).join('')+(on.length?`<button type="button" class="cd-link" data-fclear>Clear all</button>`:'');
@@ -289,7 +289,10 @@ function draw(){const el=host();if(!el||el.hidden)return;shell();
  if(!C.ready){head('Creative Discovery','Loading ads…');body.innerHTML=`<div class="cd-skel">${Array.from({length:10},(_,i)=>`<i style="aspect-ratio:${[.5625,.8,1,.8,.5625][i%5]}"></i>`).join('')}</div>`;return}
  ({discover:vDiscover,jd:vJD,trending:vTrending,brands:vBrands,boards:vBoards}[C.tab]||vDiscover)(body)}
 function counts(){const set=(k,n)=>{const s=$(`[data-cnt="${k}"]`);if(s)s.textContent=n==null?'':fmtN(n)};set('discover',ADS.length);set('jd',ADS.filter(a=>a.mk).length);set('trending',C.tr?TR.filter(a=>a.week===C.week).length:null);set('brands',BRANDS.filter(b=>b.n>=3).length);set('boards',C.boards.length||null)}
-function vDiscover(body){const list=sorted(filtered(ADS,'discover'),C.sort.discover);
+/* Discover mixes brands: each brand's best ad first, then round-robin, so no single brand fills the screen */
+function mixBrands(arr){const by=new Map();arr.forEach(a=>{const k=a.bid||a.b;if(!by.has(k))by.set(k,[]);by.get(k).push(a)});const qs=[...by.values()],out=[];
+ while(out.length<arr.length)for(const q of qs)if(q.length)out.push(q.shift());return out}
+function vDiscover(body){let list=sorted(filtered(ADS,'discover'),C.sort.discover);if(C.sort.discover==='proven'&&!C.f.brand.size)list=mixBrands(list);
  head('Discover',`${fmtN(list.length)} of ${fmtN(ADS.length)} ads from ${fmtN(BRANDS.length)} brands. Hover a video to preview it, move across it to scrub. Click to open.`);
  grid(body,list,'discover')}
 function vJD(body){const base=ADS.filter(a=>a.mk);const list=sorted(filtered(base,'jd'),C.sort.jd);

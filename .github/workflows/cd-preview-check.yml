@@ -33,6 +33,8 @@ jobs:
           npm init -y >/dev/null
           npm install --no-save playwright@1.48.2
           npx playwright install --with-deps chromium
+          # Google Chrome (Chromium based) plays the H.264 ads; Playwright's bundled Chromium has no proprietary codecs
+          npx playwright install chrome
       - name: Wait for Pages to serve this commit's preview
         env:
           BASE: ${{ inputs.base_url }}
@@ -47,6 +49,7 @@ jobs:
       - name: Run the check
         env:
           BASE: ${{ inputs.base_url }}
+          PW_CHANNEL: chrome
         run: node tools/cd-preview-check.js "$BASE" cd-shots
       - name: Upload screenshots
         if: always()
