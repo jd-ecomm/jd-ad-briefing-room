@@ -295,7 +295,7 @@ function counts(){const set=(k,n)=>{const s=$(`[data-cnt="${k}"]`);if(s)s.textCo
 function mixBrands(arr){const by=new Map();arr.forEach(a=>{const k=a.bid||a.b;if(!by.has(k))by.set(k,[]);by.get(k).push(a)});const qs=[...by.values()],out=[];
  while(out.length<arr.length)for(const q of qs)if(q.length)out.push(q.shift());return out}
 function vDiscover(body){let list=sorted(filtered(ADS,'discover'),C.sort.discover);if(C.sort.discover==='proven'&&!C.f.brand.size)list=mixBrands(list);
- head('Discover',`${fmtN(list.length)} of ${fmtN(ADS.length)} ads from ${fmtN(BRANDS.length)} brands. Hover a video to preview it, move across it to scrub. Click to open.`);
+ head('Discover',`${fmtN(list.length)} of ${fmtN(ADS.length)} ads from ${fmtN(BRANDS.length)} brands. ${FINE.matches?'Hover a video to preview it, move across it to scrub. Click to open.':'Tap any ad to open it.'}`);
  grid(body,list,'discover')}
 function vJD(body){const base=ADS.filter(a=>a.mk);const list=sorted(filtered(base,'jd'),C.sort.jd);
  const mk={};base.forEach(a=>mk[a.mk]=(mk[a.mk]||0)+1);

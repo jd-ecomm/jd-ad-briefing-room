@@ -86,7 +86,7 @@
 .cd-cnav button{width:26px;height:26px;border-radius:50%;border:0;background:transparent;color:#fff;display:grid;place-items:center;cursor:pointer}
 .cd-cnav button:hover{background:rgba(255,255,255,.18)}
 .cd-fr:hover .cd-cnav,.cd-fr:focus-within .cd-cnav,.cd-cnav.big{opacity:1}
-@media (hover:none){.cd-cnav{opacity:1}}
+@media (hover:none){.cd-fr .cd-cnav{display:none}.cd-cnav.big{display:inline-flex}}
 .cd-fseg{display:flex;gap:4px;align-self:flex-start;background:var(--s2);border:1px solid var(--line);border-radius:999px;padding:2px}
 .cd-fseg button,.cd-seg button{border:0;background:transparent;color:var(--fg2);font:700 10.5px/1 var(--body);padding:6px 9px;border-radius:999px;cursor:pointer;font-variant-numeric:tabular-nums}
 .cd-fseg button[aria-pressed="true"],.cd-seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
