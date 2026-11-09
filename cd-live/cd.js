@@ -15,7 +15,7 @@ const MK={'66cf75a0e42d53dcea7879b5':'JD UK','67aa28cb0a70ccc0c54281c6':'JD US',
 const TRC=[['apparel','Apparel'],['sports-fitness','Sports & Fitness'],['retail','Retail'],['accessories','Accessories'],['health-wellness','Health & Wellness']];
 const TRN=Object.fromEntries(TRC);
 const TABS=[['discover','Discover'],['jd','JD'],['trending','Trending'],['brands','Brands'],['boards','Boards']];
-const SORTS={discover:[['proven','Proven'],['rising','Rising'],['newest','Newest'],['saved','Most saved']],jd:[['proven','Proven score'],['newest','Newest'],['longest','Longest running']],trending:[['rank','Rank'],['newest','Newest']],brand:[['proven','Proven'],['newest','Newest'],['saved','Most saved']],boards:[['added','Recently added']]};
+const SORTS={discover:[['newest','Newest'],['proven','Proven'],['rising','Rising'],['saved','Most saved']],jd:[['proven','Proven score'],['newest','Newest'],['longest','Longest running']],trending:[['rank','Rank'],['newest','Newest']],brand:[['proven','Proven'],['newest','Newest'],['saved','Most saved']],boards:[['added','Recently added']]};
 const PROVEN_TIP=`Proven score = days live (capped at ${CAP}) + variants of the same concept + parallel launches. Proven = running ${PROVEN_DAYS}+ days.`;
 
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>Array.from(r.querySelectorAll(s));
@@ -69,7 +69,7 @@ const sv=(s,n=16)=>s.replace('<svg',`<svg width="${n}" height="${n}" aria-hidden
 
 /* ---------- state ---------- */
 const C={tab:'discover',q:'',f:null,
- sort:{discover:'proven',jd:'proven',trending:'rank',brand:'proven',boards:'added'},brand:null,board:null,week:null,
+ sort:{discover:'newest',jd:'proven',trending:'rank',brand:'proven',boards:'added'},brand:null,board:null,week:null,
  fmt:{},filtersOpen:false,started:false,ready:false,err:null,tr:null,trErr:null,favs:new Set(),allFavs:{},boards:[],items:[],saveErr:null,lists:{},viewer:null};
 let ROWS=[],ADS=[],BYID={},BRANDS=[],BRAND_BY={},TR=[];
 
