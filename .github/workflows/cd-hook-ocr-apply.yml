@@ -1,0 +1,49 @@
+name: Creative Discovery hook OCR apply
+
+# Post-processes raw OCR (cd-hooks/ocr-p1..p8 data branches) with scripts/cd_hook_ocr_post.py and
+# writes hook_text / onscreen_text / hook_kind (hook_source='ocr') to in_ads where hook_source is null.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "1 = post-process only, do not write"
+        required: false
+        default: "0"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q requests wordninja rapidfuzz
+      - name: Fetch raw OCR branches
+        run: |
+          mkdir -p raw
+          for p in 1 2 3 4 5 6 7 8; do
+            git fetch -q --depth 1 origin "cd-hooks/ocr-p$p" && git show "FETCH_HEAD:ocr_raw_p${p}of8.json" > "raw/p$p.json" || echo "part $p missing"
+          done
+          ls -la raw
+      - name: Post-process
+        run: python3 scripts/cd_hook_ocr_post.py raw/*.json > results.json && python3 -c "import json;d=json.load(open('results.json'));print(len(d['results']),'results',len(d['failed']),'failed')"
+      - name: Write to Supabase
+        if: ${{ inputs.dry_run != '1' }}
+        env:
+          SUPABASE_URL: https://cymkcvdsxoneojfisjgk.supabase.co
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5bWtjdmRzeG9uZW9qZmlzamdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxMTg0ODQsImV4cCI6MjEwODY5NDQ4NH0.rgRRRXCab-s5xy4ICFa_l511Gol8EMqPEjBHThnAC9I' }}
+        run: python3 -u scripts/cd_hook_ocr_apply.py results.json
+      - name: Keep results on a data branch
+        run: |
+          mkdir pub && cp results.json pub/ && cd pub
+          B="cd-hooks/ocr-results"
+          git init -q -b "$B"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "Hook OCR results (run ${{ github.run_id }})"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "$B:$B"
