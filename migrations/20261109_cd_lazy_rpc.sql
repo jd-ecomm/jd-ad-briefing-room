@@ -70,7 +70,7 @@ begin
   ord := case sortk when 'newest' then 't.s_newest' when 'saved' then 't.s_saved' when 'longest' then 't.s_longest'
     when 'rising' then format('(c.var*4 + c.par*3 + greatest(0, 30 - (%L::date - t.sd_max))*2 + (case when c.st = ''active'' then 5 else 0 end))', today)
     else 't.ps' end;
-  q := 'from cd_cards c join cd_ct t on t.vg = c.vg and t.live' || case when needh then ' join cd_card_hay h on h.vg = c.vg' else '' end || ' where c.live and ' || w;
+  q := 'from cd_cf c join cd_ct t on t.vg = c.vg and t.live' || case when needh then ' join cd_card_hay h on h.vg = c.vg' else '' end || ' where c.live and ' || w;
   if mix then
     execute format('with f as (select c.vg, t.ps, t.min_id, c.bid, row_number() over (partition by c.bid order by t.ps desc, t.min_id) rn %s),
       b as (select bid, ps bps, min_id bmid from f where rn = 1),
@@ -90,7 +90,7 @@ begin
   if coalesce((p->>'summary')::boolean, false) then res := res || jsonb_build_object('summary', cd_summary_j()); end if;
 
   if coalesce(p->>'ctx','') = 'jd' and coalesce((p->>'stats')::boolean, false) then
-    execute format('with a as (select c.vg, t.min_id, c.mk, c.st, c.nf, c.vf, t.proven from cd_cards c join cd_ct t on t.vg = c.vg and t.live %s where c.live and c.mk is not null and %s)
+    execute format('with a as (select c.vg, t.min_id, c.mk, c.st, c.nf, c.vf, t.proven from cd_cf c join cd_ct t on t.vg = c.vg and t.live %s where c.live and c.mk is not null and %s)
       select jsonb_build_object(''all'', (select count(*) from a), ''live'', (select count(*) from a where st = ''active''), ''proven'', (select count(*) from a where proven),
         ''multi'', (select count(*) from a where nf >= 2),
         ''fmt'', coalesce((select jsonb_agg(jsonb_build_array(v, n) order by n desc, fm) from (select v, count(*) n, min(min_id) fm from a, unnest(vf) v group by v order by count(*) desc, min(min_id) limit 6) z), ''[]''::jsonb),
@@ -101,7 +101,7 @@ begin
 
   -- zero results with 2+ words: how many ads match each word on its own (base only, no filters)
   if tot = 0 and coalesce((p->>'sugg')::boolean, true) and cardinality(array_remove(string_to_array(cd_nz(p->>'q'), ' '), '')) > 1 then
-    execute format('select coalesce(jsonb_object_agg(term, n), ''{}''::jsonb) from (select term, (select count(*) from cd_cards c join cd_card_hay h on h.vg = c.vg where c.live and h.live and %s and h.hay like ''%%'' || replace(term, ''%%'', ''\%%'') || ''%%'') n
+    execute format('select coalesce(jsonb_object_agg(term, n), ''{}''::jsonb) from (select term, (select count(*) from cd_cf c join cd_card_hay h on h.vg = c.vg where c.live and h.live and %s and h.hay like ''%%'' || replace(term, ''%%'', ''\%%'') || ''%%'') n
        from unnest(array_remove(string_to_array(cd_nz(%L), '' ''), '''')) term) z', base, p->>'q') into ex;
     res := res || jsonb_build_object('terms', ex);
   end if;
@@ -121,7 +121,7 @@ begin
   execute format($q$
     with x as (select c.vg, c.min_id, c.bid, coalesce(c.market,'n/a') mkt, c.kinds, c.fl, %s tg, c.hfs, (case when c.st='active' then 'live' else 'ended' end) st,
         t.proven, (c.st = 'active' and t.sd_max >= %L::date) rising, t.sv > 0 saved, c.nf >= 2 multi, c.lp, c.cta, t.d %s
-      from cd_cards c join cd_ct t on t.vg = c.vg and t.live %s where c.live and %s),
+      from cd_cf c join cd_ct t on t.vg = c.vg and t.live %s where c.live and %s),
     y as (select *, f_brand and f_mkt and f_kind and f_asp and f_tag and f_hf and f_st and f_sig and f_lp and f_cta and f_days and f_launch and f_q as f_all from x)
     select jsonb_build_object(
       'n', (select count(*) from y where f_q and f_mkt and f_kind and f_asp and f_tag and f_hf and f_st and f_sig and f_lp and f_cta and f_days and f_launch and (f_brand or %L)),
@@ -143,12 +143,12 @@ end $$;
 create or replace function public.cd_summary_j() returns jsonb language sql stable security definer set search_path = public as $$
   select jsonb_build_object(
     'cards', (select count(*) from cd_ct where live),
-    'jd', (select count(*) from cd_cards where live and mk is not null),
+    'jd', (select count(*) from cd_cf where live and mk is not null),
     'brands', (select count(*) from cd_brands where live),
     'maxd', (select coalesce(max(d), 1) from cd_ct where live),
     'blist', (select coalesce(jsonb_agg(jsonb_build_array(bid, b, g, market, mk, focus, n) order by n desc, first_mid), '[]'::jsonb) from cd_brands where live),
-    'tags', (select coalesce(jsonb_agg(v order by v), '[]'::jsonb) from (select distinct v from cd_cards, unnest(vf) v where live) z),
-    'profiled', (select count(distinct c.b) from cd_cards c where c.live and exists (select 1 from cd_brand_profiles p where p.brand = c.b and p.stats is not null)),
+    'tags', (select coalesce(jsonb_agg(v order by v), '[]'::jsonb) from (select distinct v from cd_cf, unnest(vf) v where live) z),
+    'profiled', (select count(distinct c.b) from cd_cf c where c.live and exists (select 1 from cd_brand_profiles p where p.brand = c.b and p.stats is not null)),
     'as_of', (select as_of from cd_meta where k = 'cd'), 'synced', (select refreshed_at from cd_meta where k = 'cd'))
 $$;
 create or replace function public.cd_summary() returns jsonb language plpgsql security definer set search_path = public as $$
@@ -172,12 +172,12 @@ begin
   if v is null then return null; end if;
   select * into c from cd_cards where vg = v;
   res := jsonb_build_object('card', jsonb_build_object('vg', v, 'm', c.m),
-    'concept', coalesce((select jsonb_agg(jsonb_build_object('vg', x.vg, 'm', cd_slim(x.vg)) order by x.ps desc, x.min_id) from (select x.vg, t.ps, t.min_id from cd_cards x join cd_ct t on t.vg = x.vg and t.live where x.live and x.ck = c.ck and x.vg <> v order by t.ps desc, t.min_id limit 12) x), '[]'::jsonb),
-    'same', coalesce((select jsonb_agg(jsonb_build_object('vg', x.vg, 'm', cd_slim(x.vg)) order by x.ps desc, x.min_id) from (select x.vg, t.ps, t.min_id from cd_cards x join cd_ct t on t.vg = x.vg and t.live where x.live and x.bid = c.bid and x.vg <> v and x.ck <> c.ck order by t.ps desc, t.min_id limit 10) x), '[]'::jsonb),
+    'concept', coalesce((select jsonb_agg(jsonb_build_object('vg', x.vg, 'm', cd_slim(x.vg)) order by x.ps desc, x.min_id) from (select x.vg, t.ps, t.min_id from cd_cf x join cd_ct t on t.vg = x.vg and t.live where x.live and x.ck = c.ck and x.vg <> v order by t.ps desc, t.min_id limit 12) x), '[]'::jsonb),
+    'same', coalesce((select jsonb_agg(jsonb_build_object('vg', x.vg, 'm', cd_slim(x.vg)) order by x.ps desc, x.min_id) from (select x.vg, t.ps, t.min_id from cd_cf x join cd_ct t on t.vg = x.vg and t.live where x.live and x.bid = c.bid and x.vg <> v and x.ck <> c.ck order by t.ps desc, t.min_id limit 10) x), '[]'::jsonb),
     'like', coalesce((select jsonb_agg(jsonb_build_object('vg', z.vg, 'm', cd_slim(z.vg)) order by z.s desc, z.min_id) from (
         select x.vg, t.min_id, cardinality(array(select unnest(x.vf) intersect select unnest(c.vf)))*3 + (case when x.kind = c.kind then 2 else 0 end) + (case when x.g = c.g then 1 else 0 end)
           + (case when x.lp = c.lp then 1 else 0 end) + (case when x.market is not distinct from c.market then 1 else 0 end) + t.ps/400.0 s
-        from cd_cards x join cd_ct t on t.vg = x.vg and t.live where x.live and x.bid is distinct from c.bid order by 3 desc, t.min_id limit 10) z), '[]'::jsonb));
+        from cd_cf x join cd_ct t on t.vg = x.vg and t.live where x.live and x.bid is distinct from c.bid order by 3 desc, t.min_id limit 10) z), '[]'::jsonb));
   return res;
 end $$;
 
@@ -199,8 +199,8 @@ begin
   perform cd_ensure();
   return (select coalesce(jsonb_agg(jsonb_build_object('b', b, 'bids', obids, 'logo', logo, 'n', n) order by fm), '[]'::jsonb) from (
     select c.b, (array_agg(c.logo order by c.min_id) filter (where c.logo <> ''))[1] logo, count(*) n, min(c.min_id) fm,
-      (select array_agg(bid order by f) from (select c2.bid, min(c2.min_id) f from cd_cards c2 where c2.live and c2.b = c.b group by c2.bid) q) obids
-    from cd_cards c where c.live group by c.b) z);
+      (select array_agg(bid order by f) from (select c2.bid, min(c2.min_id) f from cd_cf c2 where c2.live and c2.b = c.b group by c2.bid) q) obids
+    from cd_cf c where c.live group by c.b) z);
 end $$;
 
 -- JD Hooks: everything the Hooks view shows above the library, computed over the hook rows (one per ad, JD markets, hook read)
@@ -208,7 +208,7 @@ create or replace function public.cd_hooks(p jsonb) returns jsonb language plpgs
 declare v_scope text := coalesce(p->>'scope','jd'); res jsonb;
 begin
   perform cd_ensure();
-  with r as (select m.id, m.vg, m.mk, m.hf, m.ht, m.hk, m.hsrc, m.sd, m.ost_or_hk, t.d, t.ps from cd_members m join cd_mt t on t.id = m.id
+  with r as (select m.id, m.vg, m.mk, m.hf, m.ht, m.hk, m.hsrc, m.sd, m.ost_or_hk, t.d, t.ps from cd_hk m join cd_mt t on t.id = m.id
              where m.live and t.live and m.hkind is not null and (v_scope = 'all' or m.mk is not null)),
   mo as (select distinct to_char(sd, 'YYYY-MM') mo from r where sd is not null order by 1 desc limit 12),
   tp as (select ht, count(*) n, min(id) fid from r where ht is not null group by ht),
@@ -239,10 +239,10 @@ declare today date := (now() at time zone 'America/Toronto')::date; scope text :
   res jsonb;
 begin
   perform cd_ensure();
-  with r as (select m.id, m.vg, m.j, m.mk, m.market, m.sd, m.hk, m.hf, m.ht, m.kind, m.asp, t.d, t.ps, t.var, t.par,
+  with r as (select m.id, m.vg, m.mk, m.market, m.sd, m.hk, m.hf, m.ht, m.kind, m.asp, t.d, t.ps, t.var, t.par,
       (case sortk when 'newest' then -(case when m.sd is not null then today - m.sd else 999 end)*1000 + t.ps when 'longest' then t.d*1000 + t.ps
         else t.ps*10000 - (case when m.sd is not null then today - m.sd else 999 end) end)::numeric sk
-    from cd_members m join cd_mt t on t.id = m.id
+    from cd_hk m join cd_mt t on t.id = m.id
     where m.live and t.live and m.hkind is not null and (scope = 'all' or m.mk is not null)
       and (v_fmt = '' or m.hf = v_fmt) and (v_mkt = '' or m.mk = v_mkt) and (v_kind = '' or m.hkind = v_kind) and t.d >= mind
       and (v_q = '' or m.hk_hay like '%' || replace(replace(v_q, '\', '\\'), '%', '\%') || '%')),
@@ -250,7 +250,7 @@ begin
   select jsonb_build_object('total', (select count(*) from r),
     'rows', coalesce((select jsonb_agg(case when wantfull then jsonb_build_object('id', pg.id, 'b', a.brand, 'mk', pg.mk, 'market', pg.market, 'sd', pg.sd, 'd', pg.d, 'format', pg.kind,
           'aspect', coalesce(nullif(a.aspect,''), pg.asp), 'hk', pg.hk, 'hf', pg.hf, 'ht', pg.ht, 'ost', a.onscreen_text, 'h', a.headline, 'x', a.copy, 'l', a.landing, 'ps', pg.ps, 'lib', a.ad_library)
-        else jsonb_build_object('vg', pg.vg, 'j', pg.j || jsonb_build_object('var', pg.var, 'par', pg.par)) end order by -pg.sk, pg.id)
+        else jsonb_build_object('vg', pg.vg, 'j', (select mm.j from cd_members mm where mm.id = pg.id) || jsonb_build_object('var', pg.var, 'par', pg.par)) end order by -pg.sk, pg.id)
       from pg left join in_ads a on wantfull and a.id = pg.id), '[]'::jsonb),
     'next', (select case when count(*) = lim then (select jsonb_build_array(x.sk, x.id) from pg x order by -x.sk desc, x.id desc limit 1) end from pg),
     'cards', case when wantfull then '{}'::jsonb else coalesce((select jsonb_object_agg(c.vg, cd_slim(c.vg)) from cd_cards c where c.vg in (select vg from pg)), '{}'::jsonb) end) into res;
@@ -259,3 +259,52 @@ end $$;
 
 grant execute on function public.cd_page(jsonb), public.cd_facets(jsonb), public.cd_summary(), public.cd_cards_by_ids(text[]), public.cd_viewer(text),
   public.cd_brand_names(), public.cd_hooks(jsonb), public.cd_hook_rows(jsonb), public.cd_slim(text) to anon, authenticated;
+
+-- ===== Round 2 (same day): narrow tables and a per-generation cache =====
+-- Live timings showed first calls of 1.5 to 3.6s when cd_cards / cd_members (wide rows) were not in memory (anon timeout is 3s).
+-- cd_cf: narrow copy of cd_cards' filter and sort columns (kept by trigger cd_cf_sync on cd_cards); cd_hk: narrow hook rows (trigger cd_hk_sync on cd_members).
+-- cd_page / cd_facets / cd_summary_j / cd_brand_names / cd_viewer read cd_cf; cd_hooks / cd_hook_rows read cd_hk (cd_members only for the 60 rows of a page).
+-- The functions above were re-created with "from cd_cf c" / "from cd_hk m" in place of "from cd_cards c" / "from cd_members m" (otherwise unchanged).
+create table if not exists public.cd_cf (vg text primary key, live boolean not null, id text, min_id text, b text, bid text, g text, market text, mk text, kind text, ck text, st text,
+  var int, par int, nf int, fl text[], kinds text[], vf text[], vfm text[], hfs text[], lp text, cta text, sd date, focus boolean, logo text);
+create index if not exists cd_cf_bid on public.cd_cf (bid) where live;
+create index if not exists cd_cf_b on public.cd_cf (b) where live;
+create index if not exists cd_cf_ck on public.cd_cf (ck) where live;
+create index if not exists cd_cf_mk on public.cd_cf (mk) where live and mk is not null;
+create table if not exists public.cd_hk (id text primary key, live boolean not null, vg text, mk text, market text, b text, hf text, ht text, hk text, hsrc text, hkind text, sd date, ost_or_hk boolean, kind text, asp text, hk_hay text);
+create index if not exists cd_hk_mk on public.cd_hk (mk) where live;
+create index if not exists cd_hk_trgm on public.cd_hk using gin (hk_hay extensions.gin_trgm_ops);
+-- triggers: cd_cf_sync (after insert or update on cd_cards) and cd_hk_sync (after insert or update on cd_members) upsert the narrow rows.
+
+-- results that only change when the data changes, kept per sync generation (cd_meta.gen): first pages without filters or search,
+-- the Hooks summary, brand names, Filters drawer counts without filters. cd_page / cd_facets / cd_hooks / cd_brand_names are thin wrappers
+-- over cd_page_raw / cd_facets_raw / cd_hooks_raw / cd_brand_names_raw (the functions above, renamed).
+create table if not exists public.cd_cache (k text primary key, gen int not null, v jsonb not null, at timestamptz not null default now());
+create or replace function public.cd_cached(p_k text, fn text, p jsonb) returns jsonb language plpgsql security definer set search_path = public as $$
+declare g int; v jsonb;
+begin
+  perform cd_ensure();
+  select m.gen into g from cd_meta m where m.k = 'cd';
+  select c.v into v from cd_cache c where c.k = p_k and c.gen = g;
+  if v is not null then return v; end if;
+  v := case fn when 'page' then cd_page_raw(p) when 'facets' then cd_facets_raw(p) when 'hooks' then cd_hooks_raw(p) when 'names' then cd_brand_names_raw() end;
+  insert into cd_cache as c (k, gen, v) values (p_k, g, v) on conflict (k) do update set gen = excluded.gen, v = excluded.v, at = now();
+  return v;
+end $$;
+create or replace function public.cd_page(p jsonb) returns jsonb language plpgsql security definer set search_path = public as $$
+begin
+  if (p->'cursor' is null or jsonb_typeof(p->'cursor') = 'null') and coalesce(btrim(p->>'q'),'') = '' and not exists (select 1 from jsonb_object_keys(coalesce(p->'f','{}'::jsonb)) k where k <> 'ai')
+  then return cd_cached('page:' || md5(p::text), 'page', p); end if;
+  return cd_page_raw(p);
+end $$;
+create or replace function public.cd_facets(p jsonb) returns jsonb language plpgsql security definer set search_path = public as $$
+begin
+  if coalesce(btrim(p->>'q'),'') = '' and not exists (select 1 from jsonb_object_keys(coalesce(p->'f','{}'::jsonb)) k where k <> 'ai')
+  then return cd_cached('facets:' || md5(p::text), 'facets', p); end if;
+  return cd_facets_raw(p);
+end $$;
+create or replace function public.cd_hooks(p jsonb) returns jsonb language plpgsql security definer set search_path = public as $$
+begin return cd_cached('hooks:' || coalesce(p->>'scope','jd'), 'hooks', p); end $$;
+create or replace function public.cd_brand_names() returns jsonb language plpgsql security definer set search_path = public as $$
+begin return cd_cached('names', 'names', null); end $$;
+-- cd_hooks_raw templates: counts per template in one pass (count(distinct mk), first hook format by id) instead of a sub-query per template (1.9s -> 30ms).
