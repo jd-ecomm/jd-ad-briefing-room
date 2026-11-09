@@ -1,0 +1,247 @@
+#!/usr/bin/env python3
+"""Creative Discovery: hook sheets for reading ON-SCREEN text (hook_text / onscreen_text).
+
+Unlike cd_contact_sheets.py, these sheets show NO headline or copy (to avoid bias) and use
+large frames (540px wide) so text written on the creative can be read.
+
+SET=pilot  -> ids from tools/cd-hooks/pilot.json (list of ids)
+SET=all    -> every JD ad (brand ilike JD*), English first, then id
+Optional ONLY_UNREAD=1 skips rows with hook_read_at set.
+
+Videos: frames at 0.0, 0.5, 1.0, 1.5, 2.0, 3.0s (hook window) + 25%, 50%, 75% of duration,
+        one ad per sheet, 5 frames per row. Poster used if the video fails.
+Images / carousels: up to 3 cards at 540px wide, side by side, two ads per sheet.
+Identical media files (same sha1) are shown once; the index lists every ad id sharing it.
+Captions: ad id and timestamp only.
+
+Output: out/<set>_NNNN.jpg, out/<set>_index.json
+  index = {"sheets": {name: [{"rep": id, "ids": [...], "format": f, "frames": [labels]}]},
+           "failed": {id: reason}}
+Env: SUPABASE_URL, SUPABASE_ANON_KEY, SET, ONLY_UNREAD
+"""
+import concurrent.futures as cf
+import hashlib
+import io
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import time
+
+import requests
+from PIL import Image, ImageDraw, ImageFont
+
+SB = os.environ.get("SUPABASE_URL", "https://cymkcvdsxoneojfisjgk.supabase.co").rstrip("/")
+KEY = os.environ["SUPABASE_ANON_KEY"]
+HDR = {"apikey": KEY, "Authorization": f"Bearer {KEY}"}
+SET = os.environ.get("SET", "pilot")
+ONLY_UNREAD = os.environ.get("ONLY_UNREAD") == "1"
+OUT = "out"
+FW = 540            # frame width
+MAX_FH = 960        # cap frame height
+COLS_V = 5
+CAP_H = 40
+COLS = "id,brand,format,video,poster,images,thumb_r2,images_r2,video_r2,is_english"
+HOOK_TS = [0.0, 0.5, 1.0, 1.5, 2.0, 3.0]
+
+
+def get(url, **kw):
+    last = None
+    for i in range(3):
+        try:
+            r = requests.get(url, timeout=90, **kw)
+            if r.status_code == 200:
+                return r
+            last = f"HTTP {r.status_code}"
+            if r.status_code in (403, 404):
+                break
+        except Exception as e:  # noqa
+            last = str(e)
+        time.sleep(2 ** i * 2)
+    raise RuntimeError(last)
+
+
+def fetch(params):
+    out, off = [], 0
+    while True:
+        r = get(f"{SB}/rest/v1/in_ads", headers=HDR,
+                params={"select": COLS, "limit": 1000, "offset": off, **params})
+        b = r.json()
+        out += b
+        if len(b) < 1000:
+            break
+        off += 1000
+    return out
+
+
+def load_rows():
+    if SET == "pilot":
+        ids = json.load(open("tools/cd-hooks/pilot.json"))
+        rows = fetch({"id": "in.(" + ",".join(ids) + ")"})
+        m = {r["id"]: r for r in rows}
+        return [m[i] for i in ids if i in m]
+    p = {"brand": "ilike.JD*", "order": "is_english.desc.nullslast,id.asc"}
+    if ONLY_UNREAD:
+        p["hook_read_at"] = "is.null"
+    return fetch(p)
+
+
+def font(sz):
+    for p in ("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+              "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"):
+        if os.path.exists(p):
+            return ImageFont.truetype(p, sz)
+    return ImageFont.load_default()
+
+
+F = None
+
+
+def fit(im):
+    im = im.convert("RGB")
+    w, h = im.size
+    nh = max(1, int(h * FW / w))
+    im = im.resize((FW, nh), Image.LANCZOS)
+    if nh > MAX_FH:
+        im = im.crop((0, 0, FW, MAX_FH))
+    return im
+
+
+def video_frames(url):
+    with tempfile.TemporaryDirectory() as d:
+        p = os.path.join(d, "v.mp4")
+        data = get(url).content
+        sha = hashlib.sha1(data).hexdigest()
+        open(p, "wb").write(data)
+        try:
+            dur = float(subprocess.run(
+                ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", p],
+                capture_output=True, text=True, timeout=60).stdout.strip() or 0)
+        except Exception:
+            dur = 0
+        ts = [t for t in HOOK_TS if dur == 0 or t < dur - 0.05]
+        if dur > 0:
+            ts += [round(dur * q, 1) for q in (0.25, 0.5, 0.75)]
+        frames = []
+        for k, t in enumerate(ts):
+            o = os.path.join(d, f"f{k}.jpg")
+            subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", p, "-ss", f"{t:.2f}", "-frames:v", "1",
+                            "-q:v", "2", o], timeout=180)
+            if os.path.exists(o):
+                frames.append((f"{t:.1f}s", fit(Image.open(o))))
+        return frames, sha, dur
+
+
+def poster_of(row):
+    ir2 = row.get("images_r2")
+    return (ir2.get("poster") if isinstance(ir2, dict) else None) or row.get("thumb_r2") or row.get("poster")
+
+
+def image_urls(row):
+    ir2 = row.get("images_r2")
+    if isinstance(ir2, list) and ir2:
+        return ir2[:3]
+    if row.get("images"):
+        return list(row["images"])[:3]
+    if row.get("thumb_r2"):
+        return [row["thumb_r2"]]
+    return []
+
+
+def build(row):
+    fmt = row.get("format") or "image"
+    try:
+        if fmt == "video":
+            url = row.get("video_r2") or row.get("video")
+            if url:
+                try:
+                    frames, sha, dur = video_frames(url)
+                    if frames:
+                        return {"kind": "video", "frames": frames, "sha": sha}
+                except Exception as e:
+                    print(f"{row['id']} video failed: {e}", flush=True)
+            p = poster_of(row)
+            if p:
+                data = get(p).content
+                return {"kind": "poster", "frames": [("poster", fit(Image.open(io.BytesIO(data))))],
+                        "sha": "p" + hashlib.sha1(data).hexdigest()}
+            return {"error": "no media"}
+        frames, h = [], hashlib.sha1()
+        for k, u in enumerate(image_urls(row)):
+            try:
+                data = get(u).content
+                h.update(data)
+                frames.append((f"card {k + 1}" if fmt == "carousel" else "image", fit(Image.open(io.BytesIO(data)))))
+            except Exception as e:
+                print(f"{row['id']} image failed: {e}", flush=True)
+        if not frames:
+            return {"error": "images failed"}
+        return {"kind": "image", "frames": frames, "sha": "i" + h.hexdigest()}
+    except Exception as e:
+        return {"error": str(e)[:200]}
+
+
+def block(ad_id, frames, cols):
+    f = font(26)
+    rows = [frames[i:i + cols] for i in range(0, len(frames), cols)]
+    rh = [max(fr.size[1] for _, fr in r) + CAP_H for r in rows]
+    W = cols * FW + (cols + 1) * 8
+    b = Image.new("RGB", (W, sum(rh) + 8 * (len(rows) + 1)), (20, 20, 20))
+    d = ImageDraw.Draw(b)
+    y = 8
+    for r, h in zip(rows, rh):
+        x = 8
+        for lab, fr in r:
+            d.text((x + 4, y + 6), f"{ad_id}  {lab}", font=f, fill=(255, 230, 0))
+            b.paste(fr, (x, y + CAP_H))
+            x += FW + 8
+        y += h + 8
+    return b
+
+
+def save(blocks, path):
+    W = max(b.size[0] for b in blocks)
+    H = sum(b.size[1] for b in blocks) + 12 * (len(blocks) - 1)
+    s = Image.new("RGB", (W, H), (0, 0, 0))
+    y = 0
+    for b in blocks:
+        s.paste(b, (0, y))
+        y += b.size[1] + 12
+    s.save(path, "JPEG", quality=80)
+
+
+def main():
+    os.makedirs(OUT, exist_ok=True)
+    rows = load_rows()
+    print(f"{SET}: {len(rows)} ads", flush=True)
+    with cf.ThreadPoolExecutor(8) as ex:
+        built = list(ex.map(build, rows))
+    groups, order, failed = {}, [], {}
+    for row, b in zip(rows, built):
+        if "error" in b:
+            failed[row["id"]] = b["error"]
+            continue
+        g = groups.get(b["sha"])
+        if g:
+            g["ids"].append(row["id"])
+        else:
+            groups[b["sha"]] = {"rep": row["id"], "ids": [row["id"]], "format": row.get("format"),
+                                "kind": b["kind"], "frames": b["frames"]}
+            order.append(b["sha"])
+    vids = [groups[s] for s in order if groups[s]["kind"] != "image"]
+    imgs = [groups[s] for s in order if groups[s]["kind"] == "image"]
+    units = [[g] for g in vids] + [imgs[i:i + 2] for i in range(0, len(imgs), 2)]
+    index = {"set": SET, "sheets": {}, "failed": failed}
+    for n, unit in enumerate(units, 1):
+        name = f"{SET}_{n:04d}.jpg"
+        blocks = [block(g["rep"], g["frames"], COLS_V if g["kind"] != "image" else 3) for g in unit]
+        save(blocks, os.path.join(OUT, name))
+        index["sheets"][name] = [{"rep": g["rep"], "ids": g["ids"], "format": g["format"], "kind": g["kind"],
+                                  "frames": [lab for lab, _ in g["frames"]]} for g in unit]
+    json.dump(index, open(os.path.join(OUT, f"{SET}_index.json"), "w"), indent=1)
+    print(f"sheets={len(units)} unique={len(order)} ads={len(rows)} failed={len(failed)}")
+
+
+if __name__ == "__main__":
+    sys.exit(main())
