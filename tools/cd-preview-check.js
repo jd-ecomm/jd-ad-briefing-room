@@ -9,6 +9,12 @@ const [, , BASE = 'http://localhost:8000/', OUT = 'cd-shots'] = process.argv;
 const FX = process.argv.includes('--fixture') ? process.argv[process.argv.indexOf('--fixture') + 1] : null;
 const KNOCK_ID = FX ? 'fx0000' : '6a7f47c4bd1fb9616677cdd4';
 fs.mkdirSync(OUT, { recursive: true });
+const SB_URL = 'https://cymkcvdsxoneojfisjgk.supabase.co/rest/v1/';
+const SB_KEY = (/SBK='([^']+)'/.exec(fs.readFileSync(path.join(__dirname, '..', 'preview', 'cd.js'), 'utf8')) || [, ''])[1];
+const JD_BIDS = ['66cf75a0e42d53dcea7879b5', '67aa28cb0a70ccc0c54281c6', '686f2d9374342e14cdc10979', '69925634d7b54bd21a2fcadb', '670ff958a61172249cb1b88d', '674e4a2a411da97a4980d2db'];
+/* counts and rows straight from in_ads (PostgREST), independent of the Creative Discovery RPCs */
+async function sqlCount(q) { const r = await fetch(SB_URL + 'in_ads?select=id&batch=not.is.null&is_english=is.true&' + q, { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, Prefer: 'count=exact', Range: '0-0' } }); return +((r.headers.get('content-range') || '').split('/')[1]); }
+async function sqlRows(select, q) { let out = [], from = 0; for (;;) { const r = await fetch(SB_URL + 'in_ads?select=' + select + '&batch=not.is.null&is_english=is.true&order=id.asc&' + q, { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, Range: `${from}-${from + 999}` } }); const j = await r.json(); out = out.concat(j); if (j.length < 1000) break; from += 1000; } return out; }
 const results = []; const ok = (name, pass, detail = '') => { results.push({ name, pass: !!pass, detail: String(detail).slice(0, 400) }); console.log((pass ? 'PASS ' : 'FAIL ') + name + (detail ? '  ' + String(detail).slice(0, 300) : '')); };
 
 function fixtureRows() {
@@ -402,7 +408,8 @@ async function hookChecks(page, tag, shot) {
   await shot('hooks');
   const fmt = await page.evaluate(() => { const b = [...document.querySelectorAll('.cd-hbc [data-hkf]')].find(b => b.dataset.hkf !== 'Visual only'); return b ? b.dataset.hkf : null; });
   await page.click(`.cd-hbc [data-hkf="${fmt}"]`); await page.waitForTimeout(500);
-  const fl = await page.evaluate(f => ({ chips: [...document.querySelectorAll('.cd-hr .cd-mk.y')].map(x => x.textContent), count: document.querySelector('#cd-hrows .cd-bcount')?.textContent, want: window.CD.ROWS.filter(m => m.mk && m.hkind && m.hf === f).length, sel: document.querySelector('[data-hk="fmt"]').value }), fmt);
+  const fl = await page.evaluate(f => ({ chips: [...document.querySelectorAll('.cd-hr .cd-mk.y')].map(x => x.textContent), count: document.querySelector('#cd-hrows .cd-bcount')?.textContent, sel: document.querySelector('[data-hk="fmt"]').value }), fmt);
+  fl.want = FX ? await page.evaluate(f => window.CD.ROWS.filter(m => m.mk && m.hkind && m.hf === f).length, fmt) : await sqlCount(`hook_kind=not.is.null&hook_kind=neq.&brand_id=in.(${JD_BIDS.join(',')})&hook_format=eq.${encodeURIComponent(fmt)}`); // lazy loading: SQL truth
   ok(`${tag} Hooks: clicking a bar ("${fmt}") filters the library`, fl.chips.length > 0 && fl.chips.every(x => x === fmt) && fl.sel === fmt && new RegExp('^' + fl.want.toLocaleString('en-CA') + ' hook').test(fl.count || ''), JSON.stringify({ ...fl, chips: fl.chips.length }));
   await shot('hooks-filtered');
   if (tag === 'd') {
@@ -412,7 +419,7 @@ async function hookChecks(page, tag, shot) {
     const want = 'ad_id,brand,market,launch_date,days_live,format,aspect,hook_text,hook_format,hook_template,onscreen_text,meta_headline,primary_text,landing_url,proven_score,ad_link,ad_library_link';
     const c1 = await dl('filtered');
     ok(`${tag} Hooks: "Download hooks (CSV)" has BOM, the right header and ${fl.want} rows`, c1.bom && c1.header.join(',') === want && c1.n === fl.want && c1.widths.length === 1, JSON.stringify(c1));
-    const wantAll = await page.evaluate(() => window.CD.ROWS.filter(m => m.hkind).length);
+    const wantAll = FX ? await page.evaluate(() => window.CD.ROWS.filter(m => m.hkind).length) : await sqlCount('hook_kind=not.is.null&hook_kind=neq.'); // lazy loading: SQL truth
     const c2 = await dl('all');
     ok(`${tag} Hooks: "Download all (CSV)" has every hook read (${wantAll} rows), same header`, c2.bom && c2.header.join(',') === want && c2.n === wantAll && c2.widths.length === 1, JSON.stringify(c2));
   }
@@ -434,7 +441,7 @@ async function hookChecks(page, tag, shot) {
   ok(`${tag} filters: Hook format group with counts`, g && g.length >= 3 && g.every(x => /^hf\|/.test(x[0])), JSON.stringify(g));
   const pick = g && (g.find(x => x[0] === 'hf|Question') || g.find(x => x[1] > 0));
   if (pick) { await page.click(`#cd-fd [data-fd="${pick[0]}"]`); await page.waitForTimeout(250); await page.click('#cd-fd [data-fdapply]'); await page.waitForTimeout(700);
-    const r = await page.evaluate(v => ({ n: window.CD.C.lists.discover.length, ok: window.CD.C.lists.discover.every(a => a.hfs.has(v)), chip: document.querySelectorAll('#cd-act [data-rmf^="hf|"]').length, hash: location.hash }), pick[0].slice(3));
+    const r = await page.evaluate(v => ({ n: window.CD.C.totals.discover ?? window.CD.C.lists.discover.length, ok: window.CD.C.lists.discover.every(a => a.hfs.has(v)), chip: document.querySelectorAll('#cd-act [data-rmf^="hf|"]').length, hash: location.hash }), pick[0].slice(3));
     ok(`${tag} filters: Hook format "${pick[0].slice(3)}" applies in Discover (${pick[1]} cards)`, r.n === pick[1] && r.ok && r.chip === 1 && /hf=/.test(r.hash), JSON.stringify(r));
     await shot('filter-hookformat');
     await page.click('#cd-act [data-fclear]'); await page.waitForTimeout(400); }
@@ -443,11 +450,12 @@ async function hookChecks(page, tag, shot) {
 const NEW_HF = ['Teaser / Knock knock','Offer / Price first','Countdown / Urgency','Question','List / How to','Style tip / Outfit','POV / Relatable','Skit / Scenario','Creator / Talking head','Social proof / Trend','Callout','Drop / New in alert','Store / Location','Seasonal / Occasion','Collection / Campaign line','Brand or collab callout','Product name reveal','Statement / Claim','Visual only','Other / Unreadable'];
 async function fixRunChecks(page, tag, shot) {
   await page.evaluate(() => { location.hash = 'discover/jd/hooks'; }); await page.waitForSelector('.cd-hooks', { timeout: 15000 }).catch(() => { }); await page.waitForTimeout(700);
-  const h = await page.evaluate(() => ({ bars: [...document.querySelectorAll('.cd-hbc [data-hkf]')].map(b => b.dataset.hkf), tps: [...document.querySelectorAll('.cd-tp')].map(t => ({ t: t.querySelector('.cd-tp-h b').textContent, n: parseInt(t.querySelector('small').textContent.replace(/,/g, '')) })), rows: window.CD.ROWS.filter(m => m.hf) }));
+  const h = await page.evaluate(() => ({ bars: [...document.querySelectorAll('.cd-hbc [data-hkf]')].map(b => b.dataset.hkf), tps: [...document.querySelectorAll('.cd-tp')].map(t => ({ t: t.querySelector('.cd-tp-h b').textContent, n: parseInt(t.querySelector('small').textContent.replace(/,/g, '')) })) }));
   const known = h.bars.every(f => NEW_HF.includes(f));
   ok(`${tag} fix: Hooks chart uses only the new format list (${h.bars.length} formats)`, h.bars.length >= 3 && known && !h.bars.includes('Other'), JSON.stringify(h.bars));
   ok(`${tag} fix: every template shown has a placeholder and is used on 2+ ads`, h.tps.length >= 1 && h.tps.every(t => /\[(PRODUCT|BRAND|SEASON|STORE|COLLECTION|PRICE|N|DATE)\]/.test(t.t) && t.n >= 2), JSON.stringify(h.tps.slice(0, 12)));
-  const d = await page.evaluate(nh => { const all = window.CD.ROWS.filter(m => m.hf); const bad = all.filter(m => !nh.includes(m.hf)); const tbad = all.filter(m => m.ht && !/\[(PRODUCT|BRAND|SEASON|STORE|COLLECTION|PRICE|N|DATE)\]/.test(m.ht)); const st = all.filter(m => m.hf === 'Statement / Claim').length; return { n: all.length, bad: bad.length, ex: bad.slice(0, 3).map(m => m.hf), tbad: tbad.length, st }; }, NEW_HF);
+  const hfRows = FX ? null : (await sqlRows('id,hook_format,hook_template', 'hook_format=not.is.null&hook_format=neq.')).map(r => ({ hf: r.hook_format, ht: r.hook_template })); // lazy loading: SQL truth
+  const d = await page.evaluate(([nh, rows]) => { const all = rows || window.CD.ROWS.filter(m => m.hf); const bad = all.filter(m => !nh.includes(m.hf)); const tbad = all.filter(m => m.ht && !/\[(PRODUCT|BRAND|SEASON|STORE|COLLECTION|PRICE|N|DATE)\]/.test(m.ht)); const st = all.filter(m => m.hf === 'Statement / Claim').length; return { n: all.length, bad: bad.length, ex: bad.slice(0, 3).map(m => m.hf), tbad: tbad.length, st }; }, [NEW_HF, hfRows]);
   ok(`${tag} fix: every loaded hook_format is in the new list, every template has a placeholder; Statement / Claim is not the catch-all (${d.st} of ${d.n})`, d.n > 0 && d.bad === 0 && d.tbad === 0 && d.st < d.n * 0.25, JSON.stringify(d));
   await shot('fix-hooks');
   await page.evaluate(() => { location.hash = 'discover/brands'; }); await page.waitForSelector('.cd-bcard', { timeout: 30000 }).catch(() => { }); await page.waitForTimeout(500);
@@ -511,10 +519,81 @@ async function loadingRun() {
   await browser.close();
 }
 
+// Lazy loading (cd-lazy, 9 Nov 2026): timings, batches on scroll, counts against the old in-browser code and SQL, deep link cold open, hidden tab
+async function lazyChecks() {
+  const perf = require('./cd-perf.js');
+  const T = await perf.measure(BASE, 'preview/', { runs: 1 });
+  fs.writeFileSync(path.join(OUT, 'perf.json'), JSON.stringify(T, null, 2));
+  const by = n => T.find(x => x.name === n) || {};
+  const d = by('desktop'), m = by('phone'), f3 = by('fast3g'), hd = by('hidden');
+  const info = x => JSON.stringify({ firstCard: x.firstCard, poster: x.firstPoster, usable: x.usable, lt: x.longTasks, bytes: x.bytes, next: x.nextBatch, hooks: x.hooks, brands: x.brands, brandPage: x.brandPage, dom: x.domCards, err: x.error });
+  ok('lazy timing: desktop first cards under 2s', d.firstCard != null && d.firstCard < 2000, info(d));
+  ok('lazy timing: phone (390, CPU 4x) first cards under 3.5s', m.firstCard != null && m.firstCard < 3500, info(m));
+  ok('lazy timing: next batch appears within about 1s of reaching the bottom (desktop, 3 batches)', (d.nextBatch || []).length === 3 && d.nextBatch.every(t => t != null && t <= 1200), JSON.stringify(d.nextBatch));
+  ok('lazy timing: next batch within about 1s on the phone', (m.nextBatch || []).length === 3 && m.nextBatch.every(t => t != null && t <= 1500), JSON.stringify(m.nextBatch));
+  ok('lazy timing: JD Hooks and Brands open under 1.5s (desktop)', d.hooks != null && d.hooks < 1500 && d.brands != null && d.brands < 1500, JSON.stringify({ hooks: d.hooks, brands: d.brands, brandPage: d.brandPage }));
+  ok('lazy timing: JD Hooks and Brands open under 1.5s (phone)', m.hooks != null && m.hooks < 1500 && m.brands != null && m.brands < 1500, JSON.stringify({ hooks: m.hooks, brands: m.brands, brandPage: m.brandPage }));
+  ok('lazy timing: no long task over 200ms (desktop)', d.longTasks && d.longTasks.max <= 200 && d.longTasksAfterScroll && d.longTasksAfterScroll.max <= 200, JSON.stringify({ load: d.longTasks, scroll: d.longTasksAfterScroll }));
+  ok('lazy timing: no long task over 200ms (phone, CPU 4x)', m.longTasks && m.longTasks.max <= 200 && m.longTasksAfterScroll && m.longTasksAfterScroll.max <= 200, JSON.stringify({ load: m.longTasks, scroll: m.longTasksAfterScroll }));
+  ok('lazy timing: Fast 3G shows the first cards (info, no target)', f3.firstCard != null, info(f3));
+  ok('lazy: hidden (background) tab still renders the first cards', hd.firstCard != null && hd.firstCard < 15000 && !(hd.errors || []).length, info(hd));
+  ok('lazy: payload from Supabase under 1.5 MB for first load + 3 batches (was 46 MB)', d.bytes && d.bytes.supabase < 1.5e6, JSON.stringify(d.bytes));
+  ok('lazy: windowing keeps far-away cards empty (no full DOM for every card)', d.domCards && d.domCards.withContent < d.domCards.cards || (d.domCards && d.domCards.cards <= 150), JSON.stringify(d.domCards));
+
+  const browser = await chromium.launch({ ...(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}), args: ['--autoplay-policy=no-user-gesture-required'] });
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'dark' });
+  await ctx.addInitScript(() => { try { localStorage.setItem('jd-email', JSON.stringify('preview-check@ryanclarke.co')); localStorage.removeItem('cd2_filters'); } catch (e) { } });
+  const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+  await page.goto(BASE + 'preview/#discover', { waitUntil: 'domcontentloaded' }); await page.waitForSelector('.cd-card', { timeout: 60000 }).catch(() => { });
+  // scroll test: three more batches load in order, no duplicates, no gaps (compared with the same pages asked of the server directly)
+  for (let k = 0; k < 3; k++) { const n0 = await page.evaluate(() => window.CD.C.lists.discover.length);
+    await page.evaluate(() => { const s = document.querySelector('#cd-body .cd-sent'); window.scrollTo(0, s.getBoundingClientRect().top + scrollY - innerHeight + 40); });
+    await page.waitForFunction(n => window.CD.C.lists.discover.length > n, n0, { timeout: 15000 }).catch(() => { }); await page.waitForTimeout(700); }
+  const sc = await page.evaluate(() => { const L = window.CD.C.lists.discover; const dom = [...document.querySelectorAll('#cd-body .cd-card[data-id]')].map(c => c.dataset.id);
+    return { n: L.length, vgs: L.map(a => a.vg), ids: L.map(a => a.id), dom, total: window.CD.C.totals.discover }; });
+  const rpc = async (fn, b) => (await fetch(SB_URL + 'rpc/' + fn, { method: 'POST', headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(b) })).json();
+  let want = [], cur = null; for (let k = 0; k < Math.ceil(sc.n / 48); k++) { const r = await rpc('cd_page', { ctx: 'discover', sort: 'proven', f: { ai: true }, q: '', limit: 48, cursor: cur }); want = want.concat(r.rows.map(x => x.vg)); cur = r.next; if (!cur) break; }
+  const dup = sc.vgs.length - new Set(sc.vgs).size; const domDup = sc.dom.length - new Set(sc.dom).size;
+  ok('lazy scroll: 3 more batches load in order (192+ cards), no duplicates, no gaps', sc.n >= 192 && !dup && !domDup && sc.vgs.every((v, i) => v === want[i]) && sc.dom.length === sc.n, JSON.stringify({ n: sc.n, dup, domDup, mismatch: sc.vgs.findIndex((v, i) => v !== want[i]), dom: sc.dom.length, total: sc.total }));
+  // counts against truth: the old in-browser code (the live page, every ad loaded) for the same filters and searches
+  const cases = [['', 'all'], ['kind=video&asp=9%3A16&st=live', 'video 9:16 active'], ['q=north%20face', 'search north face'], ['q=knock%20knock', 'search knock knock'], ['hf=Question', 'hook format Question'],
+    ['mkt=CA', 'market CA'], ['sig=proven', 'Proven'], ['sig=rising', 'Rising'], ['days=30-90', 'days 30 to 90'], ['tag=UGC%20Selfie', 'tag UGC Selfie'], ['lp=PDP&kind=image', 'PDP images'], ['launch=2026-09-01_2026-10-15', 'launch dates']];
+  const live = await ctx.newPage(); await live.goto(BASE + '#discover', { waitUntil: 'domcontentloaded' });
+  const liveReady = await live.waitForFunction(() => window.CD && window.CD.C && window.CD.C.ready, null, { timeout: 120000 }).then(() => true).catch(() => false);
+  for (const [qs, label] of cases) {
+    const old = liveReady ? await live.evaluate(async h => { location.hash = 'discover' + (h ? '?' + h : ''); await new Promise(r => setTimeout(r, 900)); return window.CD.C.lists.discover.length; }, qs) : null;
+    const nw = await page.evaluate(async h => { location.hash = 'discover' + (h ? '?' + h : ''); const t0 = performance.now(); await new Promise(r => setTimeout(r, 300));
+      while (performance.now() - t0 < 10000) { const fd = window.CD.C.cur; if (fd && fd.first && !fd.loading) break; await new Promise(r => setTimeout(r, 100)); }
+      return { n: window.CD.C.cur && window.CD.C.cur.total, head: document.querySelector('#cd-head p')?.textContent || '' }; }, qs);
+    ok(`lazy counts: ${label} = ${old} (old code over every ad)`, old != null && nw.n === old && new RegExp('^' + (nw.n || 0).toLocaleString('en-CA') + ' (of|results?)').test(nw.head), JSON.stringify({ old, new: nw.n, head: nw.head.slice(0, 80) }));
+  }
+  if (liveReady) { const of = await live.evaluate(() => window.CD.ADS.length); const sum = await rpc('cd_summary', {}); ok(`lazy counts: total cards ${sum.cards} = old ${of}; brands ${sum.brands}`, sum.cards === of, JSON.stringify({ cards: sum.cards, old: of }));
+    const jdOld = await live.evaluate(() => window.CD.ADS.filter(a => a.mk).length); ok(`lazy counts: JD cards ${sum.jd} = old ${jdOld}`, sum.jd === jdOld); }
+  // SQL truth: hook rows and released ads
+  const hooksSql = await sqlCount(`hook_kind=not.is.null&hook_kind=neq.&brand_id=in.(${JD_BIDS.join(',')})`); const hk = await rpc('cd_hooks', { scope: 'jd' });
+  ok(`lazy counts: JD hooks ${hk.n} = SQL ${hooksSql}`, hk.n === hooksSql);
+  await live.close();
+  // Filters drawer count matches the grid
+  await page.evaluate(() => { location.hash = 'discover?kind=video'; }); await page.waitForTimeout(1500); await page.click('#cd-fbtn'); await page.waitForSelector('#cd-fd:not([hidden]) .cd-fd', { timeout: 8000 }).catch(() => { }); await page.waitForTimeout(300);
+  const fc = await page.evaluate(() => ({ btn: document.querySelector('[data-fdapply]')?.textContent || '', total: window.CD.C.totals.discover }));
+  ok('lazy counts: Filters drawer "Show N results" = grid count', new RegExp('Show ' + (fc.total || 0).toLocaleString('en-CA') + ' result').test(fc.btn), JSON.stringify(fc));
+  await page.keyboard.press('Escape'); await page.screenshot({ path: path.join(OUT, 'd-lazy-scroll.png') });
+  // deep link cold open: a new tab straight onto a share link opens the viewer without waiting for the grid
+  const p3 = await ctx.newPage(); await p3.addInitScript(perf.probe);
+  await p3.goto(BASE + 'preview/#discover/ad/' + KNOCK_ID, { waitUntil: 'domcontentloaded' });
+  const t = await p3.waitForSelector('#cd-vw:not([hidden]) .phone', { timeout: 20000 }).then(() => p3.evaluate(() => performance.now())).catch(() => null);
+  const dl = await p3.evaluate(() => ({ mid: window.CD.C.viewer && window.CD.C.viewer.mid, firstCard: window.__cdp && window.__cdp.firstCard, hook: ([...document.querySelectorAll('#cd-vw p')].find(p => /Hook line:/.test(p.textContent)) || {}).textContent || '' }));
+  ok('lazy: deep link cold open shows the ad in under 3s, without waiting for the grid', t != null && t < 3000 && dl.mid === KNOCK_ID && /KNOCK KNOCK/.test(dl.hook), JSON.stringify({ ms: t && Math.round(t), ...dl }));
+  await p3.screenshot({ path: path.join(OUT, 'd-lazy-deeplink.png') });
+  ok('lazy: no page errors in the lazy checks', !errors.length, errors.slice(0, 3).join(' | '));
+  await browser.close();
+}
+
 module.exports = { routeFixture };
 if (require.main === module) (async () => {
   for (const vp of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) { try { await run(vp); } catch (e) { ok(`run ${vp.width}`, false, e.stack || e.message); } }
   try { await loadingRun(); } catch (e) { ok('loading run', false, e.stack || e.message); }
+  if (!FX) try { await lazyChecks(); } catch (e) { ok('lazy checks', false, e.stack || e.message); }
   fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify({ base: BASE, when: new Date().toISOString(), passed: results.filter(r => r.pass).length, failed: results.filter(r => !r.pass).length, results }, null, 2));
   const f = results.filter(r => !r.pass).length; console.log(`\n${results.length - f} passed, ${f} failed`); process.exit(0); // failures are reported in results.json and the step summary, never as a failed job
 })();
