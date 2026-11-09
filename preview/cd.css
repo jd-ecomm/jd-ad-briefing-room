@@ -205,3 +205,4 @@
 }
 @media (prefers-reduced-motion:reduce){.cd-skel i{animation:none}}
 .cd-clock{display:inline-block;width:28px;height:8px;border-radius:4px;background:#fff;opacity:.9}
+@media (max-width:640px){#t-cd>i:not(.cd-dot){display:none}#t-cd{flex:1;justify-content:center}}

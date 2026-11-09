@@ -78,7 +78,9 @@ async function run(vp) {
 
   await page.goto(BASE + 'preview/#discover', { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('.cd-card', { timeout: 60000 }).catch(() => { });
-  const nCards = await page.locator('.cd-card').count(); ok(`${tag} discover: cards render`, nCards > 0, nCards + ' cards');
+  const nCards = await page.locator('.cd-card').count();
+  if (!nCards) { await page.screenshot({ path: path.join(OUT, `${tag}-fail-discover.png`) }); }
+  ok(`${tag} discover: cards render`, nCards > 0, nCards + ' cards' + (nCards ? '' : ' | body: ' + (await page.evaluate(() => (document.getElementById('v-cd') || document.body).innerText.slice(0, 200))) + ' | hash ' + (await page.evaluate(() => location.href)) + ' | errors: ' + errors.concat(loadFails).slice(0, 4).join(' / ')));
   ok(`${tag} discover: inside Briefing Room (hero + projects row + section)`, await page.evaluate(() => !!document.querySelector('header.hero') && !!document.querySelector('.proj #t-cd.on') && !document.getElementById('v-cd').hidden));
   ok(`${tag} discover: no old Discover Ads / Trending section`, await page.evaluate(() => !document.getElementById('v-trending') && !document.getElementById('v-inspo') && !document.getElementById('t-trending')));
   ok(`${tag} discover: no bottom tab bar`, await page.evaluate(() => ![...document.querySelectorAll('nav,div')].some(e => { const s = getComputedStyle(e); return s.position === 'fixed' && parseFloat(s.bottom) <= 1 && e.offsetHeight > 30 && e.offsetHeight < 120 && e.offsetWidth > innerWidth * .8; })));

@@ -75,11 +75,13 @@ function bucket(a){const m=/^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/.exec(a||'');if(!m
  [['9:16',9/16],['4:5',.8],['1:1',1],['16:9',16/9]].forEach(([k,v])=>{const d=Math.abs(r-Math.log(v));if(d<bd){bd=d;best=k}});return best}
 const ratioOf=s=>{const m=/^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/.exec(s||'');return m&&+m[2]?m[1]/m[2]:null};
 const COLS='id,brand,brand_id,brand_group,logo,logo_s,logo_r2,status,start_date,end_date,days_live,format,visual_formats,aspect,platforms,cards,headline,copy,cta,landing,video,video_s,video_r2,poster,poster_frame,images,images_s,images_r2,thumb_s,thumb_r2,saves,market,concept_key,variant_group,formats,first_seen';
+/* the anon role has a 3s statement timeout, and other jobs write to in_ads; retry a busy or failed page before giving up */
+async function apiRetry(path,opt,tries=4){let e;for(let i=0;i<tries;i++){try{return await api(path,opt)}catch(x){e=x;await new Promise(r=>setTimeout(r,800*Math.pow(2,i)))}}throw e}
 async function loadAds(){const q=`in_ads?select=${COLS}&batch=eq.1&is_english=is.true&order=id.asc`;
- const first=await api(q,{headers:{Range:`0-${PAGE-1}`,'Range-Unit':'items',Prefer:'count=exact'}});let rows=first.data||[];
+ const first=await apiRetry(q,{headers:{Range:`0-${PAGE-1}`,'Range-Unit':'items',Prefer:'count=exact'}});let rows=first.data||[];
  const total=+((first.range||'').split('/')[1])||rows.length;const pages=[];for(let f=PAGE;f<total;f+=PAGE)pages.push(f);
- const res=await Promise.all(pages.map(f=>api(q,{headers:{Range:`${f}-${f+PAGE-1}`,'Range-Unit':'items'}})));res.forEach(r=>rows=rows.concat(r.data||[]));return rows}
-async function loadTrending(){let all=[],from=0;for(;;){const r=await api('tr_ads?select=week,category,rank,brand,age,kind,video,poster,images,logo,video_s,poster_s,images_s,logo_s&order=week.desc,category.asc,rank.asc',{headers:{Range:from+'-'+(from+999)}});const j=r.data||[];all=all.concat(j);if(j.length<1000)break;from+=1000}return all}
+ for(let i=0;i<pages.length;i+=2){const res=await Promise.all(pages.slice(i,i+2).map(f=>apiRetry(q,{headers:{Range:`${f}-${f+PAGE-1}`,'Range-Unit':'items'}})));res.forEach(r=>rows=rows.concat(r.data||[]))}return rows}
+async function loadTrending(){let all=[],from=0;for(;;){const r=await apiRetry('tr_ads?select=week,category,rank,brand,age,kind,video,poster,images,logo,video_s,poster_s,images_s,logo_s&order=week.desc,category.asc,rank.asc',{headers:{Range:from+'-'+(from+999)}});const j=r.data||[];all=all.concat(j);if(j.length<1000)break;from+=1000}return all}
 async function loadSaves(){try{const f=(await api('in_favs?select=email,ad_id')).data||[];C.allFavs={};C.favs=new Set();
   f.forEach(x=>{C.allFavs[x.ad_id]=(C.allFavs[x.ad_id]||0)+1;if(x.email===me())C.favs.add(x.ad_id)});
   C.boards=(await api('in_boards?select=id,name,note,created_by,created_at&order=created_at.asc')).data||[];
@@ -285,7 +287,7 @@ function head(title,sub,extra=''){$('#cd-head').innerHTML=`<div class="cd-h1"><d
 function draw(){const el=host();if(!el||el.hidden)return;shell();
  $$('[data-cdtab]',el).forEach(a=>{const on=a.dataset.cdtab===C.tab;a.setAttribute('aria-selected',on);a.classList.toggle('on',on)});
  drawFilters();const body=$('#cd-body');
- if(C.err){head('Creative Discovery','');body.innerHTML=`<div class="cd-note"><b>Can't load ads here.</b> This copy of the Briefing Room can't reach the team database (${esc(C.err)}). Open the team site to see them.</div>`;return}
+ if(C.err){head('Creative Discovery','');body.innerHTML=`<div class="cd-note"><b>Can't load ads right now.</b> The team database didn't answer (${esc(C.err.slice(0,90))}). <button type="button" class="cd-btn y" id="cd-retry">Try again</button></div>`;$('#cd-retry').onclick=()=>{C.err=null;C.started=false;start()};return}
  if(!C.ready){head('Creative Discovery','Loading ads…');body.innerHTML=`<div class="cd-skel">${Array.from({length:10},(_,i)=>`<i style="aspect-ratio:${[.5625,.8,1,.8,.5625][i%5]}"></i>`).join('')}</div>`;return}
  ({discover:vDiscover,jd:vJD,trending:vTrending,brands:vBrands,boards:vBoards}[C.tab]||vDiscover)(body)}
 function counts(){const set=(k,n)=>{const s=$(`[data-cnt="${k}"]`);if(s)s.textContent=n==null?'':fmtN(n)};set('discover',ADS.length);set('jd',ADS.filter(a=>a.mk).length);set('trending',C.tr?TR.filter(a=>a.week===C.week).length:null);set('brands',BRANDS.filter(b=>b.n>=3).length);set('boards',C.boards.length||null)}
