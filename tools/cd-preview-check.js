@@ -390,6 +390,9 @@ async function hookChecks(page, tag, shot) {
     trend: document.querySelectorAll('.cd-sm').length, tps: document.querySelectorAll('.cd-tp').length, ai: document.querySelectorAll('.cd-tp-ai li').length, rows: document.querySelectorAll('.cd-hr').length, thumb: !!document.querySelector('.cd-hr-m img'), copy: document.querySelectorAll('.cd-hr [data-copy]').length,
     signalsLbl: /not results/i.test(document.body.innerText), filters: ['fmt', 'mkt', 'kind', 'min', 'sort'].every(k => document.querySelector(`[data-hk="${k}"]`)), csv: document.querySelectorAll('[data-hkcsv]').length, fb: document.getElementById('cd-fbtn').hidden }));
   ok(`${tag} Hooks: header strip, format bars, signals (not results), trend, templates with AI suggestions, library with thumbs and Copy link`, /#discover\/jd\/hooks/.test(hv.hash) && hv.strip.length === 5 && hv.bars >= 3 && hv.sig >= 3 && hv.trend >= 1 && hv.trend <= 5 && hv.tps >= 1 && hv.ai >= 3 && hv.rows > 0 && hv.thumb && hv.copy === hv.rows && hv.signalsLbl && hv.filters && hv.csv === 2, JSON.stringify(hv));
+  const bw = await page.evaluate(() => [...document.querySelectorAll('.cd-hbc [data-hkf]')].map(b => [+b.querySelector('b').textContent.split(' ')[0].replace(/,/g, ''), b.querySelector('.cd-hb-t i').getBoundingClientRect().width]));
+  const bmax = Math.max(...bw.map(x => x[0])), wmax = Math.max(...bw.map(x => x[1]));
+  ok(`${tag} Hooks: bar lengths match the counts (longest bar = most used)`, bw.length > 1 && bw.every(([n, w]) => Math.abs(w - n / bmax * wmax) <= 2), JSON.stringify(bw.map(x => [x[0], Math.round(x[1])])));
   await noHScrollP(page, tag, 'Hooks');
   await shot('hooks');
   const fmt = await page.evaluate(() => { const b = [...document.querySelectorAll('.cd-hbc [data-hkf]')].find(b => b.dataset.hkf !== 'Visual only'); return b ? b.dataset.hkf : null; });
