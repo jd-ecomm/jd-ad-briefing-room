@@ -1,0 +1,157 @@
+{
+ "set": "blind",
+ "sheets": {
+  "blind_001.jpg": [
+   "6a9cae630973d675996f1dd9",
+   "6aafcc1dfce96c9e259741f8",
+   "6af0d1f16c7ca7701767a7be",
+   "6abf900767369d32ccdd0231"
+  ],
+  "blind_002.jpg": [
+   "6abf900767369d32ccdd0204",
+   "6ab541b0fce96c9e25ba46f5",
+   "6aafcc1dfce96c9e2597421e",
+   "6af0d1f431b38702a4138dc5"
+  ],
+  "blind_003.jpg": [
+   "6aa464a2fce96c9e25505882",
+   "6ac8e8055c0724606c0d504d",
+   "6af0d1f431b38702a4138dec",
+   "6aee7a47326d6d369b4a3890"
+  ],
+  "blind_004.jpg": [
+   "6ab541b0fce96c9e25ba473e",
+   "6aa2ce13fce96c9e25447d6e",
+   "6a84646bbd1fb9616697235c",
+   "6af0d1f431b38702a4138dd8"
+  ],
+  "blind_005.jpg": [
+   "6aafcc1dfce96c9e259741f9",
+   "6af0d1f431b38702a4138dc7",
+   "6a962ecd0973d67599429c4c",
+   "6abf900767369d32ccdd0203"
+  ],
+  "blind_006.jpg": [
+   "6aaedd86fce96c9e2591dd31",
+   "6a84646bbd1fb9616697234b",
+   "6a7e9f77bd1fb9616672976b",
+   "6ab541b0fce96c9e25ba4721"
+  ],
+  "blind_007.jpg": [
+   "6a89f909bd1fb96166be0417",
+   "6aee7a47326d6d369b4a3884",
+   "6aaedd86fce96c9e2591dd29",
+   "6abf900767369d32ccdd0214"
+  ],
+  "blind_008.jpg": [
+   "6abf900767369d32ccdd0215",
+   "6aaaaca4fce96c9e2575a957",
+   "6abf900767369d32ccdd0230",
+   "6a962ecd0973d67599429c4a"
+  ],
+  "blind_009.jpg": [
+   "6af0d1f431b38702a4138de5",
+   "6abf900767369d32ccdd0210",
+   "6af0d1f431b38702a4138dd6",
+   "6aaaaca4fce96c9e2575a952"
+  ],
+  "blind_010.jpg": [
+   "6aee7a47326d6d369b4a3885",
+   "6a917d8b0973d6759926f6eb",
+   "6aa2ce13fce96c9e25447d6a",
+   "6abf900767369d32ccdd0211"
+  ],
+  "blind_011.jpg": [
+   "6aaaaca4fce96c9e2575a955",
+   "6a848a59bd1fb96166989385",
+   "6aa2ce12fce96c9e25447cc9",
+   "6ac648115c0724606cfb72de"
+  ],
+  "blind_012.jpg": [
+   "6acc4ed75c0724606c24156b",
+   "6a84646bbd1fb9616697234c",
+   "6a962ecd0973d67599429c4b",
+   "6aa2ce12fce96c9e25447cd1"
+  ],
+  "blind_013.jpg": [
+   "6aa2ce12fce96c9e25447ccc",
+   "6aa2ce12fce96c9e25447cc8",
+   "6af0d1f431b38702a4138dd9",
+   "6aa2ce13fce96c9e25447d29"
+  ],
+  "blind_014.jpg": [
+   "6aafcc1efce96c9e25974255",
+   "6aafcc1dfce96c9e259741f4",
+   "6af0d1f431b38702a4138dca",
+   "6ab541b0fce96c9e25ba4732"
+  ],
+  "blind_015.jpg": [
+   "6a89f909bd1fb96166be040b",
+   "6a84646bbd1fb96166972341",
+   "6aa2ce12fce96c9e25447cc7",
+   "6aafcc1efce96c9e25974256"
+  ],
+  "blind_016.jpg": [
+   "6aaaaca4fce96c9e2575a96b",
+   "6a84646bbd1fb96166972352",
+   "6a9773cb0973d675994ac48e",
+   "6a91efa60973d6759929d01d"
+  ],
+  "blind_017.jpg": [
+   "6acedca35c0724606c34c164",
+   "6af0d1f431b38702a4138de1",
+   "6ae5578a286187d48693e370",
+   "6a88fa4cbd1fb96166b73bcb"
+  ],
+  "blind_018.jpg": [
+   "6abf900767369d32ccdd01fb",
+   "6af0d1f16c7ca7701767a7ba",
+   "6af0d1f16c7ca7701767a7b7",
+   "6a917d8b0973d6759926f6ec"
+  ],
+  "blind_019.jpg": [
+   "6aa69536fce96c9e255caffe",
+   "6af0d1f331b38702a4138d3f",
+   "6a8d5faf54d81c5891e6ea66",
+   "6a88fa4cbd1fb96166b73bd0"
+  ],
+  "blind_020.jpg": [
+   "6aaaaca5fce96c9e2575a9bd",
+   "6ae5578a286187d48693e389",
+   "6a7e9f77bd1fb96166729733",
+   "6a84646bbd1fb961669723b8"
+  ],
+  "blind_021.jpg": [
+   "6aaedd86fce96c9e2591dd2b",
+   "6abf900767369d32ccdd0222",
+   "6af0d1f16c7ca7701767a7b8",
+   "6abf900767369d32ccdd0223"
+  ],
+  "blind_022.jpg": [
+   "6aba5facfce96c9e25d98354",
+   "6af0d1f16c7ca7701767a7b9",
+   "6acc4ed75c0724606c241556",
+   "6a88fa4cbd1fb96166b73bf9"
+  ],
+  "blind_023.jpg": [
+   "6a88fa4cbd1fb96166b73c17",
+   "6a88fa4cbd1fb96166b73c0e",
+   "6a84646bbd1fb961669723b4",
+   "6a91efa60973d6759929d017"
+  ],
+  "blind_024.jpg": [
+   "6a88fa4cbd1fb96166b73c11",
+   "6a88fa4cbd1fb96166b73bcd",
+   "6ad2ab91272de1c5ab14f5a8",
+   "6aaaaca5fce96c9e2575a9af"
+  ],
+  "blind_025.jpg": [
+   "6aafcc1dfce96c9e2597423b",
+   "6a88fa4cbd1fb96166b73bfb",
+   "6a88fa4cbd1fb96166b73bce",
+   "6a8d5faf54d81c5891e6ea67"
+  ]
+ },
+ "failed": [],
+ "notes": {}
+}
