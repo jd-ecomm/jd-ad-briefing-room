@@ -1,0 +1,199 @@
+{
+  "base": "https://jd-ecomm.github.io/jd-ad-briefing-room/",
+  "page": "preview/",
+  "when": "2026-11-09T15:35:56.388Z",
+  "results": [
+    {
+      "name": "desktop",
+      "vp": "1440x900",
+      "cpu": 0,
+      "net": "none",
+      "hidden": false,
+      "firstCard": 19005,
+      "firstPoster": 19161,
+      "usable": 19005,
+      "longTasks": {
+        "n": 1,
+        "max": 315,
+        "total": 315
+      },
+      "bytes": {
+        "all": 49141510,
+        "supabase": 45987909,
+        "supabaseRequests": 35
+      },
+      "cards": 36,
+      "nextBatch": [
+        21,
+        46,
+        46
+      ],
+      "longTasksAfterScroll": {
+        "n": 1,
+        "max": 315
+      },
+      "domCards": {
+        "cards": 144,
+        "withContent": 144,
+        "videos": 0
+      },
+      "hooks": 61,
+      "brands": 61,
+      "brandPage": 37,
+      "errors": []
+    },
+    {
+      "name": "desktop",
+      "vp": "1440x900",
+      "cpu": 0,
+      "net": "none",
+      "hidden": false,
+      "firstCard": 19500,
+      "firstPoster": 19653,
+      "usable": 19500,
+      "longTasks": {
+        "n": 2,
+        "max": 334,
+        "total": 392
+      },
+      "bytes": {
+        "all": 49138330,
+        "supabase": 45990266,
+        "supabaseRequests": 38
+      },
+      "cards": 36,
+      "nextBatch": [
+        21,
+        26,
+        26
+      ],
+      "longTasksAfterScroll": {
+        "n": 2,
+        "max": 334
+      },
+      "domCards": {
+        "cards": 144,
+        "withContent": 144,
+        "videos": 0
+      },
+      "hooks": 52,
+      "brands": 58,
+      "brandPage": 36,
+      "errors": []
+    },
+    {
+      "name": "phone",
+      "vp": "390x844",
+      "cpu": 4,
+      "net": "none",
+      "hidden": false,
+      "firstCard": 31321,
+      "firstPoster": 31470,
+      "usable": 31321,
+      "longTasks": {
+        "n": 17,
+        "max": 1248,
+        "total": 2934
+      },
+      "bytes": {
+        "all": 47003378,
+        "supabase": 45990271,
+        "supabaseRequests": 38
+      },
+      "cards": 36,
+      "nextBatch": [
+        118,
+        84,
+        106
+      ],
+      "longTasksAfterScroll": {
+        "n": 21,
+        "max": 1248
+      },
+      "domCards": {
+        "cards": 144,
+        "withContent": 144,
+        "videos": 0
+      },
+      "hooks": 300,
+      "brands": 273,
+      "brandPage": 168,
+      "errors": []
+    },
+    {
+      "name": "phone",
+      "vp": "390x844",
+      "cpu": 4,
+      "net": "none",
+      "hidden": false,
+      "firstCard": 12967,
+      "firstPoster": 13100,
+      "usable": 12967,
+      "longTasks": {
+        "n": 18,
+        "max": 1229,
+        "total": 2977
+      },
+      "bytes": {
+        "all": 47000833,
+        "supabase": 45987725,
+        "supabaseRequests": 35
+      },
+      "cards": 36,
+      "nextBatch": [
+        122,
+        188,
+        200
+      ],
+      "longTasksAfterScroll": {
+        "n": 21,
+        "max": 1229
+      },
+      "domCards": {
+        "cards": 144,
+        "withContent": 144,
+        "videos": 0
+      },
+      "hooks": 270,
+      "brands": 264,
+      "brandPage": 156,
+      "errors": []
+    },
+    {
+      "name": "fast3g",
+      "vp": "1440x900",
+      "cpu": 0,
+      "net": "Fast 3G",
+      "hidden": false,
+      "error": "page.waitForFunction: Timeout 240000ms exceeded.",
+      "errors": []
+    },
+    {
+      "name": "fast3g",
+      "vp": "1440x900",
+      "cpu": 0,
+      "net": "Fast 3G",
+      "hidden": false,
+      "error": "page.waitForFunction: Timeout 240000ms exceeded.",
+      "errors": []
+    },
+    {
+      "name": "hidden",
+      "vp": "1440x900",
+      "cpu": 0,
+      "net": "none",
+      "hidden": true,
+      "firstCard": 35267,
+      "errors": []
+    },
+    {
+      "name": "hidden",
+      "vp": "1440x900",
+      "cpu": 0,
+      "net": "none",
+      "hidden": true,
+      "firstCard": 18181,
+      "errors": []
+    }
+  ]
+}
