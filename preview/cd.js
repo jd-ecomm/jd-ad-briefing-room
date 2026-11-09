@@ -77,7 +77,7 @@ const ratioOf=s=>{const m=/^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/.exec(s||'');return
 const COLS='id,brand,brand_id,brand_group,logo,logo_s,logo_r2,status,start_date,end_date,days_live,format,visual_formats,aspect,platforms,cards,headline,copy,cta,landing,video,video_s,video_r2,poster,poster_frame,images,images_s,images_r2,thumb_s,thumb_r2,saves,market,concept_key,variant_group,formats,first_seen';
 /* the anon role has a 3s statement timeout, and other jobs write to in_ads; retry a busy or failed page before giving up */
 async function apiRetry(path,opt,tries=4){let e;for(let i=0;i<tries;i++){try{return await api(path,opt)}catch(x){e=x;await new Promise(r=>setTimeout(r,800*Math.pow(2,i)))}}throw e}
-async function loadAds(){const q=`in_ads?select=${COLS}&batch=eq.1&is_english=is.true&order=id.asc`;
+async function loadAds(){const q=`in_ads?select=${COLS}&batch=not.is.null&is_english=is.true&order=id.asc`;
  const first=await apiRetry(q,{headers:{Range:`0-${PAGE-1}`,'Range-Unit':'items',Prefer:'count=exact'}});let rows=first.data||[];
  const total=+((first.range||'').split('/')[1])||rows.length;const pages=[];for(let f=PAGE;f<total;f+=PAGE)pages.push(f);
  for(let i=0;i<pages.length;i+=2){const res=await Promise.all(pages.slice(i,i+2).map(f=>apiRetry(q,{headers:{Range:`${f}-${f+PAGE-1}`,'Range-Unit':'items'}})));res.forEach(r=>rows=rows.concat(r.data||[]))}return rows}

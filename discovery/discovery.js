@@ -122,7 +122,7 @@ const S = {
 const prevVisit = S.lastVisit;
 
 async function loadAds(onProgress) {
-  const q = `in_ads?select=${COLS}&batch=eq.1&is_english=is.true&order=id.asc`;
+  const q = `in_ads?select=${COLS}&batch=not.is.null&is_english=is.true&order=id.asc`;
   const first = await api(q, { headers: { Range: `0-${PAGE - 1}`, "Range-Unit": "items", Prefer: "count=exact" } });
   let rows = first.data || [];
   const total = +((first.range || "").split("/")[1]) || rows.length;
