@@ -422,3 +422,4 @@
 .cd-dv .cd-buf span{font:700 10.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
 @keyframes cdspin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.cd-dv .cd-shim{animation:none}.cd-dv .cd-buf i{animation:none;border-top-color:var(--jd)}}
+.cd-dv .ig-media:has(.cd-buf.on)>.cd-shim span{display:none}

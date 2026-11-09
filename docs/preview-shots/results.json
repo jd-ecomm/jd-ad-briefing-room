@@ -1,7 +1,7 @@
 {
   "base": "https://jd-ecomm.github.io/jd-ad-briefing-room/",
-  "when": "2026-11-09T08:11:47.835Z",
-  "passed": 87,
+  "when": "2026-11-09T08:44:18.638Z",
+  "passed": 117,
   "failed": 0,
   "results": [
     {
@@ -50,21 +50,6 @@
       "detail": "5 columns"
     },
     {
-      "name": "d filters: panel opens",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "d filters: no horizontal scroll",
-      "pass": true,
-      "detail": "scrollWidth 1440 vs 1440"
-    },
-    {
-      "name": "d filters: type = video applies",
-      "pass": true,
-      "detail": ""
-    },
-    {
       "name": "d hover: video plays muted on hover",
       "pass": true,
       "detail": ""
@@ -77,7 +62,7 @@
     {
       "name": "d hover: moving the pointer never pauses or seeks (plays straight through)",
       "pass": true,
-      "detail": "[0.17,0.25,0.34,0.42,0.5,0.58,0.67,0.75,0.83,0.92,1.02,1.1,1.18,1.27,1.35,1.43,1.52]"
+      "detail": "[0.16,0.24,0.33,0.41,0.49,0.58,0.66,0.75,0.83,0.92,1,1.08,1.16,1.25,1.33,1.4,1.48]"
     },
     {
       "name": "d hover: mouse out pauses and returns to poster",
@@ -92,17 +77,17 @@
     {
       "name": "d JD: JD Global section (stats, market chips, Show more)",
       "pass": true,
-      "detail": "{\"n\":36,\"cols\":2,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":248,\"ch\":440,\"rows\":0,\"more\":true,\"filters\":false}"
+      "detail": "{\"n\":36,\"cols\":2,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":248,\"ch\":440,\"rows\":0,\"more\":true,\"filters\":true}"
     },
     {
       "name": "d JD: larger cards, 2 per row, sorted by Proven, no list rows",
       "pass": true,
-      "detail": "{\"n\":36,\"cols\":2,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":248,\"ch\":440,\"rows\":0,\"more\":true,\"filters\":false}"
+      "detail": "{\"n\":36,\"cols\":2,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":248,\"ch\":440,\"rows\":0,\"more\":true,\"filters\":true}"
     },
     {
       "name": "d JD: card keeps Proven score, market pill, days · format · landing",
       "pass": true,
-      "detail": "{\"n\":36,\"cols\":2,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":248,\"ch\":440,\"rows\":0,\"more\":true,\"filters\":false}"
+      "detail": "{\"n\":36,\"cols\":2,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":248,\"ch\":440,\"rows\":0,\"more\":true,\"filters\":true}"
     },
     {
       "name": "d JD: no creative cropped (10 measured)",
@@ -165,6 +150,81 @@
       "detail": "0 playing"
     },
     {
+      "name": "d filters: \"Filters\" button visible with its label",
+      "pass": true,
+      "detail": "{\"vis\":true,\"txt\":\"FILTERS\"}"
+    },
+    {
+      "name": "d filters: opens as a right drawer",
+      "pass": true,
+      "detail": "{\"open\":true,\"right\":1440,\"bottom\":900,\"w\":440,\"h\":900,\"vw\":1440,\"vh\":900,\"counts\":219,\"brandSearch\":true,\"quick\":3,\"slider\":2,\"dates\":2,\"ai\":true}"
+    },
+    {
+      "name": "d filters: all groups with live counts, brand search, quick groups, slider, dates, AI toggle",
+      "pass": true,
+      "detail": "{\"open\":true,\"right\":1440,\"bottom\":900,\"w\":440,\"h\":900,\"vw\":1440,\"vh\":900,\"groups\":[\"Brand\",\"Market\",\"Media type\",\"Aspect\",\"Visual format\",\"Status\",\"Days live\",\"Launch date\",\"Proven, Rising, Most saved\",\"Landing page type\",\"CTA\"],\"counts\":219,\"brandSearch\":true,\"quick\":3,\"slider\":2,\"dates\":2,\"ai\":true}"
+    },
+    {
+      "name": "d filters: live result count updates in the drawer",
+      "pass": true,
+      "detail": "Show 5,077 results -> Show 931 results"
+    },
+    {
+      "name": "d filters: 3 filters applied, 3 removable chips, \"Filters · 3\", state in the URL",
+      "pass": true,
+      "detail": "{\"chips\":3,\"btn\":\"FILTERS · 3\",\"hash\":\"#discover?kind=video&asp=9%3A16&st=live\",\"ok\":true,\"n\":931}"
+    },
+    {
+      "name": "d filters applied: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d filters: shared URL restores the same filters",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d filters: removing a chip removes that filter",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d filters: Clear all",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d search: \"knock knock\" finds the New Balance 204L ad (hook text)",
+      "pass": true,
+      "detail": "{\"n\":1,\"sub\":\"1 result for \\\"knock knock\\\"\",\"empty\":\"\",\"sugg\":0,\"ids\":1,\"brands\":[\"JD Sports Australia\"]}"
+    },
+    {
+      "name": "d search: case and accent insensitive, partial words",
+      "pass": true,
+      "detail": "{\"n\":1}"
+    },
+    {
+      "name": "d search: \"north face\" finds The North Face",
+      "pass": true,
+      "detail": "{\"n\":668,\"sub\":\"668 results for \\\"north face\\\"\",\"empty\":\"\",\"sugg\":0,\"ids\":965,\"brands\":[\"The North Face\",\"JD Sports\",\"Little Burgundy Shoes\",\"Sport Chek\",\"Browns Shoes\",\"JD Sports Australia\"]}"
+    },
+    {
+      "name": "d search: 0 results shows \"No results for\" with suggestions",
+      "pass": true,
+      "detail": "{\"n\":0,\"sub\":\"0 results for \\\"north zzqxq\\\"\",\"empty\":\"No results for \\\"north zzqxq\\\" Check the spelling or use fewer words.\\nTRY\\nThe North Face\\nThe North Face\\nThe North Face\\nThe North Face\\n\\\"north\\\" (676)\",\"sugg\":5,\"ids\":0,\"brands\":[]}"
+    },
+    {
+      "name": "d viewer: ad 6a7f47c4bd1fb9616677cdd4 Hook line starts \"KNOCK KNOCK\", Meta headline shown separately",
+      "pass": true,
+      "detail": "{\"hook\":\"KNOCK KNOCK...NEW BALANCE 204L AT JD 😍\",\"headline\":\"New Balance 204L at JD\"}"
+    },
+    {
+      "name": "d loading: no \"Loading ads\" bar or diagonal placeholders",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "d Brands: tiles render",
       "pass": true,
       "detail": ""
@@ -192,12 +252,12 @@
     {
       "name": "d viewer: batch 1 panels and actions present",
       "pass": true,
-      "detail": "{\"labels\":[],\"acts\":[],\"hookTxt\":\"Hook not read yet\",\"hk\":null,\"hkind\":null,\"h\":\"Where to Next?\",\"hookOk\":true}"
+      "detail": "{\"labels\":[],\"acts\":[],\"hookTxt\":\"Visual hook, no text\",\"hk\":null,\"hkind\":\"visual\",\"h\":\"Where to Next?\",\"hookOk\":true}"
     },
     {
       "name": "d viewer: Hook line = hook_text (never the Meta headline)",
       "pass": true,
-      "detail": "{\"labels\":[],\"acts\":[],\"hookTxt\":\"Hook not read yet\",\"hk\":null,\"hkind\":null,\"h\":\"Where to Next?\",\"hookOk\":true}"
+      "detail": "{\"labels\":[],\"acts\":[],\"hookTxt\":\"Visual hook, no text\",\"hk\":null,\"hkind\":\"visual\",\"h\":\"Where to Next?\",\"hookOk\":true}"
     },
     {
       "name": "d viewer: no horizontal scroll",
@@ -227,7 +287,7 @@
     {
       "name": "d media load failures (info)",
       "pass": true,
-      "detail": "1 failed resource loads"
+      "detail": "2 failed resource loads"
     },
     {
       "name": "m discover: cards render",
@@ -275,21 +335,6 @@
       "detail": "2 columns"
     },
     {
-      "name": "m filters: panel opens",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "m filters: no horizontal scroll",
-      "pass": true,
-      "detail": "scrollWidth 390 vs 390"
-    },
-    {
-      "name": "m filters: type = video applies",
-      "pass": true,
-      "detail": ""
-    },
-    {
       "name": "m touch grid: no video playing without hover",
       "pass": true,
       "detail": "0 playing"
@@ -297,17 +342,17 @@
     {
       "name": "m JD: JD Global section (stats, market chips, Show more)",
       "pass": true,
-      "detail": "{\"n\":36,\"cols\":1,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":294,\"ch\":523,\"rows\":0,\"more\":true,\"filters\":false}"
+      "detail": "{\"n\":36,\"cols\":1,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":294,\"ch\":523,\"rows\":0,\"more\":true,\"filters\":true}"
     },
     {
       "name": "m JD: larger cards, 1 per row, sorted by Proven, no list rows",
       "pass": true,
-      "detail": "{\"n\":36,\"cols\":1,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":294,\"ch\":523,\"rows\":0,\"more\":true,\"filters\":false}"
+      "detail": "{\"n\":36,\"cols\":1,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":294,\"ch\":523,\"rows\":0,\"more\":true,\"filters\":true}"
     },
     {
       "name": "m JD: card keeps Proven score, market pill, days · format · landing",
       "pass": true,
-      "detail": "{\"n\":36,\"cols\":1,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":294,\"ch\":523,\"rows\":0,\"more\":true,\"filters\":false}"
+      "detail": "{\"n\":36,\"cols\":1,\"h\":\"JD Global Proven score = days live (capped at 90) + variants of the same concept + parallel launches. Proven = running 60+ days.\",\"stats\":3,\"chips\":7,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\",\"sub\":\"48 days · video · PLP / collection\",\"sorted\":true,\"cw\":294,\"ch\":523,\"rows\":0,\"more\":true,\"filters\":true}"
     },
     {
       "name": "m JD: no creative cropped (4 measured)",
@@ -368,6 +413,81 @@
       "name": "m autoplay off again: nothing plays",
       "pass": true,
       "detail": "0 playing"
+    },
+    {
+      "name": "m filters: \"Filters\" button visible with its label",
+      "pass": true,
+      "detail": "{\"vis\":true,\"txt\":\"FILTERS\"}"
+    },
+    {
+      "name": "m filters: opens as a bottom sheet",
+      "pass": true,
+      "detail": "{\"open\":true,\"right\":390,\"bottom\":844,\"w\":390,\"h\":743,\"vw\":390,\"vh\":844,\"counts\":219,\"brandSearch\":true,\"quick\":3,\"slider\":2,\"dates\":2,\"ai\":true}"
+    },
+    {
+      "name": "m filters: all groups with live counts, brand search, quick groups, slider, dates, AI toggle",
+      "pass": true,
+      "detail": "{\"open\":true,\"right\":390,\"bottom\":844,\"w\":390,\"h\":743,\"vw\":390,\"vh\":844,\"groups\":[\"Brand\",\"Market\",\"Media type\",\"Aspect\",\"Visual format\",\"Status\",\"Days live\",\"Launch date\",\"Proven, Rising, Most saved\",\"Landing page type\",\"CTA\"],\"counts\":219,\"brandSearch\":true,\"quick\":3,\"slider\":2,\"dates\":2,\"ai\":true}"
+    },
+    {
+      "name": "m filters: live result count updates in the drawer",
+      "pass": true,
+      "detail": "Show 5,077 results -> Show 931 results"
+    },
+    {
+      "name": "m filters: 3 filters applied, 3 removable chips, \"Filters · 3\", state in the URL",
+      "pass": true,
+      "detail": "{\"chips\":3,\"btn\":\"FILTERS · 3\",\"hash\":\"#discover?kind=video&asp=9%3A16&st=live\",\"ok\":true,\"n\":931}"
+    },
+    {
+      "name": "m filters applied: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m filters: shared URL restores the same filters",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m filters: removing a chip removes that filter",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m filters: Clear all",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m search: \"knock knock\" finds the New Balance 204L ad (hook text)",
+      "pass": true,
+      "detail": "{\"n\":1,\"sub\":\"1 result for \\\"knock knock\\\"\",\"empty\":\"\",\"sugg\":0,\"ids\":1,\"brands\":[\"JD Sports Australia\"]}"
+    },
+    {
+      "name": "m search: case and accent insensitive, partial words",
+      "pass": true,
+      "detail": "{\"n\":1}"
+    },
+    {
+      "name": "m search: \"north face\" finds The North Face",
+      "pass": true,
+      "detail": "{\"n\":668,\"sub\":\"668 results for \\\"north face\\\"\",\"empty\":\"\",\"sugg\":0,\"ids\":965,\"brands\":[\"The North Face\",\"JD Sports\",\"Little Burgundy Shoes\",\"Sport Chek\",\"Browns Shoes\",\"JD Sports Australia\"]}"
+    },
+    {
+      "name": "m search: 0 results shows \"No results for\" with suggestions",
+      "pass": true,
+      "detail": "{\"n\":0,\"sub\":\"0 results for \\\"north zzqxq\\\"\",\"empty\":\"No results for \\\"north zzqxq\\\" Check the spelling or use fewer words.\\nTRY\\nThe North Face\\nThe North Face\\nThe North Face\\nThe North Face\\n\\\"north\\\" (676)\",\"sugg\":5,\"ids\":0,\"brands\":[]}"
+    },
+    {
+      "name": "m viewer: ad 6a7f47c4bd1fb9616677cdd4 Hook line starts \"KNOCK KNOCK\", Meta headline shown separately",
+      "pass": true,
+      "detail": "{\"hook\":\"KNOCK KNOCK...NEW BALANCE 204L AT JD 😍\",\"headline\":\"New Balance 204L at JD\"}"
+    },
+    {
+      "name": "m loading: no \"Loading ads\" bar or diagonal placeholders",
+      "pass": true,
+      "detail": ""
     },
     {
       "name": "m Brands: tiles render",
@@ -438,6 +558,36 @@
       "name": "m media load failures (info)",
       "pass": true,
       "detail": "2 failed resource loads"
+    },
+    {
+      "name": "throttled: page loader \"Loading creative\"",
+      "pass": true,
+      "detail": "{\"txt\":\"LOADING CREATIVE\",\"top\":459,\"h\":558,\"main\":459}"
+    },
+    {
+      "name": "throttled: no layout jump when the loader goes (grid starts where the loader was)",
+      "pass": true,
+      "detail": "{\"before\":459,\"after\":459}"
+    },
+    {
+      "name": "throttled: card shimmer at the true aspect with \"Loading creative\"",
+      "pass": true,
+      "detail": "{\"shim\":40,\"label\":\"Loading creative\"}"
+    },
+    {
+      "name": "throttled: viewer shows spinner + \"Loading creative\" while the video buffers",
+      "pass": true,
+      "detail": "{\"on\":true,\"txt\":\"LOADING CREATIVE\"}"
+    },
+    {
+      "name": "naming: \"Directory\" in the Creative Discovery nav, no \"Home\"",
+      "pass": true,
+      "detail": "[\"Discover\",\"Directory\",\"Trending Ads Weekly\",\"Brands\",\"JD Global\",\"Boards\",\"Reels\",\"Projects\",\"Discover\",\"Directory\",\"Trending\",\"Brands\",\"More\"]"
+    },
+    {
+      "name": "naming: Creative Discovery opens on Discover by default",
+      "pass": true,
+      "detail": ""
     }
   ]
 }
