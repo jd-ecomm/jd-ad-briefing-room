@@ -1,0 +1,59 @@
+name: Creative Discovery hook OCR (non-priority brands)
+
+# Machine text reading (RapidOCR) of on-screen text for English video ads of non-priority,
+# non-JD brands (scripts/cd_hook_sheets.py SET=ocr). Same frames as the hook sheets
+# (0.0 to 3.0s hook window + 25/50/75%). Results JSON is pushed to cd-hooks/ocr-p<N> data
+# branches and written to Supabase by a Claude session (hook_source = 'ocr').
+on:
+  workflow_dispatch:
+    inputs:
+      only_unread:
+        description: "Skip ads that already have hook_read_at"
+        required: false
+        default: "1"
+
+concurrency:
+  group: cd-hook-ocr
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  ocr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [1, 2, 3, 4, 5, 6, 7, 8]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ffmpeg and Python deps
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+          pip install -q requests pillow numpy rapidocr-onnxruntime wordninja
+      - name: OCR part ${{ matrix.part }} of 8
+        env:
+          SUPABASE_URL: https://cymkcvdsxoneojfisjgk.supabase.co
+          # Public anon key (same as cd-media-copy.yml); read only use here.
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5bWtjdmRzeG9uZW9qZmlzamdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxMTg0ODQsImV4cCI6MjEwODY5NDQ4NH0.rgRRRXCab-s5xy4ICFa_l511Gol8EMqPEjBHThnAC9I' }}
+          SET: ocr
+          PART: ${{ matrix.part }}
+          PARTS: "8"
+          ONLY_UNREAD: ${{ inputs.only_unread }}
+        run: python3 -u scripts/cd_hook_sheets.py
+      - name: Push results to a data branch
+        run: |
+          B="cd-hooks/ocr-p${{ matrix.part }}"
+          cd out
+          git init -q -b "$B"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Hook OCR $B (run ${{ github.run_id }})"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "$B:$B"

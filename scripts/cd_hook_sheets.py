@@ -6,6 +6,9 @@ large frames (540px wide) so text written on the creative can be read.
 
 SET=pilot  -> ids from tools/cd-hooks/pilot.json (list of ids)
 SET=all    -> every JD ad (brand ilike JD*), English first, then id
+SET=priority -> English video ads of PRIORITY brands (sheets, read by Claude)
+SET=ocr    -> English video ads of all other non-JD brands; no sheets, RapidOCR on the same
+              frames, writes out/ocr_p<PART>of<PARTS>.json (hook_text, onscreen_text, hook_kind)
 Optional ONLY_UNREAD=1 skips rows with hook_read_at set.
 
 Videos: frames at 0.0, 0.5, 1.0, 1.5, 2.0, 3.0s (hook window) + 25%, 50%, 75% of duration,
@@ -44,7 +47,13 @@ COLS_V = 5
 CAP_H = 40
 COLS = "id,brand,format,video,poster,images,thumb_r2,images_r2,video_r2,is_english"
 DEBUG = SET == "debug"
+PRIORITY = [b.strip() for b in os.environ.get(
+    "PRIORITY", "Foot Locker,Foot Locker Canada,Nike,adidas,New Balance,Jordan").split(",") if b.strip()]
+PART = int(os.environ.get("PART") or 1)
+PARTS = int(os.environ.get("PARTS") or 1)
 HOOK_TS = [0.0, 0.5, 1.0, 1.5, 2.0, 3.0]
+OCR_CONF = float(os.environ.get("OCR_CONF") or 0.8)
+OCR_MIN_H = float(os.environ.get("OCR_MIN_H") or 0.018)  # box height as share of frame height
 
 
 def get(url, **kw):
@@ -82,6 +91,18 @@ def load_rows():
         rows = fetch({"id": "in.(" + ",".join(ids) + ")"})
         m = {r["id"]: r for r in rows}
         return [m[i] for i in ids if i in m]
+    if SET in ("priority", "ocr"):
+        pri = "(" + ",".join(f'"{b}"' for b in PRIORITY) + ")"
+        p = {"brand": ("in." if SET == "priority" else "not.in.") + pri, "is_english": "is.true",
+             "format": "eq.video", "order": "brand.asc,id.asc"}
+        if SET == "ocr":
+            p["and"] = "(brand.not.ilike.JD*)"
+        if ONLY_UNREAD:
+            p["hook_read_at"] = "is.null"
+        rows = fetch(p)
+        if PARTS > 1:
+            rows = rows[PART - 1::PARTS]
+        return rows
     p = {"brand": "ilike.JD*", "order": "is_english.desc.nullslast,id.asc"}
     if ONLY_UNREAD:
         p["hook_read_at"] = "is.null"
@@ -236,10 +257,87 @@ def save(blocks, path):
     s.save(path, "JPEG", quality=80)
 
 
+def ocr_texts(engine, im):
+    """Return caption-like text lines in reading order (filters tiny or low-confidence boxes)."""
+    import numpy as np
+    res, _ = engine(np.array(im))
+    H = im.size[1]
+    lines = []
+    for box, text, score in res or []:
+        ys = [pt[1] for pt in box]
+        xs = [pt[0] for pt in box]
+        h = max(ys) - min(ys)
+        if float(score) < OCR_CONF or h < H * OCR_MIN_H or len(text.strip()) < 2:
+            continue
+        lines.append((min(ys), min(xs), text.strip()))
+    lines.sort(key=lambda t: (round(t[0] / (H * 0.03)), t[1]))
+    return [t for _, _, t in lines]
+
+
+def norm(t):
+    return " ".join("".join(c for c in t.lower() if c.isalnum() or c.isspace()).split())
+
+
+_TL = None
+
+
+def _engine():
+    import threading
+    global _TL
+    if _TL is None:
+        _TL = threading.local()
+    if not hasattr(_TL, "e"):
+        from rapidocr_onnxruntime import RapidOCR
+        _TL.e = RapidOCR()
+    return _TL.e
+
+
+def ocr_one(row):
+    b = build(row)
+    if "error" in b:
+        return {"id": row["id"], "error": b["error"]}
+    engine = _engine()
+    hook, allt, seen_h, seen_a = [], [], set(), set()
+    for lab, im in b["frames"]:
+        try:
+            t = float(lab.rstrip("s"))
+        except ValueError:
+            t = 99.0
+        txt = " ".join(ocr_texts(engine, im))
+        k = norm(txt)
+        if not k:
+            continue
+        if k not in seen_a:
+            seen_a.add(k)
+            allt.append(txt)
+        if t <= 3.0 and k not in seen_h:
+            seen_h.add(k)
+            hook.append(txt)
+    return {"id": row["id"], "sha": b["sha"], "hook_text": " ".join(hook) or None,
+            "onscreen_text": " | ".join(allt) or None, "hook_kind": "text" if hook else "visual"}
+
+
+def ocr_run(rows):
+    out, failed = [], {}
+    with cf.ThreadPoolExecutor(4) as ex:
+        for i, r in enumerate(ex.map(ocr_one, rows), 1):
+            if "error" in r:
+                failed[r["id"]] = r["error"]
+            else:
+                out.append(r)
+            if i % 50 == 0:
+                print(f"ocr {i}/{len(rows)}", flush=True)
+    name = f"ocr_p{PART}of{PARTS}.json"
+    json.dump({"results": out, "failed": failed}, open(os.path.join(OUT, name), "w"), ensure_ascii=False, indent=0)
+    print(f"ocr: {len(out)} results, {len(failed)} failed")
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     rows = load_rows()
     print(f"{SET}: {len(rows)} ads", flush=True)
+    if SET == "ocr":
+        return ocr_run(rows)
     if DEBUG:
         built, rr = [], []
         for row in rows:
@@ -250,6 +348,7 @@ def main():
     else:
         with cf.ThreadPoolExecutor(8) as ex:
             built = list(ex.map(build, rows))
+
     groups, order, failed = {}, [], {}
     for row, b in zip(rows, built):
         if "error" in b:

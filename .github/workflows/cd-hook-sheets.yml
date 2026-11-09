@@ -10,7 +10,7 @@ on:
         description: "Which set"
         required: true
         type: choice
-        options: [pilot, all, debug]
+        options: [pilot, all, debug, priority]
       only_unread:
         description: "Skip ads that already have hook_read_at (all only)"
         required: false
