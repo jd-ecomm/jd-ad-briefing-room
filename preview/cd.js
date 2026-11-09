@@ -152,8 +152,9 @@ function getFeed(p){const k=JSON.stringify(p);let fd=FEEDS.get(k);if(fd){FEEDS.d
  while(FEEDS.size>12){const k0=FEEDS.keys().next().value;if(FEEDS.get(k0)===C.cur)break;FEEDS.delete(k0)}return fd}
 function moreFeed(fd,n){if(fd.done)return Promise.resolve(fd);if(fd.loading)return fd.loading;
  const body={...fd.p,limit:n||(fd.p.ctx==='jd'?60:BATCH),cursor:fd.next};if(!SUM)body.summary=true;if(fd.p.ctx==='jd'&&!fd.first)body.stats=true;
- fd.loading=rpc('cd_page',body).then(r=>{if(r.summary)setSummary(r.summary);if(r.jd)fd.jd=r.jd;if(r.terms)fd.terms=r.terms;fd.total=+r.total||0;
-   const seen=new Set(fd.items.map(x=>x.vg));(r.rows||[]).forEach(row=>{const it=addCard(row);if(it&&!seen.has(it.vg)){seen.add(it.vg);fd.items.push(it)}});
+ fd.loading=rpc('cd_page',body).then(async r=>{if(r.summary)setSummary(r.summary);if(r.jd)fd.jd=r.jd;if(r.terms)fd.terms=r.terms;fd.total=+r.total||0;
+   /* build the batch's cards in slices, giving the main thread back in between (no long task) */
+   const seen=new Set(fd.items.map(x=>x.vg));const rows=r.rows||[];for(let i=0;i<rows.length;i++){const it=addCard(rows[i]);if(it&&!seen.has(it.vg)){seen.add(it.vg);fd.items.push(it)}if(i%12===11&&i<rows.length-1)await yieldNow()}
    fd.next=r.next||null;fd.done=!r.next;fd.first=true;fd.err=null;fd.loading=null;return fd},e=>{fd.loading=null;fd.err=e.message;throw e});
  return fd.loading}
 /* cards that contain these ad ids (boards, brand top ads) */

@@ -58,6 +58,7 @@ async function scenario(browser, base, pagePath, name, { vp, mobile = false, cpu
       await page.waitForTimeout(2500);
       const lt = await page.evaluate(() => window.__cdp.lt);
       out.longTasks = { n: lt.length, max: lt.reduce((m, x) => Math.max(m, x[1]), 0), total: lt.reduce((s, x) => s + x[1], 0) };
+      out.lt = lt.slice(0, 30);
       out.bytes = { all: bytes.all, supabase: bytes.sb, supabaseRequests: bytes.reqSb };
       out.cards = await page.evaluate(() => document.querySelectorAll('#v-cd .cd-card').length);
       out.timeline = await page.evaluate(() => { const n = performance.getEntriesByType('navigation')[0] || {};
@@ -74,7 +75,7 @@ async function scenario(browser, base, pagePath, name, { vp, mobile = false, cpu
           nb.push(t); await page.waitForTimeout(600);
         }
         out.nextBatch = nb;
-        const lt2 = await page.evaluate(() => window.__cdp.lt); out.longTasksAfterScroll = { n: lt2.length, max: lt2.reduce((m, x) => Math.max(m, x[1]), 0) };
+        const lt2 = await page.evaluate(() => window.__cdp.lt); out.longTasksAfterScroll = { n: lt2.length, max: lt2.reduce((m, x) => Math.max(m, x[1]), 0) }; out.lt2 = lt2.slice(0, 40);
         out.domCards = await page.evaluate(() => ({ cards: document.querySelectorAll('#v-cd .cd-card').length, withContent: document.querySelectorAll('#v-cd .cd-card .cd-fr').length, videos: document.querySelectorAll('#v-cd video[src]').length }));
         /* JD Hooks and Brands open times */
         out.hooks = await page.evaluate(async () => { await new Promise(r => setTimeout(r, 300)); const t0 = performance.now(); location.hash = 'discover/jd/hooks';
