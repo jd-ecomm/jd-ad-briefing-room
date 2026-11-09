@@ -1,0 +1,338 @@
+{
+  "base": "https://jd-ecomm.github.io/jd-ad-briefing-room/",
+  "when": "2026-11-09T07:21:22.855Z",
+  "passed": 66,
+  "failed": 0,
+  "results": [
+    {
+      "name": "d discover: cards render",
+      "pass": true,
+      "detail": "36 cards"
+    },
+    {
+      "name": "d discover: inside Briefing Room (hero + projects row + section)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d discover: no old Discover Ads / Trending section",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d discover: no bottom tab bar",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d discover: no video playing without hover",
+      "pass": true,
+      "detail": "0 playing"
+    },
+    {
+      "name": "d discover: no creative cropped (22 measured)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d discover: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d discover: responsive columns",
+      "pass": true,
+      "detail": "5 columns"
+    },
+    {
+      "name": "d filters: panel opens",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d filters: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d filters: type = video applies",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d hover: video plays muted on hover",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d hover: the video is visible above the poster while scrubbing",
+      "pass": true,
+      "detail": "VIDEO"
+    },
+    {
+      "name": "d hover: scrub to 50% sets the video to the middle",
+      "pass": true,
+      "detail": "{\"t\":4.5015,\"d\":9.003,\"p\":true,\"bar\":\"scaleX(0.5)\",\"cls\":\"cd-fr hov vis scrub\",\"top\":\"VIDEO\"}"
+    },
+    {
+      "name": "d hover: scrub back follows the pointer",
+      "pass": true,
+      "detail": "0.200"
+    },
+    {
+      "name": "d hover: mouse out pauses and returns to poster",
+      "pass": true,
+      "detail": "{\"p\":true,\"vis\":false}"
+    },
+    {
+      "name": "d JD: grid with Proven badge",
+      "pass": true,
+      "detail": "{\"n\":36,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\"}"
+    },
+    {
+      "name": "d JD: no creative cropped (27 measured)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d JD: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d JD: no video playing without hover",
+      "pass": true,
+      "detail": "0 playing"
+    },
+    {
+      "name": "d Trending: native cards with rank badge, no iframe",
+      "pass": true,
+      "detail": "{\"n\":36,\"badge\":\"#1\",\"iframe\":0}"
+    },
+    {
+      "name": "d Trending: no creative cropped (21 measured)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d Trending: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d Trending: no video playing without hover",
+      "pass": true,
+      "detail": "0 playing"
+    },
+    {
+      "name": "d Brands: tiles render",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d Brands: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d Boards: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d Boards: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d viewer: Reels frame has no numbers",
+      "pass": true,
+      "detail": "{\"reels\":true,\"digits\":[],\"controls\":true,\"vids\":1}"
+    },
+    {
+      "name": "d viewer: one video with native controls (single scrubber)",
+      "pass": true,
+      "detail": "{\"reels\":true,\"digits\":[],\"controls\":true,\"vids\":1}"
+    },
+    {
+      "name": "d viewer: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 1440 vs 1440"
+    },
+    {
+      "name": "d viewer: Esc closes",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d Projects section still opens",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d no console errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "d media load failures (info)",
+      "pass": true,
+      "detail": "1 failed resource loads"
+    },
+    {
+      "name": "m discover: cards render",
+      "pass": true,
+      "detail": "36 cards"
+    },
+    {
+      "name": "m discover: inside Briefing Room (hero + projects row + section)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m discover: no old Discover Ads / Trending section",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m discover: no bottom tab bar",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m discover: no video playing without hover",
+      "pass": true,
+      "detail": "0 playing"
+    },
+    {
+      "name": "m discover: no creative cropped (12 measured)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m discover: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m discover: responsive columns",
+      "pass": true,
+      "detail": "2 columns"
+    },
+    {
+      "name": "m filters: panel opens",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m filters: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m filters: type = video applies",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m touch grid: no video playing without hover",
+      "pass": true,
+      "detail": "0 playing"
+    },
+    {
+      "name": "m JD: grid with Proven badge",
+      "pass": true,
+      "detail": "{\"n\":36,\"badge\":\"124 Proven\",\"mk\":\"JD Australia\"}"
+    },
+    {
+      "name": "m JD: no creative cropped (14 measured)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m JD: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m JD: no video playing without hover",
+      "pass": true,
+      "detail": "0 playing"
+    },
+    {
+      "name": "m Trending: native cards with rank badge, no iframe",
+      "pass": true,
+      "detail": "{\"n\":36,\"badge\":\"#1\",\"iframe\":0}"
+    },
+    {
+      "name": "m Trending: no creative cropped (11 measured)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m Trending: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m Trending: no video playing without hover",
+      "pass": true,
+      "detail": "0 playing"
+    },
+    {
+      "name": "m Brands: tiles render",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m Brands: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m Boards: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m Boards: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m viewer: Reels frame has no numbers",
+      "pass": true,
+      "detail": "{\"reels\":true,\"digits\":[],\"controls\":true,\"vids\":1}"
+    },
+    {
+      "name": "m viewer: one video with native controls (single scrubber)",
+      "pass": true,
+      "detail": "{\"reels\":true,\"digits\":[],\"controls\":true,\"vids\":1}"
+    },
+    {
+      "name": "m viewer: no horizontal scroll",
+      "pass": true,
+      "detail": "scrollWidth 390 vs 390"
+    },
+    {
+      "name": "m viewer: Esc closes",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m Projects section still opens",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m no console errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "m media load failures (info)",
+      "pass": true,
+      "detail": "1 failed resource loads"
+    }
+  ]
+}
