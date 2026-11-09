@@ -1,0 +1,1130 @@
+[
+ {
+  "n": 1,
+  "id": "6af0d1f16c7ca7701767a7de",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6af0d1f16c7ca7701767a7de/img1.jpg"
+   ]
+  },
+  "text": "Create the new | Don't wait for tomorrow. Create it. This Christmas, we're doing what's never been done.",
+  "label": "Headline"
+ },
+ {
+  "n": 2,
+  "id": "6aafcc1dfce96c9e2597424f",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aafcc1dfce96c9e2597424f/img1.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aafcc1dfce96c9e2597424f/img2.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aafcc1dfce96c9e2597424f/img3.jpg"
+   ]
+  },
+  "text": "What's Your Way? | Autumn is here. Back to it, your way.",
+  "label": "Headline"
+ },
+ {
+  "n": 3,
+  "id": "6acedca35c0724606c34c167",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6acedca35c0724606c34c167/img1.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6acedca35c0724606c34c167/img2.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6acedca35c0724606c34c167/img3.jpg"
+   ]
+  },
+  "text": "Your cosy edit for autumn | New knits just hit. These picks are a need this season.",
+  "label": "Headline"
+ },
+ {
+  "n": 4,
+  "id": "6ab541b0fce96c9e25ba472c",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ab541b0fce96c9e25ba472c/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ab541b0fce96c9e25ba472c/poster.jpg"
+  },
+  "text": "A fresh 3-Stripes lineup | Your new season wardrobe's all about adidas. Shop the collection at JD.",
+  "label": "Montage"
+ },
+ {
+  "n": 5,
+  "id": "6ac8e8055c0724606c0d504e",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ac8e8055c0724606c0d504e/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ac8e8055c0724606c0d504e/poster.jpg"
+  },
+  "text": "Prince Carneiro | New proportions, same energy. Bringing the BadBo 1.1 into rotation. Shop the collection at JD Sports. ",
+  "label": "Montage"
+ },
+ {
+  "n": 6,
+  "id": "6aafcc1dfce96c9e259741f7",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aafcc1dfce96c9e259741f7/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aafcc1dfce96c9e259741f7/poster.jpg"
+  },
+  "text": "Animal Print, Always | we love animal print",
+  "label": "Montage"
+ },
+ {
+  "n": 7,
+  "id": "6aa2ce13fce96c9e25447d58",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa2ce13fce96c9e25447d58/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa2ce13fce96c9e25447d58/poster.jpg"
+  },
+  "text": "JD Sports | Put the spotlight on autumn. Make it yours.",
+  "label": "Try-On"
+ },
+ {
+  "n": 8,
+  "id": "6aa2ce12fce96c9e25447ccd",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa2ce12fce96c9e25447ccd/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa2ce12fce96c9e25447ccd/poster.jpg"
+  },
+  "text": "What's Your Way? | Put the spotlight on autumn. Make it yours.",
+  "label": "Try-On"
+ },
+ {
+  "n": 9,
+  "id": "6aba5facfce96c9e25d9836a",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aba5facfce96c9e25d9836a/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aba5facfce96c9e25d9836a/poster.jpg"
+  },
+  "text": "What's Your Way? | Put the spotlight on autumn. Make it yours.",
+  "label": "Try-On"
+ },
+ {
+  "n": 10,
+  "id": "6ae5578a286187d48693e36e",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ae5578a286187d48693e36e/img1.jpg"
+   ]
+  },
+  "text": "Students, save 20% on style | Secure 20% student discount on your next haul. Limited time only.",
+  "label": "Offer-First Banner"
+ },
+ {
+  "n": 11,
+  "id": "6aa69536fce96c9e255caff3",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa69536fce96c9e255caff3/img1.jpg"
+   ]
+  },
+  "text": "Y2K Is Back. Only at JD. | Retro running, reloaded. Saucony ProGrid Omni 9 drops in two colorways you can only get at JD",
+  "label": "Offer-First Banner"
+ },
+ {
+  "n": 12,
+  "id": "6ac648115c0724606cfb7277",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ac648115c0724606cfb7277/img1.jpg"
+   ]
+  },
+  "text": "Grab a deal. Offers are live. | Bag a deal. Offers have landed and there's up to 50% off. Move fast.",
+  "label": "Offer-First Banner"
+ },
+ {
+  "n": 13,
+  "id": "6ab541b0fce96c9e25ba4722",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ab541b0fce96c9e25ba4722/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ab541b0fce96c9e25ba4722/poster.jpg"
+  },
+  "text": "Nike Shori a JD. | New Nike Tech Shori tracksuit spotted instore. Shop now online",
+  "label": "Cinematic B-Roll"
+ },
+ {
+  "n": 14,
+  "id": "6ac648115c0724606cfb728e",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ac648115c0724606cfb728e/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ac648115c0724606cfb728e/poster.jpg"
+  },
+  "text": "The On edit | New routes. New speeds. Unlock the next level in On's Cloudvista.",
+  "label": "Cinematic B-Roll"
+ },
+ {
+  "n": 15,
+  "id": "6aa69536fce96c9e255caff1",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa69536fce96c9e255caff1/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa69536fce96c9e255caff1/poster.jpg"
+  },
+  "text": "Y2K Is Back. Only at JD. | Retro running, reloaded. Saucony ProGrid Omni 9 drops in two colorways you can only get at JD",
+  "label": "Cinematic B-Roll"
+ },
+ {
+  "n": 16,
+  "id": "6aa2ce13fce96c9e25447d6b",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa2ce13fce96c9e25447d6b/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa2ce13fce96c9e25447d6b/poster.jpg"
+  },
+  "text": "New season styles from adidas Originals | New season style from adidas Originals. Shop The Original look from the 3-Stri",
+  "label": "Split Screen"
+ },
+ {
+  "n": 17,
+  "id": "6a88fa4cbd1fb96166b73c1b",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a88fa4cbd1fb96166b73c1b/img1.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a88fa4cbd1fb96166b73c1b/img2.jpg"
+   ]
+  },
+  "text": "Get 20% off school essentials | Going back just got better. Save 20% on school essentials & more. Don't miss out.",
+  "label": "Split Screen"
+ },
+ {
+  "n": 18,
+  "id": "6a8fbdc354d81c5891f7210b",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a8fbdc354d81c5891f7210b/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a8fbdc354d81c5891f7210b/poster.jpg"
+  },
+  "text": "New Balance AC Runner at JD | Archival running, reimagined. The New Balance AC Runner \u2014 out now at JD Sports.",
+  "label": "Split Screen"
+ },
+ {
+  "n": 19,
+  "id": "6ae5578a286187d48693e388",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ae5578a286187d48693e388/img1.jpg"
+   ]
+  },
+  "text": "Step out in new The North Face | New-season staples from The North Face. Rooted in outdoor-wear, and re-engineered for t",
+  "label": "Product Image"
+ },
+ {
+  "n": 20,
+  "id": "6aa2ce12fce96c9e25447cd4",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa2ce12fce96c9e25447cd4/img1.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa2ce12fce96c9e25447cd4/img2.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa2ce12fce96c9e25447cd4/img3.jpg"
+   ]
+  },
+  "text": "New drop: The North Face | First look at The North Face's autumn drop. Check out the latest at JD.",
+  "label": "Product Image"
+ },
+ {
+  "n": 21,
+  "id": "6a917d8b0973d6759926f6ee",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a917d8b0973d6759926f6ee/img1.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a917d8b0973d6759926f6ee/img2.jpg"
+   ]
+  },
+  "text": "Coming 8/29 To Times Sq. | AIRMAX 1000.2 drops exclusively at JD Sports Times Square on 8/29.",
+  "label": "Product Image"
+ },
+ {
+  "n": 22,
+  "id": "6abf900767369d32ccdd01fa",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abf900767369d32ccdd01fa/img1.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abf900767369d32ccdd01fa/img2.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abf900767369d32ccdd01fa/img3.jpg"
+   ]
+  },
+  "text": "Your look. Your way. | @wellwitholi does it her way. Shop her look now online.",
+  "label": "UGC Overlay"
+ },
+ {
+  "n": 23,
+  "id": "6abf900767369d32ccdd0201",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abf900767369d32ccdd0201/img1.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abf900767369d32ccdd0201/img2.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abf900767369d32ccdd0201/img3.jpg"
+   ]
+  },
+  "text": "Your look. Your way. | @wellwitholi does it her way. Shop her look now online.",
+  "label": "UGC Overlay"
+ },
+ {
+  "n": 24,
+  "id": "6aa2ce12fce96c9e25447cd0",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa2ce12fce96c9e25447cd0/img1.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa2ce12fce96c9e25447cd0/img2.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa2ce12fce96c9e25447cd0/img3.jpg"
+   ]
+  },
+  "text": "What's Your Way? | Ace & Mal do it their way.",
+  "label": "UGC Overlay"
+ },
+ {
+  "n": 25,
+  "id": "6aee7a47326d6d369b4a3892",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aee7a47326d6d369b4a3892/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aee7a47326d6d369b4a3892/poster.jpg"
+  },
+  "text": "JD Sports US |",
+  "label": "Demo"
+ },
+ {
+  "n": 26,
+  "id": "6a9cae630973d675996f1df8",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a9cae630973d675996f1df8/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a9cae630973d675996f1df8/poster.jpg"
+  },
+  "text": "Get Set For The New Term | Out with the old. In with the fresh. Shop your Back to School fits now at JD Sports",
+  "label": "Demo"
+ },
+ {
+  "n": 27,
+  "id": "6a84646bbd1fb96166972367",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a84646bbd1fb96166972367/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a84646bbd1fb96166972367/poster.jpg"
+  },
+  "text": "Get Set For The New Term | A little bit of back to uni shopping at JD Sports. Ready for the new term. Shop your Back to ",
+  "label": "Demo"
+ },
+ {
+  "n": 28,
+  "id": "6a9cae630973d675996f1dd7",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a9cae630973d675996f1dd7/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a9cae630973d675996f1dd7/poster.jpg"
+  },
+  "text": "Shop Studio Fleece | Off-duty style on another level",
+  "label": "Slideshow"
+ },
+ {
+  "n": 29,
+  "id": "6aaaaca5fce96c9e2575a9aa",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aaaaca5fce96c9e2575a9aa/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aaaaca5fce96c9e2575a9aa/poster.jpg"
+  },
+  "text": "Student discount just doubled | Save 20% with our big student discount. Plus earn 20% back in JD Cash with JD STATUS.",
+  "label": "Slideshow"
+ },
+ {
+  "n": 30,
+  "id": "6a9cae630973d675996f1de0",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a9cae630973d675996f1de0/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a9cae630973d675996f1de0/poster.jpg"
+  },
+  "text": "Nike's new everyday staple | A classic sweatsuit, just better. Introducing Studio Fleece.",
+  "label": "Slideshow"
+ },
+ {
+  "n": 31,
+  "id": "6ad2a743085dc308b8950fdd",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ad2a743085dc308b8950fdd/img2.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ad2a743085dc308b8950fdd/img1.jpg"
+   ]
+  },
+  "text": "ad.doubleclick.net | TON STYLE. TON ATTITUDE. TON \u00c9NERGIE. #OriginalsSport",
+  "label": "Celebrity"
+ },
+ {
+  "n": 32,
+  "id": "6abee68c67369d32ccd843cb",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abee68c67369d32ccd843cb/img1.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abee68c67369d32ccd843cb/img2.jpg"
+   ]
+  },
+  "text": "Quiet the weather. | Lewis Hamilton, seven-time world champion and lululemon Ambassador, in fall 2026 outerwear.",
+  "label": "Celebrity"
+ },
+ {
+  "n": 33,
+  "id": "6ac2cbb767369d32ccf0ff6a",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ac2cbb767369d32ccf0ff6a/img1.jpg"
+   ]
+  },
+  "text": "Nike Moon Shoe | Originally pioneered for speed on the track, now for living among the stars. Shop now.",
+  "label": "Celebrity"
+ },
+ {
+  "n": 34,
+  "id": "6a8d5faf54d81c5891e6ea5a",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a8d5faf54d81c5891e6ea5a/img1.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a8d5faf54d81c5891e6ea5a/img2.jpg"
+   ]
+  },
+  "text": "Premium picks from Lacoste | From tees and polos to sneaks and accessories, come take a look at the latest from Lacoste.",
+  "label": "Lifestyle Image"
+ },
+ {
+  "n": 35,
+  "id": "6a8d5faf54d81c5891e6ea5b",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a8d5faf54d81c5891e6ea5b/img1.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a8d5faf54d81c5891e6ea5b/img2.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a8d5faf54d81c5891e6ea5b/img3.jpg"
+   ]
+  },
+  "text": "Level up in Lacoste | Premium picks have landed in the Lacoste lineup. Check out the full collection at JD.",
+  "label": "Lifestyle Image"
+ },
+ {
+  "n": 36,
+  "id": "6adc341f4f255ae65f3c2412",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6adc341f4f255ae65f3c2412/img1.jpg"
+   ]
+  },
+  "text": "The 204L. Reaching cruising altitude. | Drawing on sleek '70s style and 2000s running-inspired detail, the 204L is uniqu",
+  "label": "Lifestyle Image"
+ },
+ {
+  "n": 37,
+  "id": "6aa2ce13fce96c9e25447d73",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa2ce13fce96c9e25447d73/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa2ce13fce96c9e25447d73/poster.jpg"
+  },
+  "text": "JD Sports | Lil Charva does it his way.",
+  "label": "Yapper"
+ },
+ {
+  "n": 38,
+  "id": "6abf900767369d32ccdd020e",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abf900767369d32ccdd020e/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abf900767369d32ccdd020e/poster.jpg"
+  },
+  "text": "The Freshest Gifts | Christmas is coming. Earn on the biggest brands with JD STATUS for your festive gifting instore & o",
+  "label": "Yapper"
+ },
+ {
+  "n": 39,
+  "id": "6aaaaca4fce96c9e2575a953",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aaaaca4fce96c9e2575a953/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aaaaca4fce96c9e2575a953/poster.jpg"
+  },
+  "text": "Save 20% as a student | Calling all students. Get 20% off your next shop and bank 20% JD Cash as a JD STATUS Member.",
+  "label": "Yapper"
+ },
+ {
+  "n": 40,
+  "id": "6af0d1f26c7ca7701767a843",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6af0d1f26c7ca7701767a843/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6af0d1f26c7ca7701767a843/poster.jpg"
+  },
+  "text": "JD Sports | Alongside @bbccin , we\u2019ve brought \u2018The Youth Club Dictionary\u2019 to life. A one of it\u2019s kind record, written by",
+  "label": "Grid Swap"
+ },
+ {
+  "n": 41,
+  "id": "6aeca566e430389503a69701",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aeca566e430389503a69701/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aeca566e430389503a69701/poster.jpg"
+  },
+  "text": "Gifts that Shine | Add a silver lining to any rotation with our most giftable shoes.",
+  "label": "Grid Swap"
+ },
+ {
+  "n": 42,
+  "id": "6ac94dfb5c0724606c108985",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ac94dfb5c0724606c108985/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ac94dfb5c0724606c108985/poster.jpg"
+  },
+  "text": "Nike | Work without compromise in the Nike Hybrid RN.",
+  "label": "Grid Swap"
+ },
+ {
+  "n": 43,
+  "id": "6ae5578a286187d48693e381",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ae5578a286187d48693e381/img1.jpg"
+   ]
+  },
+  "text": "Seen the latest collection? | Take on the elements when you step out in The North Face this season. Shop the latest coll",
+  "label": "Collage"
+ },
+ {
+  "n": 44,
+  "id": "6ae5578a286187d48693e385",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ae5578a286187d48693e385/img1.jpg"
+   ]
+  },
+  "text": "A new lineup from The North Face | A new-season collection from The North Face. From tracksuits to puffer jackets, shop ",
+  "label": "Collage"
+ },
+ {
+  "n": 45,
+  "id": "6aaaaca5fce96c9e2575a9a1",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aaaaca5fce96c9e2575a9a1/img1.jpg"
+   ]
+  },
+  "text": "A stacked Summer drop from Unlike Humans | Your summer rotation needs some JD-exclusive heat from Unlike Humans. Shop th",
+  "label": "Collage"
+ },
+ {
+  "n": 46,
+  "id": "6ae7d24e119f2013402f8e88",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ae7d24e119f2013402f8e88/img1.jpg"
+   ]
+  },
+  "text": "Swiss-engineered comfort by On | Unmatched energy meets everyday style. Powered by CloudTec\u00ae technology, shop the On Clo",
+  "label": "Feature Benefit Pointout"
+ },
+ {
+  "n": 47,
+  "id": "6ac2cb6b67369d32ccf0fc26",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ac2cb6b67369d32ccf0fc26/img1.jpg"
+   ]
+  },
+  "text": "Every. Day. Speed. | Air Zoom and ultra-light ZoomX fuel the road to raceday in Pegasus Plus 2.",
+  "label": "Feature Benefit Pointout"
+ },
+ {
+  "n": 48,
+  "id": "6aaf7fb1fce96c9e2595b0fb",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aaf7fb1fce96c9e2595b0fb/img1.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aaf7fb1fce96c9e2595b0fb/img2.jpg"
+   ]
+  },
+  "text": "To run with ease | The NAGINO\u2122 Collection supports every run with comfort that moves with her and helps her feel free",
+  "label": "Feature Benefit Pointout"
+ },
+ {
+  "n": 49,
+  "id": "6aa2ce13fce96c9e25447d1c",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa2ce13fce96c9e25447d1c/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa2ce13fce96c9e25447d1c/poster.jpg"
+  },
+  "text": "What's Your Way? | Put the spotlight on autumn. Make it yours.",
+  "label": "Static To Video Hybrid"
+ },
+ {
+  "n": 50,
+  "id": "6aaaaca5fce96c9e2575a9ca",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aaaaca5fce96c9e2575a9ca/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aaaaca5fce96c9e2575a9ca/poster.jpg"
+  },
+  "text": "We've doubled student discount | Limited time student deal: bag 20% off the latest styles and earn 20% JD Cash with JD S",
+  "label": "Static To Video Hybrid"
+ },
+ {
+  "n": 51,
+  "id": "6a7e9f77bd1fb96166729760",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a7e9f77bd1fb96166729760/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a7e9f77bd1fb96166729760/poster.jpg"
+  },
+  "text": "New season The North Face | Streets to trails, The North Face has always got your back. Check out the latest in the new ",
+  "label": "Static To Video Hybrid"
+ },
+ {
+  "n": 52,
+  "id": "6add4d0b7c94558bca6dbf5b",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6add4d0b7c94558bca6dbf5b/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6add4d0b7c94558bca6dbf5b/poster.jpg"
+  },
+  "text": "adidas Originals x Molly-Mae | Molly-Mae has been back in the 3-Stripes studio. Check out Samba Slate from drop 2.",
+  "label": "Unboxing"
+ },
+ {
+  "n": 53,
+  "id": "6aee7a47326d6d369b4a3892",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aee7a47326d6d369b4a3892/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aee7a47326d6d369b4a3892/poster.jpg"
+  },
+  "text": "JD Sports US |",
+  "label": "Unboxing"
+ },
+ {
+  "n": 54,
+  "id": "6a91efa70973d6759929d02b",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a91efa70973d6759929d02b/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a91efa70973d6759929d02b/poster.jpg"
+  },
+  "text": "Get Set For The New Term | Fresh pair. New Term. Superstar. Shop your Back to School fits now at JD Sports",
+  "label": "Unboxing"
+ },
+ {
+  "n": 55,
+  "id": "6acc4ed75c0724606c241518",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6acc4ed75c0724606c241518/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6acc4ed75c0724606c241518/poster.jpg"
+  },
+  "text": "What's Your Way? | Fittings to fit check. What's Your Way?",
+  "label": "Behind The Scenes"
+ },
+ {
+  "n": 56,
+  "id": "6aa464a2fce96c9e2550586e",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa464a2fce96c9e2550586e/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa464a2fce96c9e2550586e/poster.jpg"
+  },
+  "text": "JD Sports | First shift at JD for Jens \ud83e\udee1",
+  "label": "Behind The Scenes"
+ },
+ {
+  "n": 57,
+  "id": "6abf900767369d32ccdd020a",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abf900767369d32ccdd020a/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abf900767369d32ccdd020a/poster.jpg"
+  },
+  "text": "What's Your Way? | Fittings to fit check. What's Your Way?",
+  "label": "Behind The Scenes"
+ },
+ {
+  "n": 58,
+  "id": "6ac231e167369d32ccec7eb1",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ac231e167369d32ccec7eb1/img1.jpg"
+   ]
+  },
+  "text": "New Power just dropped | When it's lock-in season, choose Power Washed. Throw it on. It\u2019s time to work \ud83c\udfa7",
+  "label": "Text Overlay"
+ },
+ {
+  "n": 59,
+  "id": "6ab69da6fce96c9e25c3e093",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ab69da6fce96c9e25c3e093/img1.jpg"
+   ]
+  },
+  "text": "Coming to City Centre Mirdif on 1st Oct | Our exclusive Gymshark pop-up is coming to City Centre Mirdif from 1st - 31st ",
+  "label": "Text Overlay"
+ },
+ {
+  "n": 60,
+  "id": "6a8a6a33bd1fb96166c0a544",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://motionswipefile.blob.core.windows.net/swipe-file-cached-links/swipe-file-source-link/2145852985993492/6a8a6a33bd1fb96166c0a544/dac71b9d-2175-4284-bb53-56d3ae9ac705.jpg"
+   ]
+  },
+  "text": "Everyday Seamless From $24 | Everyday Seamless, now in new colours \ud83d\udc9b\ud83e\ude77 Come try the soft, second-skin gym sets you'll wan",
+  "label": "Text Overlay"
+ },
+ {
+  "n": 61,
+  "id": "6aeb1107614cef70d7f1950f",
+  "format": "carousel",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aeb1107614cef70d7f1950f/img2.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aeb1107614cef70d7f1950f/img3.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aeb1107614cef70d7f1950f/img1.jpg"
+   ]
+  },
+  "text": "JD Sports | With the help of DC3, we\u2019re raising awareness of the pivotal role youth clubs play in the lives of young peo",
+  "label": "Testimonial"
+ },
+ {
+  "n": 62,
+  "id": "6aee7a47326d6d369b4a388a",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aee7a47326d6d369b4a388a/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aee7a47326d6d369b4a388a/poster.jpg"
+  },
+  "text": "mytrran | #ad Burgundy has been calling my name and JD had exactly what I needed to stay stylish AND exclusive this fall",
+  "label": "Testimonial"
+ },
+ {
+  "n": 63,
+  "id": "6a84646bbd1fb9616697235d",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a84646bbd1fb9616697235d/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a84646bbd1fb9616697235d/poster.jpg"
+  },
+  "text": "Get Set with JD STATUS | Get Set for Back To School! Earn 10x JD Cash on selected backpacks when you are a verified JD S",
+  "label": "Testimonial"
+ },
+ {
+  "n": 64,
+  "id": "6aa2ce13fce96c9e25447d5e",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa2ce13fce96c9e25447d5e/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa2ce13fce96c9e25447d5e/poster.jpg"
+  },
+  "text": "JD Sports | Jens really getting the full JD experience \ud83d\ude02",
+  "label": "Skit"
+ },
+ {
+  "n": 65,
+  "id": "6a9cae630973d675996f1de4",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a9cae630973d675996f1de4/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a9cae630973d675996f1de4/poster.jpg"
+  },
+  "text": "Nike's latest edit is in | New Nike hits different. Tracksuits to tees, cop the latest looks now.",
+  "label": "Skit"
+ },
+ {
+  "n": 66,
+  "id": "6ac85db45c0724606c09549b",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ac85db45c0724606c09549b/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ac85db45c0724606c09549b/poster.jpg"
+  },
+  "text": "JD Sports | @chunkz & @ajshabeel play the guess the number challenge \ud83d\ude2d",
+  "label": "Skit"
+ },
+ {
+  "n": 67,
+  "id": "6a9cae630973d675996f1dd8",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a9cae630973d675996f1dd8/img1.jpg"
+   ]
+  },
+  "text": "Shop Studio Fleece | Off-duty style on another level",
+  "label": "UGC Selfie"
+ },
+ {
+  "n": 68,
+  "id": "6aaf27d9fce96c9e25934263",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aaf27d9fce96c9e25934263/img1.jpg"
+   ]
+  },
+  "text": "Gymshark \ud83e\udd1d Hoodies | Hoodies for those headphones on, head down, get it done kinda days.",
+  "label": "UGC Selfie"
+ },
+ {
+  "n": 69,
+  "id": "6abf10cf67369d32ccd932f8",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abf10cf67369d32ccd932f8/img1.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abf10cf67369d32ccd932f8/img2.jpg"
+   ]
+  },
+  "text": "New in: Power Washed \ud83d\udd25 | Check out Power's heavyweight fabric finished with a washed, worn-in aesthetic \ud83d\udcaa",
+  "label": "UGC Selfie"
+ },
+ {
+  "n": 70,
+  "id": "6af0d1f431b38702a4138dae",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6af0d1f431b38702a4138dae/img4.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6af0d1f431b38702a4138dae/img3.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6af0d1f431b38702a4138dae/img1.jpg"
+   ]
+  },
+  "text": "Create The New | Do what's never been done before. Shop @xhattie.armstrongx's look now.",
+  "label": "Influencer Endorsement"
+ },
+ {
+  "n": 71,
+  "id": "6af0d1f431b38702a4138dbf",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6af0d1f431b38702a4138dbf/img3.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6af0d1f431b38702a4138dbf/img1.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6af0d1f431b38702a4138dbf/img2.jpg"
+   ]
+  },
+  "text": "Create The New | Do what's never been done before. Shop @CHRISSTASSY's look now.",
+  "label": "Influencer Endorsement"
+ },
+ {
+  "n": 72,
+  "id": "6abf900767369d32ccdd020d",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abf900767369d32ccdd020d/img1.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abf900767369d32ccdd020d/img2.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abf900767369d32ccdd020d/img3.jpg"
+   ]
+  },
+  "text": "Your look. Your way. | @patmorais.m1 does it his way. Shop his look now online.",
+  "label": "Influencer Endorsement"
+ },
+ {
+  "n": 73,
+  "id": "6ae689f3119f2013402f63aa",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ae689f3119f2013402f63aa/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ae689f3119f2013402f63aa/poster.jpg"
+  },
+  "text": "Rami Content Creation | The @adidas Stan Smith icon, styled my way. From street wear to dressed-up looks, the simple @ad",
+  "label": "Listicle"
+ },
+ {
+  "n": 74,
+  "id": "6aeafa7cae079e4f84c40b5b",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aeafa7cae079e4f84c40b5b/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aeafa7cae079e4f84c40b5b/poster.jpg"
+  },
+  "text": "Gifts at Nike | Gift teens their next favorite look with Nike P-6000s and Tech Fleece this holiday.",
+  "label": "Listicle"
+ },
+ {
+  "n": 75,
+  "id": "6ae689f3119f2013402f63a9",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ae689f3119f2013402f63a9/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ae689f3119f2013402f63a9/poster.jpg"
+  },
+  "text": "Rami Content Creation | The @adidas Stan Smith icon, styled my way. From street wear to dressed-up looks, the simple @ad",
+  "label": "Listicle"
+ },
+ {
+  "n": 76,
+  "id": "6aa0ee40a059f830c273693d",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa0ee40a059f830c273693d/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa0ee40a059f830c273693d/poster.jpg"
+  },
+  "text": "SoleSavy | \u201cI wear them for everything\u201d \u2026 we can tell \ud83d\ude2d\ud83e\udd40 School is officially back in session and we know that fresh sne",
+  "label": "Before and After"
+ },
+ {
+  "n": 77,
+  "id": "6ab541b0fce96c9e25ba470b",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ab541b0fce96c9e25ba470b/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ab541b0fce96c9e25ba470b/poster.jpg"
+  },
+  "text": "Cosy Season Starts Now | Cosy season is near. Shop your Autumn Essentials now online.",
+  "label": "Before and After"
+ },
+ {
+  "n": 78,
+  "id": "6aa0ee40a059f830c273693e",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa0ee40a059f830c273693e/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa0ee40a059f830c273693e/poster.jpg"
+  },
+  "text": "SoleSavy | \u201cI wear them for everything\u201d \u2026 we can tell \ud83d\ude2d\ud83e\udd40 School is officially back in session and we know that fresh sne",
+  "label": "Before and After"
+ },
+ {
+  "n": 79,
+  "id": "6aa464a2fce96c9e2550586e",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa464a2fce96c9e2550586e/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa464a2fce96c9e2550586e/poster.jpg"
+  },
+  "text": "JD Sports | First shift at JD for Jens \ud83e\udee1",
+  "label": "POV"
+ },
+ {
+  "n": 80,
+  "id": "6a84646bbd1fb961669723c1",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a84646bbd1fb961669723c1/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6a84646bbd1fb961669723c1/poster.jpg"
+  },
+  "text": "Get Set with JD STATUS | Get Set for Back To School! Earn 10x JD Cash on selected backpacks when you are a verified JD S",
+  "label": "POV"
+ },
+ {
+  "n": 81,
+  "id": "6aeafa7cae079e4f84c40b67",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aeafa7cae079e4f84c40b67/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aeafa7cae079e4f84c40b67/poster.jpg"
+  },
+  "text": "Gifts at Nike | Gift everyday comfort to someone always on the move with Nike Tech Fleece.",
+  "label": "POV"
+ },
+ {
+  "n": 82,
+  "id": "6af0d1f431b38702a4138de8",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6af0d1f431b38702a4138de8/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6af0d1f431b38702a4138de8/poster.jpg"
+  },
+  "text": "Create The New | @jazzy is here to create. Shop @jazzy\u2019s look.",
+  "label": "Greenscreen"
+ },
+ {
+  "n": 83,
+  "id": "6af0d1f331b38702a4138d3d",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6af0d1f331b38702a4138d3d/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6af0d1f331b38702a4138d3d/poster.jpg"
+  },
+  "text": "Create The New | @jenstaylor0 is here to create. Shop @jenstaylor0\u2019s look.",
+  "label": "Greenscreen"
+ },
+ {
+  "n": 84,
+  "id": "6af0d1f431b38702a4138def",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6af0d1f431b38702a4138def/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6af0d1f431b38702a4138def/poster.jpg"
+  },
+  "text": "Create The New | @jazzy is here to create. Shop @jazzy\u2019s look",
+  "label": "Greenscreen"
+ },
+ {
+  "n": 85,
+  "id": "6abb25e067369d32ccbfd08d",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abb25e067369d32ccbfd08d/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abb25e067369d32ccbfd08d/poster.jpg"
+  },
+  "text": "omatsouza | Dreaming in Nike Air Max 90 #ad #TeamNike @nikesportswear",
+  "label": "Transformation"
+ },
+ {
+  "n": 86,
+  "id": "6aa8b8b6fce96c9e2569b200",
+  "format": "video",
+  "media": {
+   "video": "https://motionswipefile.blob.core.windows.net/swipe-file-cached-links/swipe-file-source-link/4802588383296150/6aa8b8b6fce96c9e2569b200/5e5214eb-01c0-41f5-bf20-c5d363f28e56.mp4",
+   "poster": "https://motionswipefile.blob.core.windows.net/swipe-file-cached-links/swipe-file-source-link/4802588383296150/6aa8b8b6fce96c9e2569b200/9209c96f-0cb6-4d57-b67f-acb5da24f217.jpg"
+  },
+  "text": "Natalie Johnson | I\u2019m obsessed!!! @nikesportswear #diy #teamnike",
+  "label": "Transformation"
+ },
+ {
+  "n": 87,
+  "id": "6ac5f3935c0724606cf9962a",
+  "format": "video",
+  "media": {
+   "video": "https://motionswipefile.blob.core.windows.net/swipe-file-cached-links/swipe-file-source-link/1422082116775017/6ac5f3935c0724606cf9962a/b16b061e-8cb8-49b1-9037-aa5536f0bfdf.mp4",
+   "poster": "https://motionswipefile.blob.core.windows.net/swipe-file-cached-links/swipe-file-source-link/1422082116775017/6ac5f3935c0724606cf9962a/89025fc0-8f81-4240-bee7-4e4ad9584463.jpg"
+  },
+  "text": "Switch up your outerwear. | Warmth for now\u2014and whatever's next.",
+  "label": "Transformation"
+ },
+ {
+  "n": 88,
+  "id": "6aa357d6fce96c9e2548a083",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa357d6fce96c9e2548a083/img1.jpg"
+   ]
+  },
+  "text": "More your speed. | The FuelCell Rebel v5, designed to look and feel fast, while turning heads and corners.",
+  "label": "Review"
+ },
+ {
+  "n": 89,
+  "id": "6aca36c85c0724606c17195c",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aca36c85c0724606c17195c/img1.jpg"
+   ]
+  },
+  "text": "Basically every shade ever \ud83c\udfa8 | Adapt Solid just dropped. It locks you in, lifts you up and, now, matches your every aest",
+  "label": "Review"
+ },
+ {
+  "n": 90,
+  "id": "6aca36c85c0724606c1719ff",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aca36c85c0724606c1719ff/img1.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aca36c85c0724606c1719ff/img2.jpg"
+   ]
+  },
+  "text": "Adapt\u2019s in its new era \ud83d\udc9a\ud83e\ude75\ud83e\ude77 | Enough solid shades for your whole gym rotation \ud83c\udfa8 Adapt Solid is hereeee.",
+  "label": "Review"
+ },
+ {
+  "n": 91,
+  "id": "6aa0ee40a059f830c273693d",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa0ee40a059f830c273693d/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aa0ee40a059f830c273693d/poster.jpg"
+  },
+  "text": "SoleSavy | \u201cI wear them for everything\u201d \u2026 we can tell \ud83d\ude2d\ud83e\udd40 School is officially back in session and we know that fresh sne",
+  "label": "Street Interview"
+ },
+ {
+  "n": 92,
+  "id": "6aaaaca4fce96c9e2575a945",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aaaaca4fce96c9e2575a945/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aaaaca4fce96c9e2575a945/poster.jpg"
+  },
+  "text": "JD Sports | Not the best attempt @wintonyanitedofficial",
+  "label": "Street Interview"
+ },
+ {
+  "n": 93,
+  "id": "6aaaaca4fce96c9e2575a946",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aaaaca4fce96c9e2575a946/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aaaaca4fce96c9e2575a946/poster.jpg"
+  },
+  "text": "JD Sports | Not the best attempt @wintonyanitedofficial",
+  "label": "Street Interview"
+ },
+ {
+  "n": 94,
+  "id": "6ac2468567369d32cced52a6",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6ac2468567369d32cced52a6/img1.jpg"
+   ]
+  },
+  "text": "The Frankie Shop | Join now and claim your exclusive welcome offer.",
+  "label": "Studio Shot"
+ },
+ {
+  "n": 95,
+  "id": "6abe0ddf67369d32ccd27f39",
+  "format": "image",
+  "media": {
+   "images": [
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abe0ddf67369d32ccd27f39/img1.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abe0ddf67369d32ccd27f39/img2.jpg",
+    "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6abe0ddf67369d32ccd27f39/img3.jpg"
+   ]
+  },
+  "text": "Designed to Persist\u2122 | Our first GORE-TEX jacket made with recycled, recyclable nylon. Includes three years of repairs t",
+  "label": "Studio Shot"
+ },
+ {
+  "n": 96,
+  "id": "6aefbc8d7f5a9a1e26201e96",
+  "format": "video",
+  "media": {
+   "video": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aefbc8d7f5a9a1e26201e96/video.mp4",
+   "poster": "https://pub-26f4afc574474ba5a4df4463a8948adb.r2.dev/cd/6aefbc8d7f5a9a1e26201e96/poster.jpg"
+  },
+  "text": "Aritzia | Cashmere coveted for its softness and warmth. As seen on @kalilacraig.",
+  "label": "Studio Shot"
+ }
+]
