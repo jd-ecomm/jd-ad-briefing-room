@@ -389,3 +389,8 @@
 .cd-hr-h,.cd-tp-a{background:none;border:0;padding:0;text-align:left;cursor:pointer}
 .cd-tp-a{color:var(--fg);font:500 12.5px/1.4 var(--body);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line2)}
 @media (max-width:600px){.cd-hooks .cd-mk{display:inline-block}.cd-hf .cd-sel:has(input) .lbl{display:inline}.cd-hdl{width:100%}.cd-hdl .cd-btn{flex:1 1 auto}}
+
+/* lazy loading (9 Nov 2026): a card far off screen keeps its box but has no content (windowing); skeleton cards while the next batch loads */
+.cd-card.cd-vz{box-sizing:border-box;visibility:hidden;contain:strict}
+.cd-card.cd-skel{pointer-events:none}
+.cd-card.cd-skel .cd-fr{cursor:default}
