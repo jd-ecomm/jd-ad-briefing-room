@@ -78,3 +78,9 @@ $$;
 
 -- cd_refresh_brand_profiles(text[] default null): upserts stats, summary, summary_basis, brand_id (most used page), is_focus;
 -- keeps category, subcategory and country. Execute revoked from anon/authenticated.
+
+-- ===== Fix run 9 Nov 2026 (task cd-build-fix) =====
+-- cd_brand_summary: brands with < 15 English ads -> "Not enough ads captured yet for a pattern (N ads)." and nothing else.
+-- 30-day changes are worded "launches captured" (the pull caps ads per brand, e.g. Gymshark -83% is a capture artefact).
+-- The top hook format is named only when 20+ hooks are read (Visual only and Other / Unreadable excluded), with
+-- "(machine read)" when most of the brand's hooks are OCR. cd_brand_stats hooks now also carry ocr and text counts.

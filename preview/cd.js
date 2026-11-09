@@ -470,7 +470,7 @@ function vTrending(body){if(C.trErr){head('Trending','');body.innerHTML=`<div cl
  grid(body,list,'trending',{base:TR})}
 /* ---------- Brands: profiles from cd_brand_profiles (stats over every English ad of the brand), list with search, category chips and sort; brand page ---------- */
 const BCATS=['JD (our markets)','Sportswear and Athletic','Footwear','Streetwear','Athleisure and Yoga','Outdoor','Fashion and Lifestyle','Luxury and Designer','Multi-brand Retailer','Canadian Retailer','Other'];
-const BSORTS=[['ads','Most ads'],['active','Most active'],['growth','Fastest growing (30 days)'],['longest','Longest running'],['az','A to Z']];
+const BSORTS=[['ads','Most ads'],['active','Most active'],['growth','Fastest growing (launches captured, 30 days)'],['longest','Longest running'],['az','A to Z']];
 const CTRY={CA:'Canada',US:'USA',UK:'UK',AU:'Australia',NZ:'New Zealand',DE:'Germany',FR:'France',ES:'Spain',NL:'Netherlands',SE:'Sweden',DK:'Denmark',CH:'Switzerland',JP:'Japan',IN:'India'};
 const MIXK=[['video','Video'],['image','Image'],['carousel','Carousel']];
 const pct1=v=>(Math.round((+v||0)*10)/10).toFixed(1).replace(/\.0$/,'.0');
@@ -486,8 +486,8 @@ function mixBar(mix,big){const segs=MIXK.filter(([k])=>+(mix||{})[k]>0);
  return`<div class="cd-mix${big?' big':''}" role="img" aria-label="${esc(MIXK.map(([k,l])=>`${l} ${pct1((mix||{})[k])}%`).join(', '))}"><div class="cd-mix-b">${segs.map(([k,l])=>`<i class="m-${k}" style="width:${+mix[k]}%" title="${l} ${pct1(mix[k])}%"></i>`).join('')}</div>
   <div class="cd-mix-l">${MIXK.map(([k,l])=>`<span data-mix="${k}"><i class="m-${k}"></i>${l} <b>${pct1((mix||{})[k])}%</b></span>`).join('')}</div></div>`}
 function trendHTML(l){if(!l)return'';const a=+l.last||0,b=+l.prior||0;
- if(b>=5&&l.pct!=null){const up=+l.pct>=0;return`<span class="cd-trend ${up?'up':'dn'}">${up?'▲':'▼'} ${up?'+':''}${l.pct}%<small> launches, last 30 days vs prior 30</small></span>`}
- return`<span class="cd-trend">${fmtN(a)}<small> launch${a===1?'':'es'} in the last 30 days</small></span>`}
+ if(b>=5&&l.pct!=null){const up=+l.pct>=0;return`<span class="cd-trend ${up?'up':'dn'}">${up?'▲':'▼'} ${up?'+':''}${l.pct}%<small> launches captured, last 30 days vs prior 30</small></span>`}
+ return`<span class="cd-trend">${fmtN(a)}<small> launch${a===1?'':'es'} captured in the last 30 days</small></span>`}
 const firstSentence=s=>{s=String(s||'');const m=/^(.+?[.!?])(\s|$)/.exec(s.replace(/^Only \d+ English ads? captured, too few for a pattern\. /,''));return m?m[1]:s};
 function profList(){const list=Object.values(NAMES).filter(n=>n.p&&n.p.stats);return list}
 function bSort(arr,mode){const g=n=>n.p.stats,f={ads:n=>g(n).totals.ads,active:n=>g(n).totals.active,growth:n=>{const l=g(n).l30||{};return(+l.prior>=5&&l.pct!=null)?+l.pct:-1e9},longest:n=>+g(n).median_days||0}[mode];
@@ -532,14 +532,14 @@ function vBrandPage(body){const nm=nameOfBid(C.brand);const n=nm&&NAMES[nm];if(!
     ${tile('Aspect mix',hbars(asp))}
     ${tile('UGC share',`<div class="cd-big">${s.ugc_share==null?'n/a':pct1(s.ugc_share)+'%'}</div><small>of tagged ads use UGC Selfie, UGC Overlay, Yapper, Testimonial, Review, Influencer, Street Interview or POV</small>`)}
     ${tile('Studio / product share',`<div class="cd-big">${s.studio_share==null?'n/a':pct1(s.studio_share)+'%'}</div><small>of tagged ads use Product Image, Studio Shot, Lifestyle Image, Cinematic B-Roll, Model Shot or Flatlay</small>`)}
-    ${tile('Launches, last 30 days',`<div class="cd-big">${fmtN(l.last||0)}</div>${trendHTML(l)}<small>Prior 30 days: ${fmtN(l.prior||0)}. ${MIXK.map(([k,lb])=>{const f=(l.by_format||{})[k];return f?`${lb} ${f.last} (prior ${f.prior})`:null}).filter(Boolean).join(' · ')}</small>`)}
+    ${tile('Launches captured, last 30 days',`<div class="cd-big">${fmtN(l.last||0)}</div>${trendHTML(l)}<small>Prior 30 days: ${fmtN(l.prior||0)}. The pull caps ads per brand, so this compares launches captured, not all launches. ${MIXK.map(([k,lb])=>{const f=(l.by_format||{})[k];return f?`${lb} ${f.last} (prior ${f.prior})`:null}).filter(Boolean).join(' · ')}</small>`)}
    </div>
    <div class="cd-bcols">
-    <section class="cd-panel2"><div class="lbl">Launches per week by format · last 8 weeks</div>${weeksChart(s.weeks||[])}</section>
+    <section class="cd-panel2"><div class="lbl">Launches captured per week by format · last 8 weeks</div>${weeksChart(s.weeks||[])}</section>
     <section class="cd-panel2"><div class="lbl">Top visual formats</div>${(s.top_tags||[]).length?hbars(s.top_tags.slice(0,8).map(t=>[t.tag,t.pct,t.n+' ads'])):'<p class="cd-muted">No visual format tags yet.</p>'}
      <p class="cd-muted">Share of tagged ads. Tags cover ${pct1(s.tag_coverage)}% of this brand's ads (${fmtN(s.tagged||0)} of ${fmtN(s.totals.ads)}; Motion tags plus ours).${s.tag_coverage<40?' Limited tags: read these as indicative.':''}</p></section>
     <section class="cd-panel2"><div class="lbl">Top hook formats</div>${hasHooks?hbars(h.top.map(x=>[x.format,x.n/Math.max(1,h.top.reduce((a,b)=>a+b.n,0))*100,x.n+' ads']))+(h.example?`<p class="cd-hex"><span class="lbl">Example · ${esc(h.example.format)}</span>"${esc(h.example.text)}"${h.example.source==='ocr'?' <em class="cd-mr">machine read</em>':''} <a class="cd-link" href="#discover/brands/${esc(n.bid)}/ad/${esc(h.example.id)}">Open ad</a></p>`:''):`<p class="cd-muted">${h.read?`${fmtN(h.read)} hooks read; formats not classified yet.`:'No hooks read for this brand yet.'}</p>`}
-     ${h.read?`<p class="cd-muted">Hooks read on ${fmtN(h.read)} ads${h.machine?', mostly machine read (indicative)':''}. Share of classified hooks.</p>`:''}</section>
+     ${h.read?`<p class="cd-muted">Hooks read on ${fmtN(h.read)} ads${h.machine?', mostly machine read (indicative)':''}. Share of classified hooks.${h.read<20?' Fewer than 20 read, so the summary does not name a top format.':''}</p>`:''}</section>
    </div>
    ${top.length?`<section class="cd-panel2"><div class="lbl">Top ads · Proven score</div><div class="cd-bstrip">${top.map(x=>card(x,'btop')).join('')}</div></section>`:''}
   </div>`;C.lists.btop=top}
@@ -548,23 +548,22 @@ function vBrandPage(body){const nm=nameOfBid(C.brand);const n=nm&&NAMES[nm];if(!
  grid($('#cd-bads',body),list,'brand',{base:n.ads})}
 function vBrands(body){if(C.brand)return vBrandPage(body);return vBrandsList(body)}
 /* ---------- JD tab, Hooks sub view: what JD markets put on screen in the first 3 seconds (in_ads.hook_text, hook_format, hook_template) ---------- */
-const HFMTS=['Teaser / Knock knock','Callout','Question','POV / Relatable','Drop / New in alert','Offer / Price first','Product name reveal','Countdown / Urgency','List / How to','Statement / Claim','Social proof / Trend','Creator / Talking head','Visual only','Other'];
+const HFMTS=['Teaser / Knock knock','Offer / Price first','Countdown / Urgency','Question','List / How to','Style tip / Outfit','POV / Relatable','Skit / Scenario','Creator / Talking head','Social proof / Trend','Callout','Drop / New in alert','Store / Location','Seasonal / Occasion','Collection / Campaign line','Brand or collab callout','Product name reveal','Statement / Claim','Visual only','Other / Unreadable'];
 const HKIND_L={text:'Video, text in first 3s',visual:'Video, visual hook (no text)',image_text:'Image or carousel with text',none:'Image or carousel, no text'};
 const HSORTS=[['proven','Proven'],['newest','Newest'],['longest','Longest running']];
 /* JD Canada ideas for the most reused JD templates. AI suggestions (written by Claude from the template), not ads that ran. */
 const HK_AI={
- "WHAT'S YOUR WAY?":["WHAT'S YOUR WAY THIS WINTER, CANADA?","WHAT'S YOUR WAY? FIND IT AT JD","WHAT'S YOUR WAY TO DO [PRODUCT]?"],
- 'CREATE THE NEW':['CREATE THE NEW THIS WINTER','CREATE THE NEW. ONLY AT JD CANADA','CREATE THE NEW WITH [PRODUCT]'],
- 'ONLY AT JD':['ONLY AT JD CANADA','ONLY AT JD: [PRODUCT]','NOWHERE ELSE IN CANADA. ONLY AT JD'],
+ 'FIND YOUR FIT AT [STORE]':['FIND YOUR FIT AT JD [STORE]','FIND YOUR WINTER FIT AT JD [STORE]','[STORE], FIND YOUR FIT AT JD'],
+ '[PRODUCT] ONLY AT JD':['[PRODUCT], ONLY AT JD CANADA','[PRODUCT]. NOWHERE ELSE IN CANADA','ONLY AT JD CANADA: [PRODUCT]'],
+ 'THE [PRODUCT]':['THE [PRODUCT], NOW AT JD CANADA','THE [PRODUCT]. BUILT FOR WINTER','MEET THE [PRODUCT]'],
+ 'UP TO [N]% OFF':['UP TO [N]% OFF AT JD CANADA','UP TO [N]% OFF. BLACK FRIDAY STARTS NOW','UP TO [N]% OFF [PRODUCT] AND MORE'],
+ '[STORE] BACK WITH A BRAND-NEW LOOK':['JD [STORE], BACK WITH A BRAND-NEW LOOK','[STORE], YOUR JD JUST GOT A NEW LOOK','NEW LOOK, SAME JD: [STORE]'],
  'JD EXCLUSIVE [PRODUCT]':['JD EXCLUSIVE [PRODUCT], NOW IN CANADA','CANADA, THE JD EXCLUSIVE [PRODUCT] IS HERE','JD EXCLUSIVE: [PRODUCT] IN STORE AND ONLINE'],
- 'NOW OPEN':['NOW OPEN: JD [STORE]','WE\'RE OPEN, [CITY]. COME THROUGH','NOW OPEN IN [CITY]'],
- '#ONLYATJD':['#ONLYATJD CANADA','#ONLYATJD: [PRODUCT]','#ONLYATJD THIS HOLIDAY'],
- 'UP TO [X]% OFF* OFFERS':['UP TO [X]% OFF* AT JD CANADA','UP TO [X]% OFF* BLACK FRIDAY STARTS NOW','UP TO [X]% OFF* [PRODUCT] AND MORE'],
- 'KNOCK KNOCK...[PRODUCT] AT JD':["KNOCK KNOCK... [PRODUCT] AT JD CANADA","KNOCK KNOCK... WHO'S THERE? [PRODUCT]","KNOCK KNOCK... THE [PRODUCT] JUST LANDED"],
- 'TOP THREE STREETWEAR PIECES WE ALL NEED THIS WINTER AT NO. [N]...':['TOP 3 PIECES FOR A CANADIAN WINTER. NO. 3...','TOP 3 WINTER FITS AT JD CANADA','TOP 3 [PRODUCT] COLOURWAYS THIS WINTER'],
- 'LAYER YOUR LOOK':['LAYER UP, CANADA','LAYER YOUR LOOK FOR -20','LAYER YOUR LOOK WITH [PRODUCT]'],
- 'KEEP THINGS COSY':['KEEP THINGS COSY THIS WINTER','COSY SEASON STARTS AT JD CANADA','KEEP THINGS COSY IN [PRODUCT]'],
- 'NEVER STOP EXPLORING':['NEVER STOP EXPLORING, CANADA','BUILT FOR A CANADIAN WINTER','NEVER STOP EXPLORING IN [PRODUCT]']};
+ 'THIS OR THAT? SHOP BOTH ON SALE AT [STORE]':['THIS OR THAT? SHOP BOTH ON SALE AT JD [STORE]','[PRODUCT] OR [PRODUCT]? BOTH ON SALE AT JD CANADA','THIS OR THAT? WHY NOT BOTH, ON SALE AT JD'],
+ "TODAY'S FIT, FROM JD: [PRODUCT]":["TODAY'S FIT, FROM JD CANADA: [PRODUCT]","TODAY'S WINTER FIT, FROM JD: [PRODUCT]","TODAY'S FIT, FROM JD [STORE]"],
+ 'NEW [PRODUCT]':['NEW [PRODUCT] AT JD CANADA','NEW [PRODUCT], JUST LANDED','NEW IN CANADA: [PRODUCT]'],
+ '[PRODUCT] >>>':['[PRODUCT] >>> EVERYTHING ELSE','[PRODUCT] FOR A CANADIAN WINTER >>>','[PRODUCT] FROM JD CANADA >>>'],
+ 'KNOCK KNOCK... [PRODUCT] AT JD':["KNOCK KNOCK... [PRODUCT] AT JD CANADA","KNOCK KNOCK... WHO'S THERE? [PRODUCT]","KNOCK KNOCK... THE [PRODUCT] JUST LANDED"]};
 const HK_AI_FMT={'Teaser / Knock knock':["KNOCK KNOCK... [PRODUCT] AT JD CANADA","WAIT FOR IT... [PRODUCT]","GUESS WHAT JUST LANDED AT JD CANADA"],
  'Callout':['IF YOU NEED A WINTER FIT, THIS IS YOUR SIGN','CALLING ALL [PRODUCT] FANS IN CANADA','YOU NEED THESE BEFORE THE FIRST SNOW'],
  'Question':['WHAT ARE YOU WEARING THIS WINTER?','THIS OR THAT? [PRODUCT] EDITION','WHO ELSE IS COPPING [PRODUCT]?'],
@@ -574,7 +573,13 @@ const HK_AI_FMT={'Teaser / Knock knock':["KNOCK KNOCK... [PRODUCT] AT JD CANADA"
  'Product name reveal':['[PRODUCT]','[PRODUCT], ONLY AT JD CANADA','MEET THE [PRODUCT]'],
  'Countdown / Urgency':['LAST CHANCE: [PRODUCT]','ENDS SUNDAY AT JD CANADA','ONLY A FEW SIZES LEFT'],
  'List / How to':['3 WAYS TO STYLE [PRODUCT]','TOP 3 WINTER FITS AT JD CANADA','HOW TO LAYER FOR A CANADIAN WINTER'],
- 'Statement / Claim':['BUILT FOR A CANADIAN WINTER','ONLY AT JD CANADA','THE FIT STARTS HERE'],
+ 'Statement / Claim':['[PRODUCT]: BUILT FOR A CANADIAN WINTER','[PRODUCT]: WARM, LIGHT, WATERPROOF','THE ONLY [PRODUCT] YOU NEED THIS WINTER'],
+ 'Style tip / Outfit':['HOW I STYLE [PRODUCT] FOR WINTER','[SEASON] FIT CHECK, ALL FROM JD CANADA','[N] WAYS TO WEAR [PRODUCT]'],
+ 'Skit / Scenario':['"WHERE\'D YOU GET THAT FIT?" "JD [STORE]"','WHEN THE FIRST SNOW HITS AND YOUR [PRODUCT] ARE READY','DAY [N] OF WEARING [PRODUCT] EVERYWHERE'],
+ 'Store / Location':['FIND YOUR FIT AT JD [STORE]','NOW OPEN: JD [STORE]','[PRODUCT], IN STORE NOW AT JD [STORE]'],
+ 'Seasonal / Occasion':['[SEASON] ESSENTIALS AT JD CANADA','READY FOR [SEASON]: [PRODUCT]','GIFTS FOR EVERYONE ON YOUR LIST, AT JD'],
+ 'Collection / Campaign line':['[COLLECTION], ONLY AT JD CANADA','[COLLECTION]: NOW IN CANADA','THE [COLLECTION] COLLECTION IS HERE'],
+ 'Brand or collab callout':['[BRAND] X [BRAND], ONLY AT JD CANADA','[BRAND] AT JD CANADA','NEW FROM [BRAND] AT JD'],
  'Social proof / Trend':['EVERYONE IN CANADA IS WEARING [PRODUCT]','THE [PRODUCT] EVERYONE IS ASKING ABOUT','SOLD OUT ONCE. BACK AT JD CANADA'],
  'Creator / Talking head':["RIGHT GUYS, I'M AT JD [STORE] AND...","OKAY SO I FOUND [PRODUCT] AT JD","LET ME SHOW YOU MY WINTER PICKS FROM JD"]};
 const HK={fmt:'',mkt:'',kind:'',min:0,q:'',sort:'proven',show:60,bym:false};
@@ -624,7 +629,7 @@ function vHooks(body){
   <section class="cd-panel2"><div class="lbl">Templates · most reused patterns</div><div class="cd-tps">${tps.map(t=>`<div class="cd-tp"><div class="cd-tp-h"><b>${esc(t.t)}</b><span class="cd-mk">${esc(t.f||'')}</span></div><small>${t.n} ads · ${[...t.mk].map(esc).join(', ')}</small>
     <ul class="cd-tp-ex">${t.ex.map(m=>`<li><button type="button" class="cd-tp-a" data-hkopen="${esc(m.id)}">"${esc(m.hk)}"</button> <span>${esc(m.mk)}</span></li>`).join('')}</ul>
     <div class="cd-tp-ai"><span class="lbl">For JD Canada · AI suggestions</span><ul>${ai(t).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div></div>`).join('')||'<p class="cd-muted">No template is used twice yet.</p>'}</div>
-   <p class="cd-muted">Templates replace brands, products, prices, percentages, dates and numbers with placeholders. AI suggestions are ideas written by Claude from the template, not ads that ran.</p></section>
+   <p class="cd-muted">Templates swap products, brands, seasons, stores, collections, prices, numbers and dates for placeholders. Only patterns used on 2+ ads are shown; a hook with no reusable pattern has no template. AI suggestions are ideas written by Claude from the template, not ads that ran.</p></section>
   <section class="cd-panel2" id="cd-hlib"><div class="cd-ph"><div class="lbl">Hook library</div><div class="cd-hdl"><button type="button" class="cd-btn" data-hkcsv="filtered">Download hooks (CSV)</button><button type="button" class="cd-btn" data-hkcsv="all" title="Every hook read in Creative Discovery, all brands">Download all (CSV)</button></div></div>
    <div class="cd-hf">
     <label class="cd-q">${sv(I.search,14)}<input id="cd-hq" type="search" placeholder="Search hooks" aria-label="Search hooks" value="${esc(HK.q)}" autocomplete="off"></label>

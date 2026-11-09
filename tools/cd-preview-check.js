@@ -25,7 +25,7 @@ function fixtureRows() {
       video_r2: f === 'video' ? `https://pub-fx.r2.dev/cd/${id}/v_${k}.mp4` : null, poster: null, poster_frame: true, images: [], images_s: [],
       images_r2: f === 'video' ? { poster: `https://pub-fx.r2.dev/cd/${id}/p_${k}.jpg` } : f === 'carousel' ? [1, 2, 3].map(n => `https://pub-fx.r2.dev/cd/${id}/p_${k}.jpg?${n}`) : [`https://pub-fx.r2.dev/cd/${id}/p_${k}.jpg`],
       thumb_s: null, thumb_r2: `https://pub-fx.r2.dev/cd/${id}/p_${k}.jpg`, saves: i % 13, market: mk, concept_key: bid + (i % 11), variant_group: i % 9 === 0 && i < 130 ? 'vg' + i : 'vgs' + i, formats: [], first_seen: sd, hook_text: i === 0 ? 'KNOCK KNOCK...NEW BALANCE 204L AT JD' : (i % 3 ? null : 'Fixture hook ' + i), onscreen_text: i % 4 ? null : 'On-screen ' + i, hook_kind: i % 5 === 1 ? 'visual' : 'text', vf_source: i % 2 ? 'motion' : 'claude', focus: i % 7 === 0, hook_source: 'claude', ad_library: 'https://www.facebook.com/ads/library/?id=' + (1000 + i),
-      hook_format: i === 0 ? 'Teaser / Knock knock' : i % 5 === 1 ? 'Visual only' : ['Question', 'Callout', 'Drop / New in alert', 'Offer / Price first', 'Statement / Claim'][i % 5], hook_template: i === 0 ? 'KNOCK KNOCK...[PRODUCT] AT JD' : (i % 3 ? null : 'FIXTURE HOOK [N]') });
+      hook_format: i === 0 ? 'Teaser / Knock knock' : i % 5 === 1 ? 'Visual only' : ['Question', 'Store / Location', 'Seasonal / Occasion', 'Offer / Price first', 'Statement / Claim'][i % 5], hook_template: i === 0 ? 'KNOCK KNOCK... [PRODUCT] AT JD' : (i % 3 ? null : 'FIXTURE HOOK [N]') });
     if (i % 9 === 0 && i < 130) { const b2 = Object.assign({}, rows[rows.length - 1], { id: id + 'b', aspect: '9:16', format: 'video', video_r2: `https://pub-fx.r2.dev/cd/${id}b/v_9x16.mp4`, images_r2: { poster: `https://pub-fx.r2.dev/cd/${id}b/p_9x16.jpg` }, thumb_r2: `https://pub-fx.r2.dev/cd/${id}b/p_9x16.jpg` }); rows.push(b2); }
   }
   return rows;
@@ -237,6 +237,7 @@ async function run(vp) {
   await shareChecks(page, ctx, tag, shot);
   await brandChecks(page, tag, shot);
   await hookChecks(page, tag, shot);
+  await fixRunChecks(page, tag, shot);
 
   // No diagonal placeholders or "Loading ads" text anywhere
   ok(`${tag} loading: no "Loading ads" bar or diagonal placeholders`, await page.evaluate(() => !/Loading ads/i.test(document.body.innerText) && !document.querySelector('#v-cd .ph, #cd-vw .ph')));
@@ -373,7 +374,7 @@ async function brandChecks(page, tag, shot) {
     const bp = await page.evaluate(() => ({ h: document.querySelector('#cd-head h2')?.textContent, sub: document.querySelector('#cd-head p')?.textContent, sum: document.querySelector('.cd-bsum-l')?.textContent.length || 0,
       tiles: [...document.querySelectorAll('.cd-stile .lbl')].map(x => x.textContent), panels: [...document.querySelectorAll('.cd-panel2 > .lbl')].map(x => x.textContent), weeks: document.querySelectorAll('.cd-wk-c').length, strip: document.querySelectorAll('.cd-bstrip .cd-card').length,
       grid: document.querySelectorAll('#cd-bads .cd-card').length, brands: [...new Set((window.CD.C.lists.brand || []).map(a => a.b))], filters: !document.getElementById('cd-fbtn').hidden }));
-    const want = ['Format mix', 'Aspect mix', 'UGC share', 'Studio / product share', 'Launches, last 30 days'];
+    const want = ['Format mix', 'Aspect mix', 'UGC share', 'Studio / product share', 'Launches captured, last 30 days'];
     ok(`${tag} Brand page ${b}: header, summary, 5 stat tiles, 8-week chart, tags, hooks, top ads, grid of only this brand, Filters`, new RegExp(b, 'i').test(bp.h || '') && /active \/ [\d,]+ total/.test(bp.sub || '') && /median \d+ days live/.test(bp.sub || '') && bp.sum > 20 && want.every(w => bp.tiles.includes(w)) && bp.weeks === 8 && bp.panels.some(p => /visual formats/i.test(p)) && bp.panels.some(p => /hook/i.test(p)) && bp.strip > 0 && bp.grid > 0 && bp.brands.length === 1 && bp.brands[0] === b && bp.filters, JSON.stringify(bp));
     const m1 = await mixOk(); ok(`${tag} Brand page ${b}: format mix sums to 100`, m1.n > 0 && !m1.bad.length, JSON.stringify(m1));
     await noHScrollP(page, tag, 'Brand page ' + b);
@@ -437,6 +438,33 @@ async function hookChecks(page, tag, shot) {
     ok(`${tag} filters: Hook format "${pick[0].slice(3)}" applies in Discover (${pick[1]} cards)`, r.n === pick[1] && r.ok && r.chip === 1 && /hf=/.test(r.hash), JSON.stringify(r));
     await shot('filter-hookformat');
     await page.click('#cd-act [data-fclear]'); await page.waitForTimeout(400); }
+}
+// Fix run (cd-build-fix): new hook formats, templates with placeholders only and 2+ uses, "launches captured", short-history brands
+const NEW_HF = ['Teaser / Knock knock','Offer / Price first','Countdown / Urgency','Question','List / How to','Style tip / Outfit','POV / Relatable','Skit / Scenario','Creator / Talking head','Social proof / Trend','Callout','Drop / New in alert','Store / Location','Seasonal / Occasion','Collection / Campaign line','Brand or collab callout','Product name reveal','Statement / Claim','Visual only','Other / Unreadable'];
+async function fixRunChecks(page, tag, shot) {
+  await page.evaluate(() => { location.hash = 'discover/jd/hooks'; }); await page.waitForSelector('.cd-hooks', { timeout: 15000 }).catch(() => { }); await page.waitForTimeout(700);
+  const h = await page.evaluate(() => ({ bars: [...document.querySelectorAll('.cd-hbc [data-hkf]')].map(b => b.dataset.hkf), tps: [...document.querySelectorAll('.cd-tp')].map(t => ({ t: t.querySelector('.cd-tp-h b').textContent, n: parseInt(t.querySelector('small').textContent.replace(/,/g, '')) })), rows: window.CD.ROWS.filter(m => m.hf) }));
+  const known = h.bars.every(f => NEW_HF.includes(f));
+  ok(`${tag} fix: Hooks chart uses only the new format list (${h.bars.length} formats)`, h.bars.length >= 3 && known && !h.bars.includes('Other'), JSON.stringify(h.bars));
+  ok(`${tag} fix: every template shown has a placeholder and is used on 2+ ads`, h.tps.length >= 1 && h.tps.every(t => /\[(PRODUCT|BRAND|SEASON|STORE|COLLECTION|PRICE|N|DATE)\]/.test(t.t) && t.n >= 2), JSON.stringify(h.tps.slice(0, 12)));
+  const d = await page.evaluate(nh => { const all = window.CD.ROWS.filter(m => m.hf); const bad = all.filter(m => !nh.includes(m.hf)); const tbad = all.filter(m => m.ht && !/\[(PRODUCT|BRAND|SEASON|STORE|COLLECTION|PRICE|N|DATE)\]/.test(m.ht)); const st = all.filter(m => m.hf === 'Statement / Claim').length; return { n: all.length, bad: bad.length, ex: bad.slice(0, 3).map(m => m.hf), tbad: tbad.length, st }; }, NEW_HF);
+  ok(`${tag} fix: every loaded hook_format is in the new list, every template has a placeholder; Statement / Claim is not the catch-all (${d.st} of ${d.n})`, d.n > 0 && d.bad === 0 && d.tbad === 0 && d.st < d.n * 0.25, JSON.stringify(d));
+  await shot('fix-hooks');
+  await page.evaluate(() => { location.hash = 'discover/brands'; }); await page.waitForSelector('.cd-bcard', { timeout: 30000 }).catch(() => { }); await page.waitForTimeout(500);
+  const b = await page.evaluate(() => ({ trend: [...document.querySelectorAll('.cd-bcard .cd-trend small')].map(x => x.textContent), sums: [...document.querySelectorAll('.cd-bcard .cd-bsum')].map(x => x.textContent) }));
+  ok(`${tag} fix: brand card trends say "launches captured"`, b.trend.length > 0 && b.trend.every(t => /captured/.test(t)), JSON.stringify(b.trend.slice(0, 4)));
+  ok(`${tag} fix: no brand summary says launches changed without "captured"`, b.sums.every(s => !/launches (up|in the last)/.test(s) || /captured/.test(s)), JSON.stringify(b.sums.filter(s => /launches/.test(s)).slice(0, 3)));
+  if (!FX) {
+    await page.evaluate(() => { const c = [...document.querySelectorAll('.cd-bcard')].find(x => /ALO Wellness Club/i.test(x.dataset.brand || '')); if (c) c.click(); }); await page.waitForTimeout(1200);
+    const a = await page.evaluate(() => ({ hash: location.hash, sum: document.querySelector('.cd-bsum-l')?.textContent || '' }));
+    ok(`${tag} fix: ALO Wellness Club (1 ad) says "Not enough ads captured yet for a pattern (1 ad)." and makes no claim`, /Not enough ads captured yet for a pattern \(1 ad\)\./.test(a.sum) && !/focuses|leans|ugc/i.test(a.sum), JSON.stringify(a));
+    await shot('fix-short-brand');
+    await page.evaluate(() => { location.hash = 'discover/brands'; }); await page.waitForTimeout(600);
+    await page.evaluate(() => { const c = [...document.querySelectorAll('.cd-bcard')].find(x => (x.dataset.brand || '') === 'Gymshark'); if (c) c.click(); }); await page.waitForTimeout(1200);
+    const g = await page.evaluate(() => ({ sum: document.querySelector('.cd-bsum-l')?.textContent || '', tiles: [...document.querySelectorAll('.cd-stile .lbl')].map(x => x.textContent) }));
+    ok(`${tag} fix: Gymshark summary says "launches captured", names a hook format (machine read)`, /launches captured/.test(g.sum) && /hook format is .+\(machine read\)/.test(g.sum) && g.tiles.includes('Launches captured, last 30 days'), JSON.stringify(g));
+    await shot('fix-gymshark');
+  }
 }
 async function noHScrollP(page, tag, where) { const r = await page.evaluate(() => [document.documentElement.scrollWidth, window.innerWidth]); ok(`${tag} ${where}: no horizontal scroll`, r[0] <= r[1] + 1, `scrollWidth ${r[0]} vs ${r[1]}`); }
 async function settleP(page) { await page.waitForFunction(() => { const imgs = [...document.querySelectorAll('.cd-fr img.cd-po')].slice(0, 30); return imgs.length && imgs.every(i => i.complete); }, null, { timeout: 30000 }).catch(() => { }); await page.waitForTimeout(500); }
