@@ -50,7 +50,19 @@ jobs:
         env:
           BASE: ${{ inputs.base_url }}
           PW_CHANNEL: chrome
-        run: node tools/cd-preview2-check.js "$BASE" cd-shots
+        # A failed check never fails the job (no failure emails): PASS/FAIL goes to the step summary and results.json.
+        run: |
+          node tools/cd-preview2-check.js "$BASE" cd-shots || echo "Some checks failed; see the summary"
+          test -f cd-shots/results.json || { echo "::error::The check produced no results.json"; exit 1; }
+      - name: Write the summary
+        if: always()
+        run: |
+          [ -f cd-shots/results.json ] || exit 0
+          node -e '
+            const r=require("./cd-shots/results.json");
+            const out=[`## Creative Discovery preview2 check`,``,`**${r.passed} passed, ${r.failed} failed** against ${r.base} (${r.when})`,``,`| | Check | Detail |`,`|---|---|---|`];
+            for(const x of r.results) out.push(`| ${x.pass?"PASS":"FAIL"} | ${x.name.replace(/\|/g,"/")} | ${String(x.detail||"").slice(0,160).replace(/\|/g,"/").replace(/\n/g," ")} |`);
+            require("fs").appendFileSync(process.env.GITHUB_STEP_SUMMARY,out.join("\n")+"\n");'
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v4
