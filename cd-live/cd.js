@@ -113,7 +113,7 @@ function norm(r){
   logo:r.logo_r2||r.logo_s||r.logo||'',vf:r.visual_formats||[],ar:r.aspect||'',asp:bucket(r.aspect),ratio:ratioOf(r.aspect),
   pl:(r.platforms||[]).filter(p=>p&&p!=='unknown'),h:r.headline||'',x:r.copy||'',cta:r.cta||'Learn more',l:r.landing||'',sd,ed:r.end_date,d,st:r.status,
   mk:MK[r.brand_id]||null,market:r.market||null,ck:r.concept_key||('c_'+r.id),vg:r.variant_group||('vg_'+r.id),fs:r.first_seen,motion:r.saves||0,
-  poster:cleanPoster,c:r.cards||imgs.length||1,hk:r.hook_text||null,ost:r.onscreen_text||null,hkind:r.hook_kind||null,hf:r.hook_format||null,ht:r.hook_template||null,hsrc:r.hook_source||null,lib:r.ad_library||null,vfs:r.vf_source||null,focus:!!r.focus};
+  poster:cleanPoster,c:r.cards||imgs.length||1,hk:r.hook_text||null,ost:r.onscreen_text||null,hkind:r.hook_kind||null,hf:r.hook_format||null,ht:r.hook_template||null,hsrc:r.hook_source||null,lib:r.ad_library||null,vfs:r.vf_source||null,focus:!!r.focus,rel:r.released_at||null};
  a.alts=[r.thumb_r2,r.thumb_s,(r.images_s||[])[0],r.poster,(r.images||[])[0]].filter(u=>u&&u!==thumb);
  a.valts=[r.video_s,r.video].filter(u=>u&&u!==vid);
  if(!a.asp){const f=(r.formats||[]).find(f=>f.ad_id===a.id);a.asp=(f&&f.aspect)||(kind==='carousel'?'1:1':'4:5');a.est=true}
@@ -318,6 +318,9 @@ function logoHTML(name,logo,cls='cd-logo'){return`<span class="${cls}" aria-hidd
 const kindLbl=k=>k==='video'?'Video':k==='carousel'?'Carousel':'Image';
 function topMeta(it){if(it.src==='tr')return`${esc(TRN[it.cat]||it.cat)}${it.age?' · Running '+esc(it.age):''}`;
  const live=it.st==='active';return`${live?'<i class="cd-live"></i>Active':'Ended'} · ${it.d} day${it.d===1?'':'s'}`}
+/* NEW (Ryan, 10 Nov 2026): released to Creative Discovery in the last 7 days by a Monday, Wednesday or Friday pull */
+const NEW_DAYS=7;function isNew(it){const rel=it.rel||((it.members||[]).find(m=>m&&m.rel)||{}).rel;return !!rel&&(Date.now()-new Date(rel))<NEW_DAYS*DAY}
+function newHTML(it){return isNew(it)?'<span class="cd-new" title="Added to Creative Discovery in the last 7 days">New</span>':''}
 function badgeHTML(it,ctx){if(it.src==='tr')return`<span class="cd-badge">#${it.rank}</span>`;
  if(ctx==='jd'||ctx==='proven')return`<span class="cd-badge" title="${esc(PROVEN_TIP)}">${it.ps} Proven</span>`;
  if(it.proven)return`<span class="cd-badge sm" title="${esc(PROVEN_TIP)}">Proven</span>`;return''}
@@ -329,7 +332,7 @@ function frameHTML(it,ctx){const m=cur(it);const r=NAT[m.thumb]||m.ratio||ratioO
  const vsrc=m.kind==='video'&&m.video?` data-v="${esc(m.video)}" data-valts="${esc(JSON.stringify(m.valts||[]))}"`:'';
  const car=m.kind==='carousel'&&m.imgs.length>1?`<span class="cd-cnav"><button type="button" data-cs="-1" aria-label="Previous card">${sv(I.chevL,14)}</button><span>1/${m.imgs.length}</span><button type="button" data-cs="1" aria-label="Next card">${sv(I.chevR,14)}</button></span>`:'';
  return`<div class="cd-fr${r?'':' unk'}${m.thumb?'':' ld'}" ${ar} data-open="${esc(it.id)}" data-ctx="${ctx}" role="button" tabindex="0" aria-label="Open ${esc(it.b)} ad"${vsrc} data-k="${m.kind}">${media}
-  ${badgeHTML(it,ctx)}${m.kind==='video'?`<span class="cd-kind"><span class="cd-dur"></span></span><i class="cd-prog"><b></b></i>`:''}${car}</div>`}
+  ${newHTML(it)}${badgeHTML(it,ctx)}${m.kind==='video'?`<span class="cd-kind"><span class="cd-dur"></span></span><i class="cd-prog"><b></b></i>`:''}${car}</div>`}
 function card(it,ctx){const m=cur(it);const saved=isSaved(it);
  const fseg=it.nf>=2?`<div class="cd-fseg" role="group" aria-label="Format">${it.fl.map(k=>`<button type="button" data-fmt="${esc(it.id)}|${k}" aria-pressed="${k===m.asp}">${k}</button>`).join('')}</div>`:'';
  const meta=it.src==='tr'?[kindLbl(m.kind),fmtWeek(it.week)]:[kindLbl(m.kind),m.asp+(m.est?'*':''),...(ctx==='jd'?[m.lp]:[])];

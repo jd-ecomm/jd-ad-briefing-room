@@ -74,6 +74,7 @@
 .cd-fr.vis video.cd-v{opacity:1}
 .cd-nopo{position:absolute;inset:0;display:grid;place-items:center;color:var(--mut)}
 .cd-badge{position:absolute;top:8px;right:8px;z-index:2;background:var(--y);color:#000;font:800 11px/1 var(--body);letter-spacing:.02em;padding:6px 8px;border-radius:999px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cd-new{position:absolute;top:8px;left:8px;z-index:2;background:#000;color:var(--y);border:1px solid var(--y);font:800 10px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;padding:5px 7px;border-radius:999px;white-space:nowrap}
 .cd-badge.sm{font-size:10px;padding:5px 7px;text-transform:uppercase;letter-spacing:.06em}
 .cd-kind{position:absolute;left:8px;bottom:10px;z-index:2;display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,.66);color:#fff;font:700 10.5px/1 var(--body);padding:5px 7px;border-radius:999px;font-variant-numeric:tabular-nums;transition:opacity .15s}
 .cd-dur:empty{display:none}
