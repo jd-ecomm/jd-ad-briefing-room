@@ -43,3 +43,7 @@ update public.in_ads set batch = 4 where batch is null;
 -- 6. brand profiles
 select public.cd_refresh_brand_profiles();
 analyze public.in_ads;
+
+-- 7. sync the page cache (required, or the new cards stay hidden until a visitor triggers cd_ensure)
+select public.cd_sync(false, null, 3000);
+-- Result 9 Nov: 89 released (75 English), cd_members +75, cd_cards 8,014 -> 8,065, cd_dirty 0 pending.
