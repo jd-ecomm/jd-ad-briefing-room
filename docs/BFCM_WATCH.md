@@ -33,6 +33,11 @@ nothing changed, so it costs little. Only a real change triggers a refresh, a pu
 Written at the end of every run that checked something, even when nothing changed.
 
 ## When something changed
+0. **Alert first** (Ryan, 13 Nov 2026: "alert me when you see the change"). The moment a change is found, before any
+   refresh work, send one Slack DM to Ryan (U0ADD8B569Z) saying what landed, e.g. "New in Drive (Paid Ads / Nov 12):
+   P01 to P08, 24 statics, uploaded 3:39pm. Adding to the Briefing Room now." Keep the message's ts. When the publish
+   in step 4 is confirmed, reply in that thread (thread_ts) with "Live on the Briefing Room: <link>". If the refresh
+   fails, reply in the thread with what failed instead. Never more than these two messages per run.
 1. **Project page** (`data.json` `project`): update status, milestones, workstreams, paid batches, open questions
    and team from ClickUp, the same way as the 12 and 13 Nov refreshes (commits 009a110, c53c846). Set
    `project.refreshed` to today. Keep the existing wording style: plain Canadian English, no em dashes, no
@@ -47,7 +52,7 @@ Written at the end of every run that checked something, even when nothing change
    Assets Delivered tab render, every new preview image loads.
 4. Commit "Briefing Room watch <date> <HH:MM> PT: <short list of changes>" and push to main; confirm with
    git ls-remote. Pages deploys in about a minute.
-5. Slack DM to Ryan (U0ADD8B569Z), one message, only when something changed, e.g.:
+5. (Replaced by step 0: alert first, then a thread reply when live.) Old single-message format, for reference:
    "Ad Briefing Room updated 2:05pm: 3 new assets in Assets Delivered (Paid batch 2: C03, C04, V02), ClickUp:
    Early Access email moved to Approved, 1 new open question. https://jd-ecomm.github.io/jd-ad-briefing-room/"
 
