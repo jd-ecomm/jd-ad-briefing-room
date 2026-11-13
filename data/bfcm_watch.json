@@ -46,5 +46,12 @@
   "1qUZuQKp1J8RZOFLbW_8XZhDPc-do4Xw3": null,
   "1t-GAATzTbXxIbJBt6MsqmN7eoSGSdte_": null,
   "1xemWBt-Zf1NqQP64Uj5_bYh5IwIXSqD-": null
+ },
+ "roots": {
+  "1p3d6jjQ28zdZSvUMVFrcQ_9HG8flvYjM": {
+   "added": "2026-11-13",
+   "by": "Ryan",
+   "note": "BFCM delivery root: watch every subfolder inside it, at any depth"
+  }
  }
 }

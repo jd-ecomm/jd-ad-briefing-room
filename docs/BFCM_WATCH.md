@@ -10,6 +10,9 @@ nothing changed, so it costs little. Only a real change triggers a refresh, a pu
 - **ClickUp**: the BFCM parent task 868mk03av, its subtasks, and every task in `data.json` `project.sources` and
   `delivered[].source_url`. A change = `date_updated` after the last check, a new comment, a new attachment,
   a status change, or a new subtask.
+- **Drive root folder** (Ryan, 13 Nov 2026): https://drive.google.com/drive/folders/1p3d6jjQ28zdZSvUMVFrcQ_9HG8flvYjM
+  (`roots` in the state file). Open it every run and walk every subfolder at any depth; any subfolder or file not in
+  the state file is new, even if nobody linked it in ClickUp. New subfolders are added to `folders`.
 - **Drive delivery folders**: every Google Drive folder URL in `delivered[].url`, plus any new Drive folder or file
   link that appears in a changed ClickUp task or comment. A change = a file id not in `data/bfcm_watch.json`.
   The cloud Drive connector cannot see these folders (JD Drive), so they are listed in Claude in Chrome on the
