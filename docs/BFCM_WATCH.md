@@ -15,10 +15,17 @@ nothing changed, so it costs little. Only a real change triggers a refresh, a pu
   the state file is new, even if nobody linked it in ClickUp. New subfolders are added to `folders`.
 - **Drive delivery folders**: every Google Drive folder URL in `delivered[].url`, plus any new Drive folder or file
   link that appears in a changed ClickUp task or comment. A change = a file id not in `data/bfcm_watch.json`.
-  The cloud Drive connector cannot see these folders (JD Drive), so they are listed in Claude in Chrome on the
-  work PC: open https://drive.google.com/drive/folders/<id> in a tab and read the file list from the page
+  The cloud Drive connector cannot see these folders (JD Drive), so they are listed in the built-in browser on the
+  work PC (mcp__remote-devices__Claude_Browser__*; Claude in Chrome blocked page scripts on Drive on 13 Nov, use it only
+  as a fallback): open https://drive.google.com/drive/folders/<id> in a tab and read the file list from the page
   (`window['_DRIVE_ivd']` holds id, name, mime type). If the work PC is offline, check ClickUp only and say
   "Drive not checked (work PC offline)" in the run log; the next run with the PC on catches up.
+
+  Fast way (tested 13 Nov): preview_start the root folder, then in javascript_tool walk it: for each folder fetch
+  `/drive/folders/<id>`, pull `window['_DRIVE_ivd'] = '...'` out of the HTML, unescape \xNN, JSON.parse, take [0];
+  each item is [id, [parent], name, mimeType, ..., [9] created ms, [10] modified ms]. Recurse into folders. Ignore
+  Raw, Auto-Save, *.aep Logs, *_AME and Archive subfolders and .psd/.ai/.aep/.txt files when deciding what is a new
+  deliverable (they are working files), but keep their ids in the state.
 
 ## State: data/bfcm_watch.json
 `{"checked": "<ISO UTC of the last check>", "tasks": {"<task id>": "<date_updated ms>"},
